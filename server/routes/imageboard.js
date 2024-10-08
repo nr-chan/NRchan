@@ -4,7 +4,6 @@ const multer = require('multer');
 const path = require('path');
 const router = express.Router();
 
-// Set up multer for handling file uploads
 const storage = multer.diskStorage({
   destination: './uploads/',
   filename: (req, file, cb) => {
@@ -43,10 +42,8 @@ const ThreadSchema = new mongoose.Schema({
   content: { type: String, required: true },
   image: String,
   created: { type: Date, default: Date.now },
-  lastBump: { type: Date, default: Date.now },
   replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reply' }],
   posterID: String,
-  sticky: { type: Boolean, default: false },
   locked: { type: Boolean, default: false }
 });
 
@@ -58,11 +55,10 @@ const generatePosterID = () => {
   return Math.random().toString(36).substring(2, 8);
 };
 
-// Routes
 
 // Get all boards
 router.get('/boards', (req, res) => {
-  res.json(['a', 'b', 'g', 'v', 'p']); // Example boards
+  res.json(['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt']); // Example boards
 });
 
 // Get threads from a board

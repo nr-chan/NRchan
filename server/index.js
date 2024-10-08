@@ -9,33 +9,28 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security middleware
-app.use(helmet()); // Helps secure Express apps with various HTTP headers
-app.use(cors()); // Enable CORS for all routes
+app.use(helmet()); 
+app.use(cors()); 
 
-// Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, 
+    max: 100 
 });
+
 app.use(limiter);
 
-// Body parsing middleware
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files statically
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI , {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI , {})
+
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Handle MongoDB connection errors after initial connection
 mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err);
 });
@@ -75,24 +70,22 @@ app.use((req, res) => {
     res.status(404).json({ error: '404 Route not found' });
 });
 
-// Start server
-app.listen(PORT, () => {
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+
+//Start server
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Graceful shutdown
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
-
 function gracefulShutdown() {
     console.log('Received kill signal, shutting down gracefully');
-    server.close(() => {
+    server.close(async() => {
         console.log('Closed out remaining connections');
-        mongoose.connection.close(false, () => {
-            console.log('MongoDB connection closed');
-            process.exit(0);
-        });
+        await mongoose.connection.close();
+        process.exit(0);
     });
 
     // If connections don't close in 10 seconds, forcefully shutdown
@@ -102,4 +95,3 @@ function gracefulShutdown() {
     }, 10000);
 }
 
-module.exports = app;
