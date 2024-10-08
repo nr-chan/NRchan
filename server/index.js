@@ -4,6 +4,9 @@ const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const imageboardRoutes = require('./routes/imageboard');
+const adminRoutes = require('./routes/admin');
+
 require('dotenv').config();
 
 const app = express();
@@ -34,10 +37,10 @@ mongoose.connection.on('error', err => {
 });
 
 // Import routes
-const imageboardRoutes = require('./routes/imageboard');
 
 // Use routes
 app.use('/', imageboardRoutes);
+app.use('/',adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
