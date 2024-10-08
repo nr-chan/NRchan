@@ -86,17 +86,20 @@ router.post('/thread', upload.single('image'), async (req, res) => {
 // Get specific thread with replies
 router.get('/thread/:id', async (req, res) => {
   try {
-    const thread = await Thread.findById(req.params.id)
-      .populate({
-        path: 'replies',
-        populate: {
-          path: 'replies'
-        }
-      });
+    const thread = await Thread.findById(req.params.id);
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
-    res.json(thread);
+
+    // Fetch all replies for this thread
+    const replies = await Reply.find({ threadID: thread._id })
+      .populate('parentReply')
+      .sort({ created: 1 });
+
+    const threadData = thread.toObject();
+    threadData.replies = replies;
+
+    res.json(threadData);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
