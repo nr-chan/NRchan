@@ -6,12 +6,14 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider,Br
 import Layout from './Layout.jsx'
 import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
+import Thread from './components/Thread.jsx'
 
 const router=createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<Layout/>}>
     <Route path='' element={<Home/>}/>
     <Route path='board/:id' element={<Board/>}/>
+    <Route path='thread/:id' element={<Thread/>}/>
     </Route>
   )
 )

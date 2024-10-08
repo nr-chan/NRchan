@@ -15,12 +15,13 @@ export default function Board() {
     politics: [
       {
         id: 1,
-        title: "Welcome to /pol/ - Politically Incorrect",
-        post: "This board is for the discussion of news, world events, political issues, and other related topics. Off-topic threads will be deleted.",
+        subject: "Welcome to /pol/ - Politically Incorrect",
+        content: "This board is for the discussion of news, world events, political issues, and other related topics. Off-topic threads will be deleted.",
         image: "sticky.jpg",
-        imageSize: "1600x1131",
-        fileName: "sticky.jpg",
-        fileSize: "733 KB"
+        created:"2024-10-08T11:10:05.768Z",
+        posterID:"12341",
+        replies:[],
+
       },
       {
         id: 2,
@@ -42,21 +43,21 @@ export default function Board() {
       }
     ]
   };
+  const fetchThreads=async()=>{
+    const response = await fetch(`http://localhost:3000/board/${board_list[links.indexOf(id)]}`);
+    const data = await response.json();
+    console.log(data);
+    setThreads(data);
+  }
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
   const createthread = async () => {
-    const formData = new FormData();
-    formData.append("img", file);
     const threaddata={
-      name: name,
+      board:board_list[links.indexOf(id)],
       subject: subject,
-      conmment:comment,
-      date:new Date().toLocaleString(),
-      time:"",
-      locked:false,
-      replies:[]
+      content:comment,
     }
     console.log(threaddata);
 
@@ -66,15 +67,10 @@ export default function Board() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: name,
+      board:board_list[links.indexOf(id)],
       subject: subject,
-      conmment:comment,
-      date:new Date().toLocaleString(),
-      time:"",
-      locked:false,
-      replies:[]
-      }),
-      file: formData
+      content:comment,
+      })
     });
 
     if (response.status === 200) {
@@ -89,12 +85,9 @@ export default function Board() {
   };
 
   useEffect(() => {
-    if (id && boardData[id]) {
-      setThreads(boardData[id]);
-    } else {
-      setThreads([]);
-    }
-  }, [id]);
+    fetchThreads();
+    // setThreads(boardData.politics);
+  },[id]);
 
   return (
     <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
@@ -141,26 +134,30 @@ export default function Board() {
       <div className="max-w-[768px] mx-auto">
         {threads.map((thread) => (
           <article key={thread.id} className="bg-[#F0E0D6] border border-[#D9BFB7] p-2 mb-4">
+            <div>
+                <span className="font-bold">ThreadID: {thread._id} </span>
+                {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
+                <span className="block text-[8px]">(600, 450)</span>
+            </div>
             <div className="flex items-start mb-2">
               <img 
-                src={`/placeholder.svg?height=250&width=250`} 
+                src={thread.image} 
                 alt={`Thread image for ${thread.title}`} 
                 className="mr-4 border" 
                 style={{width: "150px", height: "auto"}} 
               />
               <div>
-                <span className="font-bold">File: </span>
-                <a href="#" className="text-[#34345C]">{thread.fileName}</a>
-                <span className="block text-[8px]">({thread.fileSize}, {thread.imageSize})</span>
-              </div>
-            </div>
-            <div>
               <span className="font-bold text-[#117743]">Anonymous </span>
-              <span className="text-[#34345C]">{new Date().toLocaleString()}</span>
-              <a href="#" className="ml-2 text-[#34345C]">[Reply]</a>
+              <span className="font-bold text-grey-600">(ID: {thread.posterID}) </span>
+              <span className="text-[#34345C]">{thread.created}</span>
+              <br/>
+              <span>to view this thread</span>
+              <a href="#" className="ml-2 text-[#34345C]">[click here]</a>
             </div>
-            <h2 className="font-bold mt-2">{thread.title}</h2>
-            <p className="mt-2">{thread.post}</p>
+            </div>
+            
+            <h2 className="font-bold mt-2">{thread.subject}</h2>
+            <p className="mt-2">{thread.content}</p>
           </article>
         ))}
       </div>
