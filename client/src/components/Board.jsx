@@ -4,10 +4,15 @@ import { useParams } from 'react-router-dom';
 export default function Board() {
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
-  const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt'];
-  const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant']
+  const [file, setFile] = useState(null);
+  const [name, setName] = useState("anon");
+  const [subject, setSubject] = useState(null);
+  const [comment, setComment] = useState(null);
+
+  const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
+  const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant','politics']
   const boardData = {
-    pol: [
+    politics: [
       {
         id: 1,
         title: "Welcome to /pol/ - Politically Incorrect",
@@ -37,6 +42,51 @@ export default function Board() {
       }
     ]
   };
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const createthread = async () => {
+    const formData = new FormData();
+    formData.append("img", file);
+    const threaddata={
+      name: name,
+      subject: subject,
+      conmment:comment,
+      date:new Date().toLocaleString(),
+      time:"",
+      locked:false,
+      replies:[]
+    }
+    console.log(threaddata);
+
+    const response = await fetch('http://localhost:3000/thread', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+      subject: subject,
+      conmment:comment,
+      date:new Date().toLocaleString(),
+      time:"",
+      locked:false,
+      replies:[]
+      }),
+      file: formData
+    });
+
+    if (response.status === 200) {
+      console.log('File uploaded successfully');
+      // Fetch resumes again after successful upload
+      const updatedResumes = await response.json();
+      setResumes(updatedResumes);
+      fetchResumes();
+    } else {
+      console.error('Error uploading file:', response.statusText);
+    }
+  };
 
   useEffect(() => {
     if (id && boardData[id]) {
@@ -65,23 +115,27 @@ export default function Board() {
       <h1 className="text-center text-[#CC1105] text-[24px] font-bold my-2">/{board_list[links.indexOf(id)]}/ - {id}</h1>
 
       {/* Post Form */}
-      <form className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">
+      <div className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">
         <table className="w-full">
           <tbody>
-            <tr><td className="bg-[#EA8]">Name</td><td><input type="text" defaultValue="Anonymous" readOnly className="w-full bg-[#F0E0D6] border border-[#AAA]" /></td></tr>
-            <tr><td className="bg-[#EA8]">Options</td><td><input type="text" className="w-full bg-[#F0E0D6] border border-[#AAA]" /></td></tr>
+            <tr>
+              <td className="bg-[#EA8]">Name</td>
+              <td>
+                <input type="text" defaultValue="Anonymous" onChange={(e) => setName(e.target.value)} className="w-full bg-[#F0E0D6] border border-[#AAA]" />
+              </td>
+            </tr>
             <tr>
               <td className="bg-[#EA8]">Subject</td>
               <td className="flex">
-                <input type="text" className="flex-grow bg-[#F0E0D6] border border-[#AAA]" />
-                <input type="submit" value="Post" className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2" />
+                <input type="text" onChange={(e) => setSubject(e.target.value)}className="flex-grow bg-[#F0E0D6] border border-[#AAA]" />
+                <input type="submit" onClick={()=>createthread()} value="Post" className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2" />
               </td>
             </tr>
-            <tr><td className="bg-[#EA8]">Comment</td><td><textarea className="w-full h-24 bg-[#F0E0D6] border border-[#AAA]"></textarea></td></tr>
-            <tr><td className="bg-[#EA8]">File</td><td><input type="file" /></td></tr>
+            <tr><td className="bg-[#EA8]">Comment</td><td><textarea className="w-full h-24 bg-[#F0E0D6] border border-[#AAA]" onChange={(e) => setComment(e.target.value)}></textarea></td></tr>
+            <tr><td className="bg-[#EA8]">File</td><td><input type="file" onChange={handleFileChange} /></td></tr>
           </tbody>
         </table>
-      </form>
+      </div>
 
       {/* Threads */}
       <div className="max-w-[768px] mx-auto">

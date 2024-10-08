@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   const nav = useNavigate();
   const categories = [
-    { title: 'Academics', boards: ['prog', 'cp', 'nerd', 'sem'] },
+    { title: 'Academics', boards: ['prog', 'cp', 'nerd', 'sem','politics'] },
     { title: 'Sports/ Games', boards: ['Video Games', 'Khelkud', 'Arambh'] },
     { title: 'Interests', boards: ['Comics & Cartoons', 'Technology', 'Sports'] },
     { title: 'Creative', boards: ['Photography', 'Music', 'Graphic Design'] },
