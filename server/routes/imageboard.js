@@ -70,6 +70,7 @@ router.post('/thread', upload.single('image'), async (req, res) => {
       board: req.body.board,
       subject: req.body.subject,
       content: req.body.content,
+      posterID: generatePosterID(),
       image: req.file ? req.file.filename : null
     });
 

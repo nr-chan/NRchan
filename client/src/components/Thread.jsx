@@ -6,9 +6,48 @@ export default function Component() {
   const { id } = useParams();   
     
     const [file, setFile] = useState(null);
-    const [name, setName] = useState("anon");
+    const [name, setName] = useState("Anonymous");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
+    
+    const [formVisible, setFormVisible] = useState(false);
+    const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+    // Add these new functions for drag functionality
+    const handleMouseDown = (e) => {
+      setIsDragging(true);
+      setDragOffset({
+        x: e.clientX - formPosition.x,
+        y: e.clientY - formPosition.y
+      });
+    };
+
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        setFormPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    useEffect(() => {
+      if (isDragging) {
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+      }
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }, [isDragging]);
+
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -30,6 +69,7 @@ export default function Component() {
 
     if (response.status === 200) {
       console.log('File uploaded successfully');
+      setFile(null);
       fetchThreads();
       // Fetch resumes again after successful upload
     } else {
@@ -136,26 +176,77 @@ useEffect(() => {
       </div>
 
       {/* form */}
-      <div className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">
-        <table className="w-full">
-          <tbody>
-            <tr>
-              <td className="bg-[#EA8]">Name</td>
-              <td>
-                <input type="text" defaultValue="Anonymous" onChange={(e) => setName(e.target.value)} className="w-full bg-[#F0E0D6] border border-[#AAA]" />
-              </td>
-            </tr>
-            <tr><td className="bg-[#EA8]">Comment</td><td><textarea className="w-full h-24 bg-[#F0E0D6] border border-[#AAA]" onChange={(e) => setComment(e.target.value)}></textarea></td></tr>
-            <tr><td className="bg-[#EA8]">File</td><td><input type="file" onChange={handleFileChange} /></td></tr>
-            <tr><td className="bg-[#EA8]">Replyto</td><td><input className="w-full bg-[#F0E0D6] border border-[#AAA]" type="text" value={replyto} onChange={handleFileChange} /></td></tr>
-            <tr>
-              <td className="flex">
-                <input type="submit" onClick={()=>createthread()} value="Post" className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {formVisible && (
+        <div 
+          className="fixed bg-[#F0E0D6] border border-[#800000] shadow-lg rounded-sm"
+          style={{ 
+            left: formPosition.x, 
+            top: formPosition.y,
+            width: '300px',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            className="bg-[#EA8] border-b border-[#800000] p-1 flex justify-between items-center cursor-move"
+            onMouseDown={handleMouseDown}
+          >
+            <span className="text-sm font-bold">Reply to Thread No.{replyto}</span>
+            <button 
+              onClick={() => setFormVisible(false)}
+              className="hover:text-[#800000] px-1"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="p-2 space-y-2">
+            <input
+              type="text"
+              placeholder="Name"
+              defaultValue={"Anonymous"}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]"
+            />
+            
+            <textarea
+              placeholder="Comment"
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full bg-white border border-[#AAA] px-1 h-24 text-sm resize-y"
+            />
+            
+            <div className="flex items-center justify-between bg-[#F0E0D6]">
+              <div className="flex-grow flex items-center">
+                <button
+                  className="bg-[white] border border-[#AAA] text-sm px-2 py-0.5"
+                  onClick={() => document.getElementById('fileInput').click()}
+                >
+                  Choose file
+                </button>
+                <input
+                  id="fileInput"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <span className="text-sm ml-2">
+                  {file ? file.name : 'No file chosen'}
+                </span>
+              </div>
+              
+              <button
+                onClick={() => {
+                  createthread();
+                  setFormVisible(false);
+                }}
+                className="bg-[#EA8] border border-[#800000] px-2 py-1 text-sm hover:bg-[#F0E0D6]"
+              >
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Thread */}
       <article key={threadData.id} className=" p-2 mb-4">
@@ -165,7 +256,7 @@ useEffect(() => {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
-              {threadData.title && (<img 
+              {threadData.image && (<img 
                 src={`${URL}/uploads/${threadData.image}`}
                 alt={`Thread image for ${threadData.title}`} 
                 className="mr-4 border" 
@@ -176,8 +267,9 @@ useEffect(() => {
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
               <span className="text-[#34345C]">{threadData.created}</span>
               <br/>
-              <span>to view this thread</span>
-              <a href="#" className="ml-2 text-[#34345C]">[click here]</a>
+              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(null)
+                  setFormVisible(true);
+              }}>[reply]</a>
             </div>
             </div>
             
@@ -210,7 +302,9 @@ useEffect(() => {
               <br/>
               {console.log(reply)}
               {reply.parentReply && (<div className="font-bold text-[#276221]"> {`>>`}{reply.parentReply._id}   </div>)}
-              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(reply._id)}}>[reply]</a>
+              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(reply._id)
+                  setFormVisible(true);
+              }}>[reply]</a>
             </div>
             </div>
           <p className="whitespace-pre-line">{reply.content}</p>
@@ -219,10 +313,6 @@ useEffect(() => {
         </>
       ))}
 
-      {/* Footer */}
-      <div className="text-center my-4 text-2xl text-blue-600 font-bold">
-        Happy Birthday 4chan!
-      </div>
     </div>
   );
 }
