@@ -18,20 +18,19 @@ export default function Component() {
         replyto:replyto,
     }
     console.log(replydata);
+    const formData = new FormData();
 
-    const response = await fetch(`${URL}/${threadData._id}/reply`, {
+    formData.append("image", file); 
+    formData.append("replyto",replyto);
+    formData.append("content", comment);
+    const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
       method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-      content:comment,
-      replyto:replyto,
-      })
+      body: formData
     });
 
     if (response.status === 200) {
       console.log('File uploaded successfully');
+      fetchThreads();
       // Fetch resumes again after successful upload
     } else {
         console.error('Error uploading file:', response.statusText);
@@ -166,12 +165,12 @@ useEffect(() => {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
-              <img 
-                src={threadData.image}
+              {threadData.title && (<img 
+                src={`${URL}/uploads/${threadData.image}`}
                 alt={`Thread image for ${threadData.title}`} 
                 className="mr-4 border" 
                 style={{width: "150px", height: "auto"}} 
-              />
+              />)}
               <div>
               <span className="font-bold text-[#117743]">Anonymous </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
@@ -199,11 +198,11 @@ useEffect(() => {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
-              <img 
-                src={reply.image} 
+              {reply.image && (<img 
+                src={`${URL}/uploads/${reply.image}`} 
                 className="mr-4 border" 
                 style={{width: "150px", height: "auto"}} 
-              />
+              />)}
               <div>
               <span className="font-bold text-[#117743]">Anonymous </span>
               <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>

@@ -36,8 +36,7 @@ export default function Board() {
 
     if (response.status === 200) {
       console.log('File uploaded successfully');
-      const updatedResumes = await response.json();
-      fetchResumes();
+      fetchThreads();
     } else {
       console.error('Error uploading file:', response.statusText);
     }

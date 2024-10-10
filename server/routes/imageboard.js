@@ -120,10 +120,12 @@ router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
     const reply = new Reply({
       content: req.body.content,
       image: req.file ? req.file.filename : null,
-      parentReply: req.body.replyto,
       posterID: generatePosterID(),
       threadID:thread._id,
     });
+    if(req.body.replyto !='null'){
+      reply.parentReply = req.body.replyto;
+    }
     await reply.save();
     thread.replies.push(reply._id);
     thread.lastBump = Date.now();
