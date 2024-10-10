@@ -7,7 +7,7 @@ import Layout from './Layout.jsx'
 import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
 import Thread from './components/Thread.jsx'
-import Admin from './components/Admin.jsx'
+// import Admin from './components/Admin.jsx'
 
 const router=createBrowserRouter(
   createRoutesFromElements(
@@ -15,7 +15,6 @@ const router=createBrowserRouter(
     <Route path='' element={<Home/>}/>
     <Route path='board/:id' element={<Board/>}/>
     <Route path='thread/:id' element={<Thread/>}/>
-    <Route path='admin/' element={<Admin/>}/>
     </Route>
   )
 )
