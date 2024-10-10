@@ -109,6 +109,7 @@ router.get('/thread/:id', async (req, res) => {
 router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
+    console.log(thread);
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
@@ -120,16 +121,19 @@ router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
     const reply = new Reply({
       content: req.body.content,
       image: req.file ? req.file.filename : null,
-      posterID: generatePosterID()
+      parentReply: req.body.replyto,
+      posterID: generatePosterID(),
+      threadID:thread._id,
     });
-
     await reply.save();
     thread.replies.push(reply._id);
     thread.lastBump = Date.now();
+    console.log(reply);
     await thread.save();
 
     res.json(reply);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 });

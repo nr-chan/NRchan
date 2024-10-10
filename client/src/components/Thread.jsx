@@ -1,104 +1,232 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+export default function Component() {
+  const { id } = useParams();
+    const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
+    const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant','politics']
+    const [file, setFile] = useState(null);
+    const [name, setName] = useState("anon");
+    const [comment, setComment] = useState(null);
+    const [replyto, setReplyto] = useState(null);
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    };
+    const createthread = async () => {
+        const replydata={
+        content:comment,
+        replyto:replyto,
+    }
+    console.log(replydata);
 
-const ThreadPage = ({ threadData }) => {
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().substr(-2)}(${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]})${date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
-  };
+    const response = await fetch(`http://localhost:3000/thread/${threadData._id}/reply`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+      content:comment,
+      replyto:replyto,
+      })
+    });
 
-  const Post = ({ post, isOP }) => (
-    <div className={`p-2 ${isOP ? 'bg-[#F0E0D6]' : 'bg-[#F0E0D6]'} border border-[#D9BFB7] mb-2`}>
-      <div className="text-[#117743] font-bold text-[10px]">
-        {post.name || 'Anonymous'} 
-        <span className="text-[#cc0000] ml-1">(ID: {post.posterID.slice(-8)})</span> 
-        <span className="text-[#000000] ml-1">{formatDate(post.created)}</span>
-        <span className="text-[#000000] ml-1">No.{post.id}</span>
-        {isOP && <span className="text-[#cc0000] ml-1">(OP)</span>}
-        <span className="text-[#cc0000] ml-1 float-right cursor-pointer">[Reply]</span>
-      </div>
-      {isOP && post.image && (
-        <div className="float-left mr-2 mt-2">
-          <a href={`/images/${post.image}`} target="_blank" rel="noopener noreferrer">
-            <img src={`/placeholder.svg?height=${post.imageDimensions.split('x')[1]}&width=${post.imageDimensions.split('x')[0]}`} alt="Thread image" className="max-w-[250px] max-h-[250px] border border-[#D9BFB7]" />
-          </a>
-          <div className="text-[10px] text-[#000000]">
-            File: <a href={`/images/${post.image}`} target="_blank" rel="noopener noreferrer" className="text-[#34345C] underline">{post.image}</a> ({post.imageSize}, {post.imageDimensions})
-          </div>
-        </div>
-      )}
-      {post.subject && <div className="text-[#cc0000] font-bold">{post.subject}</div>}
-      <div className="text-[10px] whitespace-pre-wrap text-[#800000] mt-1">{post.content}</div>
-    </div>
-  );
-
-  return (
-    <div className="bg-[#FFFFEE] text-[#800000] font-sans text-[10px] min-h-screen">
-      {/* Board Navigation */}
-      <div className="bg-[#F8E0B0] p-1 border-b border-[#D9BFB7] flex flex-wrap">
-        {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'gif', 'h', 'hr', 'k', 'm', 'o', 'p', 'r', 's', 't', 'u', 'v', 'vg', 'vm', 'vmg', 'vr', 'vrpg', 'vst', 'w', 'wg', 'i', 'ic', 'r9k', 's4s', 'vip', 'qa', 'cm', 'hm', 'lgbt', 'y', '3', 'aco', 'adv', 'an', 'bant', 'biz', 'cgl', 'ck', 'co', 'diy', 'fa', 'fit', 'gd', 'hc', 'his', 'int', 'jp', 'lit', 'mlp', 'mu', 'n', 'news', 'out', 'po', 'pol', 'pw', 'qst', 'sci', 'soc', 'sp', 'tg', 'toy', 'trv', 'tv', 'vp', 'vt', 'wsg', 'wsr', 'x', 'xs'].map(board => (
-          <a key={board} href={`/${board}/`} className="mr-[2px] text-[#800000] hover:underline">{board}</a>
-        ))}
-        <span className="ml-auto">
-          <a href="#" className="text-[#800000] hover:underline">[Settings]</a>
-          <a href="#" className="text-[#800000] hover:underline ml-[2px]">[Search]</a>
-          <a href="#" className="text-[#800000] hover:underline ml-[2px]">[Home]</a>
-        </span>
-      </div>
-
-      <div className="max-w-[720px] mx-auto p-2">
-        {/* Board Title */}
-        <h1 className="text-center text-[24px] text-[#AF0A0F] font-bold mb-4">/pol/ - Politically Incorrect</h1>
-
-        {/* Reply Form */}
-        <div className="mb-4">
-          <form className="bg-[#F0E0D6] border border-[#D9BFB7]">
-            <table className="w-full text-[10px]">
-              <tbody>
-                <tr>
-                  <td className="bg-[#EA8] p-1 w-[60px]">Name</td>
-                  <td className="p-1"><input type="text" defaultValue="Anonymous" className="w-full bg-[#FFFFFF] border border-[#AAA] p-1" /></td>
-                </tr>
-                <tr>
-                  <td className="bg-[#EA8] p-1">Options</td>
-                  <td className="p-1 flex">
-                    <input type="text" className="flex-grow bg-[#FFFFFF] border border-[#AAA] p-1" />
-                    <input type="submit" value="Post" className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2 py-1" />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="bg-[#EA8] p-1">Comment</td>
-                  <td className="p-1"><textarea className="w-full h-24 bg-[#FFFFFF] border border-[#AAA] p-1"></textarea></td>
-                </tr>
-                <tr>
-                  <td className="bg-[#EA8] p-1">File</td>
-                  <td className="p-1">
-                    <input type="file" className="bg-[#FFFFFF] border border-[#AAA] p-1" />
-                    <span className="ml-2">No file chosen</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
-        </div>
-
-        {/* Thread Content */}
-        <div className="mb-4">
-          <Post post={threadData} isOP={true} />
-          {threadData.replies.map(reply => (
-            <Post key={reply.id} post={reply} isOP={false} />
-          ))}
-        </div>
-
-        {/* Bottom Navigation */}
-        <div className="text-center mb-4">
-          <a href="#" className="text-[#34345C] underline mr-2">[Return]</a>
-          <a href="#" className="text-[#34345C] underline mr-2">[Catalog]</a>
-          <a href="#" className="text-[#34345C] underline mr-2">[Bottom]</a>
-          <a href="#" className="text-[#34345C] underline mr-2">[Update]</a>
-        </div>
-      </div>
-    </div>
-  );
+    if (response.status === 200) {
+      console.log('File uploaded successfully');
+      // Fetch resumes again after successful upload
+    } else {
+        console.error('Error uploading file:', response.statusText);
+    }
 };
 
-export default ThreadPage;
+const td = {
+    id: 484162649,
+    image: "images (1).jpg",
+    imageSize: "8 KB",
+    imageDimensions: "225x224",
+    name: "Anonymous",
+    subject: "a;owjsef;l as;jog",
+    content: "Russian government-owned 2ch bans you if you post about the exchange rate and inflation, since mid-2022\n\nThings must be going good there",
+    created: "14:53:00",
+    posterID: "1231u1bu",
+    replies: [
+        {
+            id: 484163033,
+            content: "Ukrainian refugee got banned on Russian for politics in /b and came to complain on 4chan.",
+            created: "15:03:03",
+            posterID: "1231hsfd",
+            isOP: false,
+            parentReply: "109231931328912319201",
+            image: null,
+      },
+      {
+          id: 484163062,
+          name: "Anonymous",
+          content: "you're banned for posting about rubble exchange rate & inflation on the politics board too",
+          created: "15:03:03",
+          posterID: "1231hsfd",
+          isOP: false,
+          parentReply: "109231931328912319201",
+          image: null,
+        },
+        {
+            id: 484163066,
+        name: "Anonymous",
+        content: "Russia has really fucked your Polish nigger mind. You come to 4chan to post about 2ch claiming you are doing because of Russia. Goddamn",
+        created: "15:03:03",
+        posterID: "1231hsfd",
+        isOP: false,
+        parentReply: "109231931328912319201",
+        image: null,
+    },
+    {
+        id: 484163086,
+        name: "Anonymous",
+        content: "Russians won't post under their own flags here, its a huge indicator on how badly things are going",
+        created: "15:03:03",
+        posterID: "1231hsfd",
+        isOP: false,
+        parentReply: "109231931328912319201",
+        image: null,
+      },
+      {
+        id: 484163138,
+        name: "Anonymous",
+        content: "They do every day numb nuts. They're some of the best posters.",
+        created: "15:03:03",
+        posterID: "1231hsfd",
+        isOP: false,
+        parentReply: "109231931328912319201",
+        image: null,
+      },
+    ]
+};
+const [threadData, setThreadData] = useState(td);
+const fetchThreads=async()=>{
+    const response = await fetch(`http://localhost:3000/thread/${id}`);
+    const data = await response.json();
+    console.log(data);
+    setThreadData(data);
+}
+useEffect(() => {
+    fetchThreads();
+    // setThreads(boardData.politics);
+},[]);
+
+
+const boards = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'gif', 'h', 'hr', 'k', 'm', 'o', 'p', 'r', 's', 't', 'u', 'v', 'vg', 'vm', 'vmg', 'vr', 'vrpg', 'vst'];
+
+  return (
+    <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
+      {/* Top navigation */}
+      <div className="bg-[#fedcba] p-1 text-xs flex flex-wrap gap-1 border-b border-[#d9bfb7]">
+      <nav className="bg-[#fedcba]flex flex-wrap">
+        {board_list.map(board => (
+          <a key={board} href={`/board/${links[board_list.indexOf(board)]}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
+        ))}
+        <a href="/" className="text-[#800000] hover:underline">[Home]</a>
+      </nav>
+        <a href="#" className="text-[#800000] hover:underline">Edit</a>
+        <div className="ml-auto">
+          <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
+          <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
+          <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
+          <a href="#" className="text-[#800000] hover:underline">Home</a>
+        </div>
+      </div>
+
+      {/* Board header */}
+      <div className="text-center my-4">
+        <img src="/placeholder.svg?height=100&width=300" width={300} height={100} alt="Board Header" className="mx-auto" />
+        <h1 className="text-4xl text-[#800000] font-bold mt-2">/pol/ - Politically Incorrect</h1>
+      </div>
+
+      {/* form */}
+      <div className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">
+        <table className="w-full">
+          <tbody>
+            <tr>
+              <td className="bg-[#EA8]">Name</td>
+              <td>
+                <input type="text" defaultValue="Anonymous" onChange={(e) => setName(e.target.value)} className="w-full bg-[#F0E0D6] border border-[#AAA]" />
+              </td>
+            </tr>
+            <tr><td className="bg-[#EA8]">Comment</td><td><textarea className="w-full h-24 bg-[#F0E0D6] border border-[#AAA]" onChange={(e) => setComment(e.target.value)}></textarea></td></tr>
+            <tr><td className="bg-[#EA8]">File</td><td><input type="file" onChange={handleFileChange} /></td></tr>
+            <tr><td className="bg-[#EA8]">Replyto</td><td><input className="w-full bg-[#F0E0D6] border border-[#AAA]" type="text" value={replyto} onChange={handleFileChange} /></td></tr>
+            <tr>
+              <td className="flex">
+                <input type="submit" onClick={()=>createthread()} value="Post" className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Thread */}
+      <article key={threadData.id} className=" p-2 mb-4">
+            <div>
+                <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
+                {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
+                <span className="block text-[8px]">(600, 450)</span>
+            </div>
+            <div className="flex items-start mb-2">
+              <img 
+                src={threadData.image}
+                alt={`Thread image for ${threadData.title}`} 
+                className="mr-4 border" 
+                style={{width: "150px", height: "auto"}} 
+              />
+              <div>
+              <span className="font-bold text-[#117743]">Anonymous </span>
+              <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
+              <span className="text-[#34345C]">{threadData.created}</span>
+              <br/>
+              <span>to view this thread</span>
+              <a href="#" className="ml-2 text-[#34345C]">[click here]</a>
+            </div>
+            </div>
+            
+            <h2 className="font-bold text-[#800000] mt-2">{threadData.subject}</h2>
+            <p className="mt-2">{threadData.content}</p>
+      </article>
+      
+
+      {/* Replies */}
+      {threadData.replies.map((reply) => (
+        <>
+        <span>{`>>`}</span>
+
+        <article key={reply._id} className="bg-[#F0E0D6] border border-[#D9BFB7] p-2 ml-5">
+          <div>
+                <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
+                {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
+                <span className="block text-[8px]">(600, 450)</span>
+            </div>
+            <div className="flex items-start mb-2">
+              <img 
+                src={reply.image} 
+                className="mr-4 border" 
+                style={{width: "150px", height: "auto"}} 
+              />
+              <div>
+              <span className="font-bold text-[#117743]">Anonymous </span>
+              <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
+              <span className="text-[#34345C]">{reply.created}</span>
+              <br/>
+              {console.log(reply)}
+              {reply.parentReply && (<div className="font-bold text-[#276221]"> {`>>`}{reply.parentReply._id}   </div>)}
+              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(reply._id)}}>[reply]</a>
+            </div>
+            </div>
+          <p className="whitespace-pre-line">{reply.content}</p>
+
+        </article>
+        </>
+      ))}
+
+      {/* Footer */}
+      <div className="text-center my-4 text-2xl text-blue-600 font-bold">
+        Happy Birthday 4chan!
+      </div>
+    </div>
+  );
+}

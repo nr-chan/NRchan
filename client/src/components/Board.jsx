@@ -60,6 +60,8 @@ export default function Board() {
       content:comment,
     }
     console.log(threaddata);
+    const formData = new FormData();
+    formData.append("img", file);
 
     const response = await fetch('http://localhost:3000/thread', {
       method: "POST",
@@ -70,7 +72,8 @@ export default function Board() {
       board:board_list[links.indexOf(id)],
       subject: subject,
       content:comment,
-      })
+      }),
+      file: formData
     });
 
     if (response.status === 200) {
@@ -152,7 +155,7 @@ export default function Board() {
               <span className="text-[#34345C]">{thread.created}</span>
               <br/>
               <span>to view this thread</span>
-              <a href="#" className="ml-2 text-[#34345C]">[click here]</a>
+              <a href={"/thread/"+thread._id} className="ml-2 text-[#34345C]">[click here]</a>
             </div>
             </div>
             
