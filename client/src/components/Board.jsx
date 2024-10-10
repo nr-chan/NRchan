@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import {links, board_list,URL} from '../Defs'
+
 export default function Board() {
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
@@ -9,10 +11,9 @@ export default function Board() {
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
 
-  const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
-  const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant','politics']
+
   const fetchThreads=async()=>{
-    const response = await fetch(`http://localhost:3000/board/${board_list[links.indexOf(id)]}`);
+    const response = await fetch(`${URL}/board/${board_list[links.indexOf(id)]}`);
     const data = await response.json();
     setThreads(data);
   }
@@ -28,14 +29,13 @@ export default function Board() {
     formData.append("subject", subject);
     formData.append("content", comment);
 
-    const response = await fetch('http://localhost:3000/thread', {
+    const response = await fetch(`${URL}/thread`, {
       method: "POST",
       body: formData, 
     });
 
     if (response.status === 200) {
       console.log('File uploaded successfully');
-      // Fetch resumes again after successful upload
       const updatedResumes = await response.json();
       fetchResumes();
     } else {
@@ -102,7 +102,7 @@ export default function Board() {
             {thread.image &&   /* Null check for image */
               <img 
                 crossorigin="anonymous" /*CORS ERROR AA RAHA KUCH */ 
-                src={`http://localhost:3000/uploads/${thread.image}`} 
+                src={`${URL}/uploads/${thread.image}`} 
                 alt={`Thread image for ${thread.title}`} 
                 className="mr-4 border" 
                 style={{width: "150px", height: "auto"}} 

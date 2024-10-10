@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {links, board_list,URL} from '../Defs'
+
 export default function Component() {
-  const { id } = useParams();
-    const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
-    const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant','politics']
+  const { id } = useParams();   
+    
     const [file, setFile] = useState(null);
     const [name, setName] = useState("anon");
     const [comment, setComment] = useState(null);
@@ -18,7 +19,7 @@ export default function Component() {
     }
     console.log(replydata);
 
-    const response = await fetch(`http://localhost:3000/thread/${threadData._id}/reply`, {
+    const response = await fetch(`${URL}/${threadData._id}/reply`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ const td = {
 };
 const [threadData, setThreadData] = useState(td);
 const fetchThreads=async()=>{
-    const response = await fetch(`http://localhost:3000/thread/${id}`);
+    const response = await fetch(`${URL}/thread/${id}`);
     const data = await response.json();
     console.log(data);
     setThreadData(data);
