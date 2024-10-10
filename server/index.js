@@ -53,7 +53,7 @@ app.use('/', imageboardRoutes);
 app.use('/',adminRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _) => {
     console.error(err.stack);
     
     // Handle multer errors

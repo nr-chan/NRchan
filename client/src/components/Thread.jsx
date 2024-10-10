@@ -111,9 +111,6 @@ useEffect(() => {
     fetchThreads();
 },[]);
 
-
-const boards = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'gif', 'h', 'hr', 'k', 'm', 'o', 'p', 'r', 's', 't', 'u', 'v', 'vg', 'vm', 'vmg', 'vr', 'vrpg', 'vst'];
-
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
       {/* Top navigation */}
