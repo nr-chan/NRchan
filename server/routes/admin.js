@@ -20,9 +20,10 @@ const AdminSchema = new mongoose.Schema({
 AdminSchema.pre('save', async function(next) {
   if (!this._id) {
     let id;
+    let exists;
     do {
       id = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
-      const exists = await Admin.findById(id);
+      exists = await Admin.findById(id);
     } while (exists);
     this._id = id;
   }
@@ -133,7 +134,7 @@ router.post('/admin/create', adminAuth, superAdminAuth, async (req, res) => {
 });
 
 // Get all admins (admin+ only)
-router.get('/admin/list', adminAuth, async (req, res) => {
+router.get('/admin/list', adminAuth, async (_, res) => {
   try {
     const admins = await Admin.find({}, '-password')
       .sort({ created: -1 });

@@ -12,8 +12,18 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet()); 
-app.use(cors()); 
+app.use(helmet(
+    {
+      crossOriginResourcePolicy: false,
+
+}
+
+)); 
+app.use(cors({
+    origin: '*',  
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type']
+})); 
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
@@ -43,7 +53,7 @@ app.use('/', imageboardRoutes);
 app.use('/',adminRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _) => {
     console.error(err.stack);
     
     // Handle multer errors

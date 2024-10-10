@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import {links, board_list,URL} from '../Defs'
+
 export default function Board() {
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
@@ -9,44 +11,10 @@ export default function Board() {
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
 
-  const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
-  const links=['prog', 'cp', 'nerd', 'sem','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','/r/', '/d/', 'Confess', 'GIF', 'Rant','politics']
-  const boardData = {
-    politics: [
-      {
-        id: 1,
-        subject: "Welcome to /pol/ - Politically Incorrect",
-        content: "This board is for the discussion of news, world events, political issues, and other related topics. Off-topic threads will be deleted.",
-        image: "sticky.jpg",
-        created:"2024-10-08T11:10:05.768Z",
-        posterID:"12341",
-        replies:[],
 
-      },
-      {
-        id: 2,
-        title: "Check the catalog before posting a new thread!",
-        post: "Reply to existing threads about a topic instead of starting a new one. Mods will delete obvious duplicate threads.",
-        image: "check catalog.jpg",
-        imageSize: "452x343",
-        fileName: "check catalog.jpg",
-        fileSize: "44 KB"
-      },
-      {
-        id: 3,
-        title: "/ptg/ - PRESIDENT TRUMP GENERAL",
-        post: "PRESIDENT DONALD J TRUMP @POTUS45",
-        image: "file.png",
-        imageSize: "720x354",
-        fileName: "file.png",
-        fileSize: "40 KB"
-      }
-    ]
-  };
   const fetchThreads=async()=>{
-    const response = await fetch(`http://localhost:3000/board/${board_list[links.indexOf(id)]}`);
+    const response = await fetch(`${URL}/board/${board_list[links.indexOf(id)]}`);
     const data = await response.json();
-    console.log(data);
     setThreads(data);
   }
   const handleFileChange = (e) => {
@@ -54,33 +22,21 @@ export default function Board() {
   };
 
   const createthread = async () => {
-    const threaddata={
-      board:board_list[links.indexOf(id)],
-      subject: subject,
-      content:comment,
-    }
-    console.log(threaddata);
     const formData = new FormData();
-    formData.append("img", file);
 
-    const response = await fetch('http://localhost:3000/thread', {
+    formData.append("image", file); 
+    formData.append("board", board_list[links.indexOf(id)]);
+    formData.append("subject", subject);
+    formData.append("content", comment);
+
+    const response = await fetch(`${URL}/thread`, {
       method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-      board:board_list[links.indexOf(id)],
-      subject: subject,
-      content:comment,
-      }),
-      file: formData
+      body: formData, 
     });
 
     if (response.status === 200) {
       console.log('File uploaded successfully');
-      // Fetch resumes again after successful upload
       const updatedResumes = await response.json();
-      setResumes(updatedResumes);
       fetchResumes();
     } else {
       console.error('Error uploading file:', response.statusText);
@@ -143,12 +99,15 @@ export default function Board() {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
+            {thread.image &&   /* Null check for image */
               <img 
-                src={thread.image} 
+                crossorigin="anonymous" /*CORS ERROR AA RAHA KUCH */ 
+                src={`${URL}/uploads/${thread.image}`} 
                 alt={`Thread image for ${thread.title}`} 
                 className="mr-4 border" 
                 style={{width: "150px", height: "auto"}} 
               />
+            }
               <div>
               <span className="font-bold text-[#117743]">Anonymous </span>
               <span className="font-bold text-grey-600">(ID: {thread.posterID}) </span>
