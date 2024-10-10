@@ -30,7 +30,7 @@ const limiter = rateLimit({
     max: 100 
 });
 
-app.use(limiter);
+app.post('*', limiter);
 
 
 app.use(express.json());

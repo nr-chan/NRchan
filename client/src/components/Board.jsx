@@ -24,21 +24,35 @@ export default function Board() {
   const createthread = async () => {
     const formData = new FormData();
 
+    if (!subject || !subject.trim()) {
+        alert('Subject cannot be empty!');
+        return;
+    }
+
+    if (!comment || !comment.trim()) {
+        alert('Content cannot be empty!');
+        return;
+    }
+
     formData.append("image", file); 
     formData.append("board", board_list[links.indexOf(id)]);
     formData.append("subject", subject);
     formData.append("content", comment);
 
-    const response = await fetch(`${URL}/thread`, {
-      method: "POST",
-      body: formData, 
-    });
+    try {
+        const response = await fetch(`${URL}/thread`, {
+            method: "POST",
+            body: formData, 
+        });
 
-    if (response.status === 200) {
-      console.log('File uploaded successfully');
-      fetchThreads();
-    } else {
-      console.error('Error uploading file:', response.statusText);
+        if (response.status === 200) {
+            console.log('File uploaded successfully');
+            fetchThreads();
+        } else {
+            console.error('Error uploading file:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
     }
   };
 
@@ -100,7 +114,6 @@ export default function Board() {
             <div className="flex items-start mb-2">
             {thread.image &&   /* Null check for image */
               <img 
-                crossorigin="anonymous" /*CORS ERROR AA RAHA KUCH */ 
                 src={`${URL}/uploads/${thread.image}`} 
                 alt={`Thread image for ${thread.title}`} 
                 className="mr-4 border" 
