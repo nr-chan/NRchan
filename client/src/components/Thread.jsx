@@ -108,7 +108,6 @@ const fetchThreads=async()=>{
 }
 useEffect(() => {
     fetchThreads();
-    // setThreads(boardData.politics);
 },[]);
 
 

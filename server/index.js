@@ -12,8 +12,18 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet()); 
-app.use(cors()); 
+app.use(helmet(
+    {
+      crossOriginResourcePolicy: false,
+
+}
+
+)); 
+app.use(cors({
+    origin: '*',  
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type']
+})); 
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
