@@ -9,6 +9,7 @@ export default function Component() {
     const [name, setName] = useState("Anonymous");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
+    const [threadData, setThreadData] = useState({});
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
@@ -56,7 +57,6 @@ export default function Component() {
         content:comment,
         replyto:replyto,
     }
-    console.log(replydata);
     const formData = new FormData();
 
     formData.append("image", file); 
@@ -78,11 +78,9 @@ export default function Component() {
 };
 
 
-const [threadData, setThreadData] = useState(td);
 const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
     const data = await response.json();
-    console.log(data);
     setThreadData(data);
 }
 useEffect(() => {
@@ -226,7 +224,7 @@ useEffect(() => {
       
 
       {/* Replies */}
-      {threadData.replies.map((reply) => (
+      {threadData.replies && threadData.replies.map((reply) => (
         <div className='flex'>
 
         <span>{`>> `}</span>
@@ -249,7 +247,6 @@ useEffect(() => {
               <span className="text-[#34345C]">{reply.created}</span>
 
               <br/>
-              {console.log(reply)}
               {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)}
               <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
