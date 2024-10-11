@@ -9,6 +9,7 @@ export default function Component() {
     const [name, setName] = useState("Anonymous");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
+    const [threadData, setThreadData] = useState({});
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
@@ -56,7 +57,6 @@ export default function Component() {
         content:comment,
         replyto:replyto,
     }
-    console.log(replydata);
     const formData = new FormData();
 
     formData.append("image", file); 
@@ -77,73 +77,10 @@ export default function Component() {
     }
 };
 
-const td = {
-    id: 484162649,
-    image: "images (1).jpg",
-    imageSize: "8 KB",
-    imageDimensions: "225x224",
-    name: "Anonymous",
-    subject: "a;owjsef;l as;jog",
-    content: "Russian government-owned 2ch bans you if you post about the exchange rate and inflation, since mid-2022\n\nThings must be going good there",
-    created: "14:53:00",
-    posterID: "1231u1bu",
-    replies: [
-        {
-            id: 484163033,
-            content: "Ukrainian refugee got banned on Russian for politics in /b and came to complain on 4chan.",
-            created: "15:03:03",
-            posterID: "1231hsfd",
-            isOP: false,
-            parentReply: "109231931328912319201",
-            image: null,
-      },
-      {
-          id: 484163062,
-          name: "Anonymous",
-          content: "you're banned for posting about rubble exchange rate & inflation on the politics board too",
-          created: "15:03:03",
-          posterID: "1231hsfd",
-          isOP: false,
-          parentReply: "109231931328912319201",
-          image: null,
-        },
-        {
-            id: 484163066,
-        name: "Anonymous",
-        content: "Russia has really fucked your Polish nigger mind. You come to 4chan to post about 2ch claiming you are doing because of Russia. Goddamn",
-        created: "15:03:03",
-        posterID: "1231hsfd",
-        isOP: false,
-        parentReply: "109231931328912319201",
-        image: null,
-    },
-    {
-        id: 484163086,
-        name: "Anonymous",
-        content: "Russians won't post under their own flags here, its a huge indicator on how badly things are going",
-        created: "15:03:03",
-        posterID: "1231hsfd",
-        isOP: false,
-        parentReply: "109231931328912319201",
-        image: null,
-      },
-      {
-        id: 484163138,
-        name: "Anonymous",
-        content: "They do every day numb nuts. They're some of the best posters.",
-        created: "15:03:03",
-        posterID: "1231hsfd",
-        isOP: false,
-        parentReply: "109231931328912319201",
-        image: null,
-      },
-    ]
-};
-const [threadData, setThreadData] = useState(td);
+
 const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
     const data = await response.json();
-    console.log(data);
     setThreadData(data);
 }
 useEffect(() => {
@@ -172,7 +109,7 @@ useEffect(() => {
       {/* Board header */}
       <div className="text-center my-4">
         <img src="/placeholder.svg?height=100&width=300" width={300} height={100} alt="Board Header" className="mx-auto" />
-        <h1 className="text-4xl text-[#800000] font-bold mt-2">/pol/ - Politically Incorrect</h1>
+        <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 
       {/* form */}
@@ -213,6 +150,14 @@ useEffect(() => {
               placeholder="Comment"
               onChange={(e) => setComment(e.target.value)}
               className="w-full bg-white border border-[#AAA] px-1 h-24 text-sm resize-y"
+            />
+            <input
+              type="text"
+              placeholder="Reply to"
+              defaultValue={replyto}
+              value={replyto}
+              onChange={(e) => setReplyto(e.target.value)}
+              className="w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]"
             />
             
             <div className="flex items-center justify-between bg-[#F0E0D6]">
@@ -267,9 +212,9 @@ useEffect(() => {
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
               <span className="text-[#34345C]">{threadData.created}</span>
               <br/>
-              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(null)
+              <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
-              }}>[reply]</a>
+              }}>[reply]</button>
             </div>
             </div>
             
@@ -279,7 +224,7 @@ useEffect(() => {
       
 
       {/* Replies */}
-      {threadData.replies.map((reply) => (
+      {threadData.replies && threadData.replies.map((reply) => (
         <div className='flex'>
 
         <span>{`>> `}</span>
@@ -302,11 +247,11 @@ useEffect(() => {
               <span className="text-[#34345C]">{reply.created}</span>
 
               <br/>
-              {console.log(reply)}
-              {reply.parentReply && (<div className="font-bold text-[#276221]"> {`>>`}{reply.parentReply._id}   </div>)}
-              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(reply._id)
+              {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)}
+              <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
-              }}>[reply]</a>
+              }}>[reply]</button>
+               <p className="whitespace-pre-line">{reply.content}</p>
             </div>
             </div>
 

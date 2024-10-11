@@ -77,7 +77,7 @@ export default function Board() {
       </div>
 
       {/* Board Title */}
-      <h1 className="text-center text-[#CC1105] text-[24px] font-bold my-2">/{board_list[links.indexOf(id)]}/ - {id}</h1>
+      <h1 className="text-center text-4xl text-[#800000] font-bold mt-2">/{board_list[links.indexOf(id)]}/ - {id}</h1>
 
       {/* Post Form */}
       <div className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">
