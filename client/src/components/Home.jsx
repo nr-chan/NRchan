@@ -1,8 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import {URL} from '../Defs'
 
 const Home = () => {
   const nav = useNavigate();
+  const [threads, setThreads] = useState([]);
+  
+  useEffect(() => {
+    fetchRecent();
+  }, []);
+
+ const fetchRecent = async () => {
+    try {
+      const response = await fetch(`${URL}/recent`);
+      const data = await response.json();
+      setThreads(data.data);
+    } catch (error) {
+      console.error('Error fetching recent threads:', error);
+    }
+  };
+
   const categories = [
     { title: 'Academics', boards: ['prog', 'cp', 'nerd', 'sem','politics'] },
     { title: 'Sports/ Games', boards: ['Video Games', 'Khelkud', 'Arambh'] },
@@ -16,12 +33,17 @@ const Home = () => {
     console.log(board);
   }
 
+
+  const getPreviewText = (content) => {
+    return content.length > 50 ? content.substring(0, 50) + '...' : content;
+  };
+
   return (
     <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
       {/* Header */}
       <header className="flex justify-center p-2">
         <img 
-          src="https://s.4cdn.org/image/title/NRchan.png" 
+          src={`${URL}/images/banner.png`} 
           alt="NRchan Logo" 
           className="h-16"
         />
@@ -62,6 +84,45 @@ const Home = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
+     {/* Popular Threads Section */}
+      <div className="max-w-[720px] mx-auto m-4">
+        <div className="bg-[#FCA] border border-[#B86] py-1 px-2 flex justify-between items-center">
+          <h2 className="text-[12px] font-bold">Popular Threads</h2>
+        </div>
+        <div className="border border-[#800000] bg-[#FFFFEE] p-2">
+          <div className="grid grid-cols-4 gap-4">
+            {threads.slice(0, 8).map((thread, index) => (
+              <div key={index} className="cursor-pointer" onClick={() => nav(`/thread/${thread._id}`)}>
+                <div className="border border-[#B86] bg-[#F0E0D6] p-2">
+                  {/* Thread Image */}
+                  <div className="h-32 bg-[#F0E0D6] flex items-center justify-center">
+                    {thread.image ? (
+                      <img 
+                        src={`${URL}/uploads/${thread.image}`} 
+                        alt={thread.subject || 'Thread image'} 
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-center text-[11px] text-gray-500">No Image</div>
+                    )}
+                  </div>
+                  {/* Thread Info */}
+                  <div className="p-1 bg-[#FFFFEE]">
+                    <div className="text-[11px] text-[#CC1105] font-bold mb-1">
+                      /{thread.board}/
+                    </div>
+                    <div className="text-[10px] text-[#800000]">
+                      {getPreviewText(thread.subject)}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
