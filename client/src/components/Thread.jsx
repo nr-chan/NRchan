@@ -188,14 +188,16 @@ useEffect(() => {
 
       {/* Replies */}
       {threadData.replies.map((reply) => (
-        <>
-        <span>{`>>`}</span>
+        <div className='flex'>
 
-        <article key={reply._id} className="bg-[#F0E0D6] border border-[#D9BFB7] p-2 ml-5">
+        <span>{`>> `}</span>
+        <span>
+        <article key={reply._id} className="bg-[#F0E0D6]  pl-10 pr-10 pt-4 pb-4 mb-3 ml-1  ">
           <div>
+          <span className="font-bold text-[#117743]">Anonymous </span>
+          <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
                 <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
                 {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
-                <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
               {reply.image && (<img 
@@ -204,19 +206,18 @@ useEffect(() => {
                 style={{width: "150px", height: "auto"}} 
               />)}
               <div>
-              <span className="font-bold text-[#117743]">Anonymous </span>
-              <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
+              
               <span className="text-[#34345C]">{reply.created}</span>
-              <br/>
-              {console.log(reply)}
-              {reply.parentReply && (<div className="font-bold text-[#276221]"> {`>>`}{reply.parentReply._id}   </div>)}
-              <a className="ml-2 text-[#34345C]" onClick={()=>{setReplyto(reply._id)}}>[reply]</a>
+              <br />
+              {reply.parentReply && (<span className="font-bold text-[#276221] mr-10"> {`>>`}{reply.parentReply._id}   </span>)}
+              <button className="ml-2 text-red-600 underline " onClick={()=>{setReplyto(reply._id)}}>[reply]</button>
+              <p className="whitespace-pre-line">{reply.content}</p>
             </div>
             </div>
-          <p className="whitespace-pre-line">{reply.content}</p>
 
         </article>
-        </>
+        </span>
+        </div>
       ))}
 
       {/* Footer */}
