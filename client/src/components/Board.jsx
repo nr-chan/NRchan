@@ -13,7 +13,7 @@ export default function Board() {
 
 
   const fetchThreads=async()=>{
-    const response = await fetch(`${URL}/board/${board_list[links.indexOf(id)]}`);
+    const response = await fetch(`${URL}/board/${id}`);
     const data = await response.json();
     setThreads(data);
   }
@@ -35,7 +35,7 @@ export default function Board() {
     }
 
     formData.append("image", file); 
-    formData.append("board", board_list[links.indexOf(id)]);
+    formData.append("board", links[board_list.indexOf(id)]);
     formData.append("subject", subject);
     formData.append("content", comment);
 
@@ -77,7 +77,7 @@ export default function Board() {
       </div>
 
       {/* Board Title */}
-      <h1 className="text-center text-4xl text-[#800000] font-bold mt-2">/{board_list[links.indexOf(id)]}/ - {id}</h1>
+      <h1 className="text-center text-4xl text-[#800000] font-bold mt-2">/{id}/ - {links[board_list.indexOf(id)]}</h1>
 
       {/* Post Form */}
       <div className="max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2">

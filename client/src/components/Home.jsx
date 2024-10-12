@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import {URL} from '../Defs'
+import {links, board_list,URL} from '../Defs'
 
 const Home = () => {
   const nav = useNavigate();
@@ -21,15 +21,15 @@ const Home = () => {
   };
 
   const categories = [
-    { title: 'Academics', boards: ['prog', 'cp', 'nerd', 'sem','politics'] },
+    { title: 'Academics', boards: ['Programming', 'Competitive Programming', 'Nerd', 'Semester','Politics'] },
     { title: 'Sports/ Games', boards: ['Video Games', 'Khelkud', 'Arambh'] },
     { title: 'Interests', boards: ['Comics & Cartoons', 'Technology', 'Sports'] },
     { title: 'Creative', boards: ['Photography', 'Music', 'Graphic Design'] },
-    { title: 'Adult (NSFW)', boards: ['r', 'd', 'Confess', 'GIF', 'Rant'] },
+    { title: 'Adult (NSFW)', boards: ['randi', 'dick', 'Confess', 'GIF', 'Rant'] },
   ];
 
   const toboard = (board) => {
-    nav(`/board/${board}`);
+    nav(`/board/${board_list[links.indexOf(board)]}`);
     console.log(board);
   }
 

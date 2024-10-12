@@ -10,11 +10,21 @@ export default function Component() {
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
+    const [sz, setSz] = useState(0);
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+    const resize=()=>{
+      if(sz){
+        setSz(0);
+      }
+      else{
+        setSz(100);
+      }
+    }
 
     // Add these new functions for drag functionality
     const handleMouseDown = (e) => {
@@ -205,7 +215,8 @@ useEffect(() => {
                 src={`${URL}/uploads/${threadData.image}`}
                 alt={`Thread image for ${threadData.title}`} 
                 className="mr-4 border" 
-                style={{width: "150px", height: "auto"}} 
+                style={{width: `${150 + sz}px`, height: "auto"}} 
+                onClick={()=>{resize()}}
               />)}
               <div>
               <span className="font-bold text-[#117743]">Anonymous </span>
