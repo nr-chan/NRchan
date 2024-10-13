@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {links, board_list,URL} from '../Defs'
 
 export default function Component() {
@@ -16,6 +16,8 @@ export default function Component() {
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const nav = useNavigate();
+    const [token, setToken] = useState("");
 
     const resize=()=>{
       if(sz){
@@ -87,6 +89,54 @@ export default function Component() {
     }
 };
 
+const deleteThread = async (threadID) => {
+    if(!token){
+      alert("Login as an admin to delete a thread");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Thread deleted successfully');
+      nav(-1);
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the thread", json);
+    }
+}
+
+const deleteReply = async (replyID) => {
+    if(!token){
+      alert("Login as an admin to delete a reply");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Reply deleted successfully');
+      fetchThreads();
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the reply", json);
+    }
+}
+
+const logout = () => {
+    localStorage.removeItem("nrtoken");
+    setToken("");
+}
 
 const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
@@ -95,6 +145,7 @@ const fetchThreads=async()=>{
 }
 useEffect(() => {
     fetchThreads();
+    setToken(localStorage.getItem("nrtoken"));
 },[]);
 
   return (
@@ -112,7 +163,13 @@ useEffect(() => {
           <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
-          <a href="#" className="text-[#800000] hover:underline">Home</a>
+          <a href="#" className="text-[#800000] hover:underline mr-2">Home</a>
+          {(token === "" || token === null)
+            ?
+            <a href="#" onClick={() => {nav('/login')}} className="text-[#800000] hover:underline">Login</a>
+            :
+            <a href="#" onClick={logout} className="text-[#800000] hover:underline">Logout</a>
+          }
         </div>
       </div>
 
@@ -226,6 +283,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteThread(threadData._id);
+              }}>[delete]</button>
             </div>
             </div>
             
@@ -262,6 +322,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteReply(reply._id);
+              }}>[delete]</button>
                <p className="whitespace-pre-line">{reply.content}</p>
             </div>
             </div>
