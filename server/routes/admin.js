@@ -252,6 +252,7 @@ router.delete('/admin/reply/:id', adminAuth, async (req, res) => {
     });
 
     await Reply.findByIdAndDelete(reply._id);
+    await Reply.deleteMany({ parentReply: reply._id });
     
     res.json({ 
       message: 'Reply deleted successfully',
