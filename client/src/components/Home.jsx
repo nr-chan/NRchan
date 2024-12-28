@@ -21,11 +21,11 @@ const Home = () => {
   };
 
   const categories = [
-    { title: 'Academics', boards: ['Programming', 'Competitive Programming', 'Nerd', 'Semester','politics'] },
+    { title: 'Academics', boards: ['Programming', 'Competitive Programming', 'Nerd', 'Semester','Politics'] },
     { title: 'Sports/ Games', boards: ['Video Games', 'Khelkud', 'Arambh'] },
     { title: 'Interests', boards: ['Comics & Cartoons', 'Technology', 'Sports'] },
     { title: 'Creative', boards: ['Photography', 'Music', 'Graphic Design'] },
-    { title: 'Adult (NSFW)', boards: ['Randi', 'Dick', 'Confess', 'GIF', 'Rant'] },
+    { title: 'Adult (NSFW)', boards: ['randi', 'dick', 'Confess', 'GIF', 'Rant'] },
   ];
 
   const toboard = (board) => {
