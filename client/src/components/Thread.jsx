@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {links, board_list,board_img,URL} from '../Defs'
+import { useNavigate, useParams } from 'react-router-dom';
+import {links, board_list,URL} from '../Defs'
 
 export default function Component() {
   const { id } = useParams();   
@@ -12,20 +12,13 @@ export default function Component() {
     const [threadData, setThreadData] = useState({});
     const [token, setToken] = useState({});
     const [sz, setSz] = useState(0);
-      const banner= board_img[Math.floor(Math.random() * board_img.length)];
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-    const [expandedImages, setExpandedImages] = React.useState({});
-
-    const toggleImageSize = (id) => {
-      setExpandedImages((prev) => ({
-        ...prev,
-        [id]: !prev[id],
-      }));
-    };
+    const nav = useNavigate();
+    const [token, setToken] = useState("");
 
     const resize=()=>{
       if(sz){
@@ -138,6 +131,54 @@ export default function Component() {
     }
 };
 
+const deleteThread = async (threadID) => {
+    if(!token){
+      alert("Login as an admin to delete a thread");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Thread deleted successfully');
+      nav(-1);
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the thread", json);
+    }
+}
+
+const deleteReply = async (replyID) => {
+    if(!token){
+      alert("Login as an admin to delete a reply");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Reply deleted successfully');
+      fetchThreads();
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the reply", json);
+    }
+}
+
+const logout = () => {
+    localStorage.removeItem("nrtoken");
+    setToken("");
+}
 
 const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
@@ -160,17 +201,23 @@ useEffect(() => {
         <a href="/" className="text-[#800000] hover:underline">[Home]</a>
       </nav>
         <a href="#" className="text-[#800000] hover:underline">Edit</a>
-        {/* <div className="ml-auto">
+        <div className="ml-auto">
           <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
-          <a href="#" className="text-[#800000] hover:underline">Home</a>
-        </div> */}
+          <a href="#" className="text-[#800000] hover:underline mr-2">Home</a>
+          {(token === "" || token === null)
+            ?
+            <a href="#" onClick={() => {nav('/login')}} className="text-[#800000] hover:underline">Login</a>
+            :
+            <a href="#" onClick={logout} className="text-[#800000] hover:underline">Logout</a>
+          }
+        </div>
       </div>
 
       {/* Board header */}
       <div className="text-center my-4">
-        <img src={`${URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
+        <img src="/placeholder.svg?height=100&width=300" width={300} height={100} alt="Board Header" className="mx-auto" />
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 
@@ -303,14 +350,10 @@ useEffect(() => {
                 {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
             </div>
             <div className="flex items-start mb-2">
-              {reply.image && (<img
-                src={`${URL}/uploads/${reply.image}`}
-                className="mr-4 border cursor-pointer"
-                style={{
-                  width: expandedImages[reply._id] ? "250px" : "150px",
-                  height: "auto",
-                }}
-                onClick={() => toggleImageSize(reply._id)}
+              {reply.image && (<img 
+                src={`${URL}/uploads/${reply.image}`} 
+                className="mr-4 border" 
+                style={{width: "150px", height: "auto"}} 
               />)}
               <div>
               
