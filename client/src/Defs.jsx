@@ -2,7 +2,7 @@ export const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 
 
 export const links=['Programming', 'Competitive Programming', 'Nerd', 'Semester','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','Randi', 'Dick', 'Confess', 'GIF', 'Rant','politics']
 export const board_img=['dhyanendra','fumo','lurking'];
-export const URL = "https://n-rchan.vercel.app"
+export const URL = "https://nr-chan.onrender.com"
 
 export const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
