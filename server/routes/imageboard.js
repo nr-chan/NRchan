@@ -14,15 +14,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5000000 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+    const allowedFileTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mkv/; 
+    const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedFileTypes.test(file.mimetype);
     if (extname && mimetype) {
       return cb(null, true);
     } else {
-      cb('Error: Images only!');
+      cb('Error: Images and Videos only!');
     }
   }
 });

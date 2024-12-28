@@ -35,10 +35,9 @@ const limiter = rateLimit({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000;
+app.use('/images', express.static(path.join(__dirname, 'images'), { maxAge: sixMonthsInMs }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {maxAge:sixMonthsInMs}));
 
 mongoose.connect(process.env.MONGODB_URI , {})
     .then(() => console.log('MongoDB connected successfully'))
