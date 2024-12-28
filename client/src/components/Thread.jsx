@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,URL} from '../Defs'
+import {links, board_list,URL, board_img} from '../Defs'
 
 export default function Component() {
   const { id } = useParams();   
@@ -11,6 +11,7 @@ export default function Component() {
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
     const [sz, setSz] = useState(0);
+    const banner = board_img[Math.floor(Math.random() * board_img.length)];
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
@@ -18,6 +19,14 @@ export default function Component() {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const nav = useNavigate();
     const [token, setToken] = useState("");
+    
+    const [expandedImages, setExpandedImages] = React.useState({});
+    const toggleImageSize = (id) => {
+      setExpandedImages((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    };
 
     const resize=()=>{
       if(sz){
@@ -168,7 +177,7 @@ export default function Component() {
 
       {/* Board header */}
       <div className="text-center my-4">
-        <img src="/placeholder.svg?height=100&width=300" width={300} height={100} alt="Board Header" className="mx-auto" />
+        <img src={`${URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 
@@ -301,10 +310,14 @@ export default function Component() {
                 {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
             </div>
             <div className="flex items-start mb-2">
-              {reply.image && (<img 
-                src={`${URL}/uploads/${reply.image}`} 
-                className="mr-4 border" 
-                style={{width: "150px", height: "auto"}} 
+              {reply.image && (<img
+                src={`${URL}/uploads/${reply.image}`}
+                className="mr-4 border cursor-pointer"
+                style={{
+                  width: expandedImages[reply._id] ? "250px" : "150px",
+                  height: "auto",
+                }}
+                onClick={() => toggleImageSize(reply._id)}
               />)}
               <div>
               

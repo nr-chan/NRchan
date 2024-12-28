@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import {links, board_list,URL} from '../Defs'
+import {links, board_list,URL, board_img} from '../Defs'
 
 export default function Board() {
   const { id } = useParams();
@@ -10,6 +10,7 @@ export default function Board() {
   const [name, setName] = useState("anon");
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
+  const banner= board_img[Math.floor(Math.random() * board_img.length)];
 
 
   const fetchThreads=async()=>{
@@ -73,7 +74,7 @@ export default function Board() {
 
       {/* Banner Image */}
       <div className="text-center my-2">
-        <img src="/placeholder.svg?height=100&width=300" alt="Board banner" className="inline-block" />
+        <img src={`${URL}/images/${banner}.png`} alt="Board banner" className="inline-block" />
       </div>
 
       {/* Board Title */}
