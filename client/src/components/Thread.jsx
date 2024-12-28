@@ -10,6 +10,7 @@ export default function Component() {
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
+    const [token, setToken] = useState({});
     const [sz, setSz] = useState(0);
       const banner= board_img[Math.floor(Math.random() * board_img.length)];
     
@@ -34,7 +35,48 @@ export default function Component() {
         setSz(100);
       }
     }
-
+    const deleteThread = async (threadID) => {
+      if(!token){
+        alert("Login as an admin to delete a thread");
+        return;
+      }
+      const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": 'bearer ' + token,
+        },
+      });
+      if (resposne.status === 200) {
+        console.log('Thread deleted successfully');
+        nav(-1);
+      } else {
+        const json = await resposne.json();
+        console.log("Error deleting the thread", json);
+      }
+  }
+  const deleteReply = async (replyID) => {
+      if(!token){
+        alert("Login as an admin to delete a reply");
+        return;
+      }
+      const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": 'bearer ' + token,
+        },
+      });
+      if (resposne.status === 200) {
+        console.log('Reply deleted successfully');
+        fetchThreads();
+      } else {
+        const json = await resposne.json();
+        console.log("Error deleting the reply", json);
+      }
+  }
+  const logout = () => {
+      localStorage.removeItem("nrtoken");
+      setToken("");
+  }
     // Add these new functions for drag functionality
     const handleMouseDown = (e) => {
       setIsDragging(true);
@@ -104,6 +146,7 @@ const fetchThreads=async()=>{
 }
 useEffect(() => {
     fetchThreads();
+    setToken(localStorage.getItem("nrtoken"));
 },[]);
 
   return (
@@ -235,6 +278,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteThread(threadData._id);
+              }}>[delete]</button>
             </div>
             </div>
             
@@ -275,6 +321,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteReply(reply._id);
+              }}>[delete]</button>
                <p className="whitespace-pre-line">{reply.content}</p>
             </div>
             </div>
