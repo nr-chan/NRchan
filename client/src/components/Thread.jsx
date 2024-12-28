@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import {links, board_list,board_img,URL} from '../Defs'
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Component() {
   const { id } = useParams();   
@@ -25,6 +25,7 @@ export default function Component() {
         [id]: !prev[id],
       }));
     };
+    const nav = useNavigate();
 
     const resize=()=>{
       if(sz){
@@ -96,6 +97,54 @@ export default function Component() {
     }
 };
 
+const deleteThread = async (threadID) => {
+    if(!token){
+      alert("Login as an admin to delete a thread");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Thread deleted successfully');
+      nav(-1);
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the thread", json);
+    }
+}
+
+const deleteReply = async (replyID) => {
+    if(!token){
+      alert("Login as an admin to delete a reply");
+      return;
+    }
+
+    const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": 'bearer ' + token,
+      },
+    });
+
+    if (resposne.status === 200) {
+      console.log('Reply deleted successfully');
+      fetchThreads();
+    } else {
+      const json = await resposne.json();
+      console.log("Error deleting the reply", json);
+    }
+}
+
+const logout = () => {
+    localStorage.removeItem("nrtoken");
+    setToken("");
+}
 
 const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
@@ -104,6 +153,7 @@ const fetchThreads=async()=>{
 }
 useEffect(() => {
     fetchThreads();
+    setToken(localStorage.getItem("nrtoken"));
 },[]);
 
   return (
@@ -121,8 +171,10 @@ useEffect(() => {
           <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
+
           <a href="#" className="text-[#800000] hover:underline">Home</a>
         </div> */}
+
       </div>
 
       {/* Board header */}
@@ -235,6 +287,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteThread(threadData._id);
+              }}>[delete]</button>
             </div>
             </div>
             
@@ -275,6 +330,9 @@ useEffect(() => {
               <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
               }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteReply(reply._id);
+              }}>[delete]</button>
                <p className="whitespace-pre-line">{reply.content}</p>
             </div>
             </div>

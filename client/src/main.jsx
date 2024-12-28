@@ -7,6 +7,7 @@ import Layout from './Layout.jsx'
 import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
 import Thread from './components/Thread.jsx'
+import Login from './components/Login.jsx'
 // import Admin from './components/Admin.jsx'
 
 const router=createBrowserRouter(
@@ -15,6 +16,7 @@ const router=createBrowserRouter(
     <Route path='' element={<Home/>}/>
     <Route path='board/:id' element={<Board/>}/>
     <Route path='thread/:id' element={<Thread/>}/>
+    <Route path='login' element={<Login/>}/>
     </Route>
   )
 )
