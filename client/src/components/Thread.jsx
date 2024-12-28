@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {links, board_list,URL} from '../Defs'
+import {links, board_list,board_img,URL} from '../Defs'
 
 export default function Component() {
   const { id } = useParams();   
@@ -11,11 +11,20 @@ export default function Component() {
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
     const [sz, setSz] = useState(0);
+      const banner= board_img[Math.floor(Math.random() * board_img.length)];
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [expandedImages, setExpandedImages] = React.useState({});
+
+    const toggleImageSize = (id) => {
+      setExpandedImages((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    };
 
     const resize=()=>{
       if(sz){
@@ -108,17 +117,17 @@ useEffect(() => {
         <a href="/" className="text-[#800000] hover:underline">[Home]</a>
       </nav>
         <a href="#" className="text-[#800000] hover:underline">Edit</a>
-        <div className="ml-auto">
+        {/* <div className="ml-auto">
           <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
           <a href="#" className="text-[#800000] hover:underline">Home</a>
-        </div>
+        </div> */}
       </div>
 
       {/* Board header */}
       <div className="text-center my-4">
-        <img src="/placeholder.svg?height=100&width=300" width={300} height={100} alt="Board Header" className="mx-auto" />
+        <img src={`${URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 
@@ -248,10 +257,14 @@ useEffect(() => {
                 {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
             </div>
             <div className="flex items-start mb-2">
-              {reply.image && (<img 
-                src={`${URL}/uploads/${reply.image}`} 
-                className="mr-4 border" 
-                style={{width: "150px", height: "auto"}} 
+              {reply.image && (<img
+                src={`${URL}/uploads/${reply.image}`}
+                className="mr-4 border cursor-pointer"
+                style={{
+                  width: expandedImages[reply._id] ? "250px" : "150px",
+                  height: "auto",
+                }}
+                onClick={() => toggleImageSize(reply._id)}
               />)}
               <div>
               
