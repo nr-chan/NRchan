@@ -10,7 +10,6 @@ export default function Component() {
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
-    const [token, setToken] = useState({});
     const [sz, setSz] = useState(0);
     
     const [formVisible, setFormVisible] = useState(false);
@@ -28,49 +27,7 @@ export default function Component() {
         setSz(100);
       }
     }
-    const deleteThread = async (threadID) => {
-      if(!token){
-        alert("Login as an admin to delete a thread");
-        return;
-      }
-      const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": 'bearer ' + token,
-        },
-      });
-      if (resposne.status === 200) {
-        console.log('Thread deleted successfully');
-        nav(-1);
-      } else {
-        const json = await resposne.json();
-        console.log("Error deleting the thread", json);
-      }
-  }
-  const deleteReply = async (replyID) => {
-      if(!token){
-        alert("Login as an admin to delete a reply");
-        return;
-      }
-      const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": 'bearer ' + token,
-        },
-      });
-      if (resposne.status === 200) {
-        console.log('Reply deleted successfully');
-        fetchThreads();
-      } else {
-        const json = await resposne.json();
-        console.log("Error deleting the reply", json);
-      }
-  }
-  const logout = () => {
-      localStorage.removeItem("nrtoken");
-      setToken("");
-  }
-    // Add these new functions for drag functionality
+
     const handleMouseDown = (e) => {
       setIsDragging(true);
       setDragOffset({
@@ -129,66 +86,60 @@ export default function Component() {
     } else {
         console.error('Error uploading file:', response.statusText);
     }
-};
+    };
 
-const deleteThread = async (threadID) => {
-    if(!token){
-      alert("Login as an admin to delete a thread");
-      return;
+    const deleteThread = async (threadID) => {
+          if(!token){
+            alert("Login as an admin to delete a thread");
+            return;
+          }
+          const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": 'bearer ' + token,
+            },
+          });
+          if (resposne.status === 200) {
+            console.log('Thread deleted successfully');
+            nav(-1);
+          } else {
+            const json = await resposne.json();
+            console.log("Error deleting the thread", json);
+          }
+      }
+      const deleteReply = async (replyID) => {
+          if(!token){
+            alert("Login as an admin to delete a reply");
+            return;
+          }
+          const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": 'bearer ' + token,
+            },
+          });
+          if (resposne.status === 200) {
+            console.log('Reply deleted successfully');
+            fetchThreads();
+          } else {
+            const json = await resposne.json();
+            console.log("Error deleting the reply", json);
+          }
+      }
+    const logout = () => {
+        localStorage.removeItem("nrtoken");
+        setToken("");
+      }
+
+    const fetchThreads=async()=>{
+        const response = await fetch(`${URL}/thread/${id}`);
+        const data = await response.json();
+        setThreadData(data);
     }
-
-    const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": 'bearer ' + token,
-      },
-    });
-
-    if (resposne.status === 200) {
-      console.log('Thread deleted successfully');
-      nav(-1);
-    } else {
-      const json = await resposne.json();
-      console.log("Error deleting the thread", json);
-    }
-}
-
-const deleteReply = async (replyID) => {
-    if(!token){
-      alert("Login as an admin to delete a reply");
-      return;
-    }
-
-    const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": 'bearer ' + token,
-      },
-    });
-
-    if (resposne.status === 200) {
-      console.log('Reply deleted successfully');
-      fetchThreads();
-    } else {
-      const json = await resposne.json();
-      console.log("Error deleting the reply", json);
-    }
-}
-
-const logout = () => {
-    localStorage.removeItem("nrtoken");
-    setToken("");
-}
-
-const fetchThreads=async()=>{
-    const response = await fetch(`${URL}/thread/${id}`);
-    const data = await response.json();
-    setThreadData(data);
-}
-useEffect(() => {
-    fetchThreads();
-    setToken(localStorage.getItem("nrtoken"));
-},[]);
+    useEffect(() => {
+        fetchThreads();
+        setToken(localStorage.getItem("nrtoken"));
+    },[]);
 
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
