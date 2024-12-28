@@ -154,7 +154,7 @@ useEffect(() => {
       <div className="bg-[#fedcba] p-1 text-xs flex flex-wrap gap-1 border-b border-[#d9bfb7]">
       <nav className="bg-[#fedcba]flex flex-wrap">
         {board_list.map(board => (
-          <a key={board} href={`/board/${links[board_list.indexOf(board)]}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
+          <a key={board} href={`/board/${board}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
         ))}
         <a href="/" className="text-[#800000] hover:underline">[Home]</a>
       </nav>

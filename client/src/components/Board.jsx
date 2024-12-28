@@ -35,7 +35,7 @@ export default function Board() {
     }
 
     formData.append("image", file); 
-    formData.append("board", links[board_list.indexOf(id)]);
+    formData.append("board", id);
     formData.append("subject", subject);
     formData.append("content", comment);
 
@@ -66,7 +66,7 @@ export default function Board() {
       {/* Board Navigation */}
       <nav className="bg-[#FAF0E6] p-1 border-b border-[#D9BFB7] flex flex-wrap">
         {board_list.map(board => (
-          <a key={board} href={`/board/${links[board_list.indexOf(board)]}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
+          <a key={board} href={`/board/${board}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
         ))}
         <a href="/" className="text-[#800000] hover:underline">[Home]</a>
       </nav>
