@@ -4,7 +4,7 @@ export const links=['Programming', 'Competitive Programming', 'Nerd', 'Semester'
 
 export const board_img=['dhyanendra','fumo','lurking'];
 
-export const URL = "http://localhost:3000"
+export const URL = "https://nrchan.onrender.com"
 
 export const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);
