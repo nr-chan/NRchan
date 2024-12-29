@@ -112,11 +112,11 @@ const Home = () => {
                             onMouseOver={(e) => e.target.play()}
                             onMouseOut={(e) => e.target.pause()}
                           >
-                            <source src={`${URL}/uploads/${thread.image}`} type="video/mp4" />
+                            <source src={`${thread.image}`} type="video/mp4" />
                           </video>
                         ) : (
                           <img 
-                            src={`${URL}/uploads/${thread.image}`} 
+                            src={`${thread.image}`} 
                             alt={thread.subject || 'Thread image'} 
                             className="max-h-full max-w-full object-contain"
                           />

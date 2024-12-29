@@ -283,13 +283,13 @@ export default function Component() {
                   style={{ width: `${150+sz}px`, height: "auto" }}
                   onClick={()=>{resize()}}
                 >
-                  <source src={`${URL}/uploads/${threadData.image}`} type="video/mp4" />
+                  <source src={`${threadData.image}`} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               ) : (
                 threadData.image && (
                   <img
-                    src={`${URL}/uploads/${threadData.image}`}
+                    src={`${threadData.image}`}
                     alt={`Thread image for ${threadData.title}`}
                     className="mr-4 border"
                     style={{ width: `${150+sz}px`, height: "auto" }}
@@ -331,7 +331,7 @@ export default function Component() {
             </div>
             <div className="flex items-start mb-2">
               {reply.image && (<img
-                src={`${URL}/uploads/${reply.image}`}
+                src={`${reply.image}`}
                 className="mr-4 border cursor-pointer"
                 style={{
                   width: expandedImages[reply._id] ? "250px" : "150px",

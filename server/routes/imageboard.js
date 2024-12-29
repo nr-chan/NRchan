@@ -4,27 +4,22 @@ const path = require('path');
 const router = express.Router();
 const Reply = require('../models/reply');
 const Thread = require('../models/thread');
+const uploadToR2  = require('../utils/uploadService');
 
-const storage = multer.diskStorage({
-  destination: './uploads/',
-  filename: (_, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_, file, cb) => {
-    const allowedFileTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mkv/; 
+    const allowedFileTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mkv/;
     const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedFileTypes.test(file.mimetype);
     if (extname && mimetype) {
       return cb(null, true);
     } else {
-      cb('Error: Images and Videos only!');
+      cb(new Error('Error: Only images and videos are allowed.'));
     }
-  }
+  },
 });
 
 
@@ -52,12 +47,8 @@ router.get('/board/:board', async (req, res) => {
   }
 });
 
-// Create new thread
 router.post('/thread', upload.single('image'), async (req, res) => {
   try {
-    console.log('Received request:', req.body); // Debug log
-    console.log('File:', req.file); // Debug log
-
     if (!req.body.content) {
       return res.status(400).json({ error: 'Content is required' });
     }
@@ -66,19 +57,26 @@ router.post('/thread', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Board is required' });
     }
 
+    let imageUrl = null;
+    if (req.file) {
+      const fileName = Date.now() + path.extname(req.file.originalname);
+      const key = `uploads/${fileName}`;
+      imageUrl = await uploadToR2(req.file, key);
+    }
+
     const thread = new Thread({
       username: req.body.username,
       board: req.body.board,
       subject: req.body.subject,
       content: req.body.content,
       posterID: generatePosterID(),
-      image: req.file ? req.file.filename : null
+      image: imageUrl,
     });
 
     await thread.save();
     res.json(thread);
   } catch (err) {
-    console.error('Error:', err); // Debug log
+    console.error('Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -230,10 +228,18 @@ router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
       return res.status(403).json({ error: 'Thread is locked' });
     }
 
+    let imageUrl = null;
+    if (req.file) {
+      const fileName = Date.now() + path.extname(req.file.originalname);
+      const key = `uploads/${fileName}`;
+      imageUrl = await uploadToR2(req.file, key);
+    }
+
+
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,
-      image: req.file ? req.file.filename : null,
+      image: imageUrl,
       posterID: generatePosterID(),
       threadID:thread._id,
     });

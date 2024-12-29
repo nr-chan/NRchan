@@ -138,13 +138,13 @@ export default function Board() {
                   className="mr-4 border" 
                   style={{ width: "150px", height: "auto" }}
                 >
-                  <source src={`${URL}/uploads/${thread.image}`} type="video/mp4" />
+                  <source src={`${thread.image}`} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               ) : (
                 thread.image && (
                   <img
-                    src={`${URL}/uploads/${thread.image}`}
+                    src={`${thread.image}`}
                     alt={`Thread image for ${thread.title}`}
                     className="mr-4 border"
                     style={{ width: "150px", height: "auto" }}
