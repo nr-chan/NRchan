@@ -102,17 +102,29 @@ const Home = () => {
               <div key={index} className="cursor-pointer" onClick={() => nav(`/thread/${thread._id}`)}>
                 <div className="border border-[#B86] bg-[#F0E0D6] p-2">
                   {/* Thread Image */}
-                  <div className="h-32 bg-[#F0E0D6] flex items-center justify-center">
-                    {thread.image ? (
-                      <img 
-                        src={`${URL}/uploads/${thread.image}`} 
-                        alt={thread.subject || 'Thread image'} 
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-center text-[11px] text-gray-500">No Image</div>
-                    )}
-                  </div>
+                    <div className="h-32 bg-[#F0E0D6] flex items-center justify-center">
+                      {thread.image ? (
+                        thread.image.endsWith('.mp4') ? (
+                          <video
+                            className="max-h-full max-w-full object-contain"
+                            controls={false}
+                            muted
+                            onMouseOver={(e) => e.target.play()}
+                            onMouseOut={(e) => e.target.pause()}
+                          >
+                            <source src={`${URL}/uploads/${thread.image}`} type="video/mp4" />
+                          </video>
+                        ) : (
+                          <img 
+                            src={`${URL}/uploads/${thread.image}`} 
+                            alt={thread.subject || 'Thread image'} 
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        )
+                      ) : (
+                        <div className="text-center text-[11px] text-gray-500">No Image</div>
+                      )}
+                    </div>
                   {/* Thread Info */}
                   <div className="p-1 bg-[#FFFFEE]">
                     <div className="text-[11px] text-[#CC1105] font-bold mb-1">
