@@ -67,6 +67,7 @@ router.post('/thread', upload.single('image'), async (req, res) => {
     }
 
     const thread = new Thread({
+      username: req.body.username,
       board: req.body.board,
       subject: req.body.subject,
       content: req.body.content,
@@ -230,6 +231,7 @@ router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
     }
 
     const reply = new Reply({
+      username: req.body.username,
       content: req.body.content,
       image: req.file ? req.file.filename : null,
       posterID: generatePosterID(),

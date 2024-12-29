@@ -78,7 +78,7 @@ export default function Component() {
         replyto:replyto,
     }
     const formData = new FormData();
-
+    formData.append("username", name); 
     formData.append("image", file); 
     formData.append("replyto",replyto);
     formData.append("content", comment);
@@ -285,7 +285,7 @@ export default function Component() {
                 onClick={()=>{resize()}}
               />)}
               <div>
-              <span className="font-bold text-[#117743]">Anonymous </span>
+              <span className="font-bold text-[#117743]">{threadData.username?threadData.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
               <span className="text-[#34345C]">{threadData.created}</span>
               <br/>
@@ -311,7 +311,7 @@ export default function Component() {
         <span>
         <article key={reply._id} className="bg-[#F0E0D6]  pl-10 pr-10 pt-4 pb-4 mb-3 ml-1  ">
           <div>
-          <span className="font-bold text-[#117743]">Anonymous </span>
+          <span className="font-bold text-[#117743]">{reply.username?reply.username : "Anonymous"} </span>
           <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
                 <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
                 {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}

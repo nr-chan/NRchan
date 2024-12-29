@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 
 // MongoDB Schemas
 const ReplySchema = new mongoose.Schema({
+  username:String,
   content: { type: String, required: true },
   image: String,
   created: { type: Date, default: Date.now },
