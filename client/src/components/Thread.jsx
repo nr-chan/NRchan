@@ -167,7 +167,6 @@ export default function Component() {
         ))}
         <a href="/" className="text-[#800000] hover:underline">[Home]</a>
       </nav>
-        <a href="#" className="text-[#800000] hover:underline">Edit</a>
         <div className="ml-auto">
           <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
           <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
