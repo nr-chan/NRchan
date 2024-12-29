@@ -10,7 +10,7 @@ export default function Board() {
   const [name, setName] = useState("anon");
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
-  const banner= board_img[Math.floor(Math.random() * board_img.length)];
+  const [banner, setBanner] = useState(null);
 
 
   const fetchThreads=async()=>{
@@ -60,6 +60,9 @@ export default function Board() {
   useEffect(() => {
     fetchThreads();
     // setThreads(boardData.politics);
+     if (!banner) {
+      setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
+    }
   },[id]);
 
   return (
