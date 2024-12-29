@@ -11,7 +11,7 @@ export default function Component() {
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
     const [sz, setSz] = useState(0);
-    const banner = board_img[Math.floor(Math.random() * board_img.length)];
+    const [banner,setBanner] = useState(null);
     
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
@@ -149,6 +149,13 @@ export default function Component() {
         fetchThreads();
         setToken(localStorage.getItem("nrtoken"));
     },[]);
+    
+    useEffect(() => {
+     if (!banner) {
+      setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
+    }
+  },[id]);
+
 
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
