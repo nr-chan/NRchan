@@ -7,7 +7,7 @@ export default function Board() {
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
   const [file, setFile] = useState(null);
-  const [name, setName] = useState("anon");
+  const [name, setName] = useState("Anonymous");
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
   const banner= board_img[Math.floor(Math.random() * board_img.length)];
@@ -34,7 +34,7 @@ export default function Board() {
         alert('Content cannot be empty!');
         return;
     }
-
+    formData.append("username", name); 
     formData.append("image", file); 
     formData.append("board", id);
     formData.append("subject", subject);
@@ -122,7 +122,7 @@ export default function Board() {
               />
             }
               <div>
-              <span className="font-bold text-[#117743]">Anonymous </span>
+              <span className="font-bold text-[#117743]">{thread.username ? thread.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {thread.posterID}) </span>
               <span className="text-[#34345C]">{thread.created}</span>
               <br/>

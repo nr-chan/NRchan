@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 
 const ThreadSchema = new mongoose.Schema({
+  username: String,
   board: { type: String, required: true },
   subject: String,
   content: { type: String, required: true },
