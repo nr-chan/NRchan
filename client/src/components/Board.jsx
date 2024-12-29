@@ -116,14 +116,25 @@ export default function Board() {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
-            {thread.image &&   /* Null check for image */
-              <img 
-                src={`${URL}/uploads/${thread.image}`} 
-                alt={`Thread image for ${thread.title}`} 
-                className="mr-4 border" 
-                style={{width: "150px", height: "auto"}} 
-              />
-            }
+            {thread.image && thread.image.endsWith('.mp4') ? (
+                <video 
+                  controls 
+                  className="mr-4 border" 
+                  style={{ width: "150px", height: "auto" }}
+                >
+                  <source src={`${URL}/uploads/${thread.image}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                thread.image && (
+                  <img
+                    src={`${URL}/uploads/${thread.image}`}
+                    alt={`Thread image for ${thread.title}`}
+                    className="mr-4 border"
+                    style={{ width: "150px", height: "auto" }}
+                  />
+                )
+              )}
               <div>
               <span className="font-bold text-[#117743]">{thread.username ? thread.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {thread.posterID}) </span>

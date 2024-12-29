@@ -277,13 +277,27 @@ export default function Component() {
                 <span className="block text-[8px]">(600, 450)</span>
             </div>
             <div className="flex items-start mb-2">
-              {threadData.image && (<img 
-                src={`${URL}/uploads/${threadData.image}`}
-                alt={`Thread image for ${threadData.title}`} 
-                className="mr-4 border" 
-                style={{width: `${150 + sz}px`, height: "auto"}} 
-                onClick={()=>{resize()}}
-              />)}
+              {threadData.image && threadData.image.endsWith('.mp4') ? (
+                <video 
+                  controls 
+                  className="mr-4 border" 
+                  style={{ width: `${150+sz}px`, height: "auto" }}
+                  onClick={()=>{resize()}}
+                >
+                  <source src={`${URL}/uploads/${threadData.image}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                threadData.image && (
+                  <img
+                    src={`${URL}/uploads/${threadData.image}`}
+                    alt={`Thread image for ${threadData.title}`}
+                    className="mr-4 border"
+                    style={{ width: `${150+sz}px`, height: "auto" }}
+                    onClick={()=>{resize()}}
+                  />
+                )
+              )}
               <div>
               <span className="font-bold text-[#117743]">{threadData.username?threadData.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
