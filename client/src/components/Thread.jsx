@@ -53,6 +53,23 @@ export default function Component() {
         });
       }
     };
+    
+    const formatDate = (dateString) => {
+      try{
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        }).format(date);
+      }catch{
+        return dateString      
+      }
+    };
+
 
     const handleMouseUp = () => {
       setIsDragging(false);
@@ -73,7 +90,7 @@ export default function Component() {
         setFile(e.target.files[0]);
     };
     const createthread = async () => {
-        const replydata={
+      const replydata={
         content:comment,
         replyto:replyto,
     }
@@ -300,7 +317,7 @@ export default function Component() {
               <div>
               <span className="font-bold text-[#117743]">{threadData.username?threadData.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
-              <span className="text-[#34345C]">{threadData.created}</span>
+              <span className="text-[#34345C]">{formatDate(threadData.created)}</span>
               <br/>
               <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
@@ -341,7 +358,7 @@ export default function Component() {
               />)}
               <div>
               
-              <span className="text-[#34345C]">{reply.created}</span>
+              <span className="text-[#34345C]">{formatDate(reply.created)}</span>
 
               <br/>
               {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)}
