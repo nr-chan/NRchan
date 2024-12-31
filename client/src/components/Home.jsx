@@ -39,25 +39,25 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
+    <div className="bg-[#FFFFEE]">
       {/* Header */}
       <header className="flex justify-center p-2">
         <img 
           src={`${URL}/images/banner.png`} 
           alt="NRchan Logo" 
-          className="h-16"
+          className="h-28"
         />
       </header>
 
       {/* Info Box */}
       <div className="max-w-[720px] mx-auto bg-[#F0E0D6] text-[#800000] p-2 m-4 border border-[#D9BFB7]">
         <div className="flex justify-between items-center bg-red-700 py-1 px-2">
-          <h2 className="text-[12px] font-bold text-white">What is NRchan?</h2>
+          <h2 className="text-[14px] font-bold text-white">What is NRchan?</h2>
         </div>
-        <p className="mt-2 text-[11px]">
+        <p className="mt-2">
           NRchan is a simple image-based bulletin board where anyone can post comments and share images. There are boards dedicated to a variety of topics, from Japanese animation and culture to videogames, music, and photography. Users do not need to register an account before participating in the community. Feel free to click on a board below that interests you and jump right in!
         </p>
-        <p className="mt-2 text-[11px]">
+        <p className="mt-2 text-[12px]">
           Be sure to familiarize yourself with the <a href="#" className="text-[#00E] underline">Rules</a> before posting, and read the <a href="#" className="text-[#00E] underline">FAQ</a> if you wish to learn more about how to use the site.
         </p>
       </div>
@@ -65,13 +65,13 @@ const Home = () => {
       {/* Boards */}
       <div className="max-w-[720px] mx-auto">
         <div className="bg-[#FCA] border border-[#B86] py-1 px-2 flex justify-between items-center">
-          <h2 className="text-[12px] font-bold">Boards</h2>
+          <h2 className="text-[15px] font-bold">Boards</h2>
         </div>
         <div className="border border-[#B86] bg-[#F0E0D6] p-2">
           <div className="flex flex-wrap -mx-2">
             {categories.map((category, index) => (
               <div key={index} className="w-1/3 px-2 mb-4">
-                <h3 className="text-[11px] font-bold text-[#CC1105] mb-1">{category.title}</h3>
+                <h3 className="text-[12.09px] underline font-bold text-[#CC1105] mb-1">{category.title}</h3>
                 <ul className="list-none">
                   {category.boards.map((board, boardIndex) => (
                     <li key={boardIndex} className="text-[11px] leading-tight">
@@ -94,7 +94,7 @@ const Home = () => {
      {/* Popular Threads Section */}
       <div className="max-w-[720px] mx-auto m-4">
         <div className="bg-[#FCA] border border-[#B86] py-1 px-2 flex justify-between items-center">
-          <h2 className="text-[12px] font-bold">Popular Threads</h2>
+          <h2 className="text-[15px] font-bold">Popular Threads</h2>
         </div>
         <div className="border border-[#800000] bg-[#FFFFEE] p-2">
           <div className="grid grid-cols-4 gap-4">
@@ -127,10 +127,10 @@ const Home = () => {
                     </div>
                   {/* Thread Info */}
                   <div className="p-1 bg-[#FFFFEE]">
-                    <div className="text-[11px] text-[#CC1105] font-bold mb-1">
+                    <div className="text-[12px] text-[#CC1105] font-bold mb-1">
                       /{thread.board}/
                     </div>
-                    <div className="text-[10px] text-[#800000]">
+                    <div className="text-[11px] text-[#800000]">
                       {getPreviewText(thread.subject)}
                     </div>
                   </div>

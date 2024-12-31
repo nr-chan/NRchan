@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,URL, board_img} from '../Defs'
+import {links, board_list,URL, board_img,formatDate,formatText} from '../Defs'
 
 export default function Component() {
-  const { id } = useParams();   
-    
+    const { id } = useParams();
     const [file, setFile] = useState(null);
     const [name, setName] = useState("Anonymous");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
     const [sz, setSz] = useState(0);
-    const [banner,setBanner] = useState(null);
-    
+    const [banner, setBanner] = useState(null);
     const [formVisible, setFormVisible] = useState(false);
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [expandedImages, setExpandedImages] = useState({});
     const nav = useNavigate();
     const [token, setToken] = useState("");
-    
-    const [expandedImages, setExpandedImages] = React.useState({});
+    const [userIP, setUserIP] = useState("");
     const toggleImageSize = (id) => {
       setExpandedImages((prev) => ({
         ...prev,
@@ -53,7 +51,8 @@ export default function Component() {
         });
       }
     };
-
+    
+    
     const handleMouseUp = () => {
       setIsDragging(false);
     };
@@ -72,11 +71,13 @@ export default function Component() {
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
+    
     const createthread = async () => {
-        const replydata={
+      const replydata={
         content:comment,
         replyto:replyto,
     }
+
     const formData = new FormData();
     formData.append("username", name); 
     formData.append("image", file); 
@@ -84,6 +85,9 @@ export default function Component() {
     formData.append("content", comment);
     const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
       method: "POST",
+      headers: {
+        ip: userIP,
+      },
       body: formData
     });
 
@@ -145,8 +149,15 @@ export default function Component() {
         const data = await response.json();
         setThreadData(data);
     }
+    
+    const getIP = async () => {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const json = await response.json();
+        setUserIP(json.ip);
+    }
     useEffect(() => {
         fetchThreads();
+        getIP();
         setToken(localStorage.getItem("nrtoken"));
     },[]);
     
@@ -269,11 +280,9 @@ export default function Component() {
       )}
 
       {/* Thread */}
-      <article key={threadData.id} className=" p-2 mb-4">
+      <article key={threadData.id} className="p-2 mb-4 bg-[#F0E0D6]">
             <div>
-                <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
-                {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
-                <span className="block text-[8px]">(600, 450)</span>
+              <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
             </div>
             <div className="flex items-start mb-2">
               {threadData.image && threadData.image.endsWith('.mp4') ? (
@@ -300,7 +309,7 @@ export default function Component() {
               <div>
               <span className="font-bold text-[#117743]">{threadData.username?threadData.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
-              <span className="text-[#34345C]">{threadData.created}</span>
+              <span className="text-[#34345C]">{formatDate(threadData.created)}</span>
               <br/>
               <button className="text-red-500" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
@@ -312,13 +321,13 @@ export default function Component() {
             </div>
             
             <h2 className="font-bold text-[#800000] mt-2">{threadData.subject}</h2>
-            <p className="mt-2">{threadData.content}</p>
+            <p className="mt-2">{formatText(threadData.content)}</p>
       </article>
       
 
       {/* Replies */}
       {threadData.replies && threadData.replies.map((reply) => (
-        <div className='flex'>
+        <div className='flex ml-4'>
 
         <span>{`>> `}</span>
         <span>
@@ -341,7 +350,7 @@ export default function Component() {
               />)}
               <div>
               
-              <span className="text-[#34345C]">{reply.created}</span>
+              <span className="text-[#34345C]">{formatDate(reply.created)}</span>
 
               <br/>
               {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)}
@@ -351,7 +360,7 @@ export default function Component() {
               <button className="text-red-500" onClick={() => {
                   deleteReply(reply._id);
               }}>[delete]</button>
-               <p className="whitespace-pre-line">{reply.content}</p>
+               <p className="whitespace-pre-line">{formatText(reply.content)}</p>
             </div>
             </div>
 
