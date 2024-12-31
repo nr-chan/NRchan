@@ -147,6 +147,9 @@ export default function Component() {
     const fetchThreads=async()=>{
         const response = await fetch(`${URL}/thread/${id}`);
         const data = await response.json();
+        if(response.status !== 200){
+          nav('/404')
+        }
         setThreadData(data);
     }
     

@@ -7,7 +7,7 @@ import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
 import Thread from './components/Thread.jsx'
 import Login from './components/Login.jsx'
-
+import P404 from './components/P404.jsx'
 
 const router=createBrowserRouter(
   createRoutesFromElements(

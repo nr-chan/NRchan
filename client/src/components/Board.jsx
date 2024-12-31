@@ -16,6 +16,9 @@ export default function Board() {
   
   const fetchThreads = async () => {
     const response = await fetch(`${URL}/board/${id}`);
+    if(response.status !== 200){
+      nav('/404')
+    }
     const data = await response.json();
     setThreads(data);
   };
