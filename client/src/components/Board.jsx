@@ -264,7 +264,6 @@ export default function Board() {
                   />
                 </button>
                 <span className="font-bold">ThreadID: {thread._id}</span>
-                <span className="block text-[8px]">(600, 450)</span>
               </div>
               
               <div className="flex items-start mb-2">
