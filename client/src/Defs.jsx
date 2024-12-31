@@ -2,7 +2,7 @@ export const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 
 
 export const links=['Programming', 'Competitive Programming', 'Nerd', 'Semester','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','Randi', 'Dick', 'Confess', 'GIF', 'Rant','politics']
 
-export const board_img=['fumo','lurking'];
+export const board_img=['fumo','lurking','joint','bhabha'];
 
 export const URL = "https://nrchan.onrender.com"
 
