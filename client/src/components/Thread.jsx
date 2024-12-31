@@ -19,6 +19,7 @@ export default function Component() {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const nav = useNavigate();
     const [token, setToken] = useState("");
+    const [userIP, setUserIP] = useState("");
     
     const [expandedImages, setExpandedImages] = React.useState({});
     const toggleImageSize = (id) => {
@@ -84,6 +85,9 @@ export default function Component() {
     formData.append("content", comment);
     const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
       method: "POST",
+      headers: {
+        ip: userIP,
+      },
       body: formData
     });
 
@@ -145,8 +149,15 @@ export default function Component() {
         const data = await response.json();
         setThreadData(data);
     }
+    
+    const getIP = async () => {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const json = await response.json();
+        setUserIP(json.ip);
+    }
     useEffect(() => {
         fetchThreads();
+        getIP();
         setToken(localStorage.getItem("nrtoken"));
     },[]);
     

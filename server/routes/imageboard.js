@@ -5,6 +5,7 @@ const router = express.Router();
 const Reply = require('../models/reply');
 const Thread = require('../models/thread');
 const uploadToR2  = require('../utils/uploadService');
+const rateLimiter = require('../utils/rateLimit');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -47,7 +48,7 @@ router.get('/board/:board', async (req, res) => {
   }
 });
 
-router.post('/thread', upload.single('image'), async (req, res) => {
+router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => {
   try {
     if (!req.body.content) {
       return res.status(400).json({ error: 'Content is required' });
@@ -216,7 +217,7 @@ router.get('/thread/:id', async (req, res) => {
 });
 
 // Reply to thread
-router.post('/thread/:id/reply', upload.single('image'), async (req, res) => {
+router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
     console.log(thread);
