@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { links, board_list, URL, board_img,formatText,formatDate } from "../Defs";
 
 export default function Board() {
+  const nav = useNavigate();
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
   const [file, setFile] = useState(null);
@@ -16,7 +17,7 @@ export default function Board() {
   
   const fetchThreads = async () => {
     const response = await fetch(`${URL}/board/${id}`);
-    if(response.status !== 200){
+    if(response.status !== 200 || !board_list.includes(id)){
       nav('/404')
     }
     const data = await response.json();
