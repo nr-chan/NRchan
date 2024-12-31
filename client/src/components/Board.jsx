@@ -14,7 +14,28 @@ export default function Board() {
   const [token, setToken] = useState("");
   const [userIP, setUserIP] = useState("");
   const [collapsedThreads, setCollapsedThreads] = useState({});
-    
+  
+  const formatText = (text) => {
+    if (!text) return null;
+    return text.split("\n").map((line, index) => {
+      if (line.trim().startsWith(">")) {
+        return (
+          <span key={index} style={{ color: "#789922" }}>
+            {line}
+            <br />
+          </span>
+        );
+      } else {
+        return (
+          <span key={index}>
+            {line}
+            <br />
+          </span>
+        );
+      }
+    });
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -285,7 +306,7 @@ export default function Board() {
               </div>
 
               <h2 className="font-bold mt-2">{thread.subject}</h2>
-              <p className="mt-2">{thread.content}</p>
+              <p className="mt-2">{formatText(thread.content)}</p>
 
               {/* Replies */}
               <div className="mt-4">
