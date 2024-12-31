@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider,BrowserRouter } from 'react-router-dom'
 import Layout from './Layout.jsx'
@@ -8,7 +7,6 @@ import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
 import Thread from './components/Thread.jsx'
 import Login from './components/Login.jsx'
-// import Admin from './components/Admin.jsx'
 
 const router=createBrowserRouter(
   createRoutesFromElements(
