@@ -8,6 +8,7 @@ import Home from './components/Home.jsx'
 import Board from './components/Board.jsx'
 import Thread from './components/Thread.jsx'
 import Login from './components/Login.jsx'
+import P404 from './components/P404.jsx'
 // import Admin from './components/Admin.jsx'
 
 const router=createBrowserRouter(
@@ -17,6 +18,7 @@ const router=createBrowserRouter(
     <Route path='board/:id' element={<Board/>}/>
     <Route path='thread/:id' element={<Thread/>}/>
     <Route path='login' element={<Login/>}/>
+    <Route path='*' element={<P404/>} />
     </Route>
   )
 )
