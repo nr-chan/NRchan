@@ -88,7 +88,29 @@ export default function Board() {
       setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
     }
   }, [id]);
+  function formatText(content) {
+    if (!content) return null;
 
+    const parts = content.split(/```/);
+  
+    return parts.map((part, index) => {
+      // Odd indexes contain code blocks
+      if (index % 2 === 1 ) {
+        if(parts.length%2==0 && index==parts.length-1){
+          part="```" + part;
+          return <span key={index}>{part}</span>;
+        }
+        return (
+
+            <code className="block bg-gray-800 text-white rounded-md p-2">
+              {part}
+            </code>
+        );
+      }
+      // Even indexes contain regular text
+      return <span key={index}>{part}</span>;
+    });
+  }
   return (
   <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
     {/* Top Navigation */}
@@ -299,7 +321,7 @@ export default function Board() {
                         />
                       </div>
                     )}
-                    <p className="mt-2">{reply.content}</p>
+                    <p className="mt-2">{formatText(reply.content)}</p>
                   </div>
                 ))}
               </div>
