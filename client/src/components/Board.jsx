@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-
-import { links, board_list, URL, board_img } from "../Defs";
+import { links, board_list, URL, board_img,formatText,formatDate } from "../Defs";
 
 export default function Board() {
   const { id } = useParams();
@@ -15,40 +14,6 @@ export default function Board() {
   const [userIP, setUserIP] = useState("");
   const [collapsedThreads, setCollapsedThreads] = useState({});
   
-  const formatText = (text) => {
-    if (!text) return null;
-    return text.split("\n").map((line, index) => {
-      if (line.trim().startsWith(">")) {
-        return (
-          <span key={index} style={{ color: "#789922" }}>
-            {line}
-            <br />
-          </span>
-        );
-      } else {
-        return (
-          <span key={index}>
-            {line}
-            <br />
-          </span>
-        );
-      }
-    });
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    }).format(date);
-  };
-
-
   const fetchThreads = async () => {
     const response = await fetch(`${URL}/board/${id}`);
     const data = await response.json();
@@ -207,12 +172,12 @@ export default function Board() {
                 onChange={(e) => setSubject(e.target.value)}
                 className="flex-grow bg-[#F0E0D6] border border-[#AAA]"
               />
-              <input
+              <button
                 type="submit"
                 onClick={() => createthread()}
-                value="Post"
-                className="ml-2 bg-[#F0E0D6] border border-[#AAA] px-2"
-              />
+                className="ml-2 bg-[#EA8] border border-[#800000] px-2 hover:bg-[#F0E0D6]"
+
+              >Post</button>
             </td>
           </tr>
           <tr>

@@ -12,3 +12,40 @@ export const fetchThreads=async()=>{
     console.log(data);
     setThreadData(data);
 }
+
+export const formatDate = (dateString) => {
+  try{
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    }).format(date);
+  }catch{
+    return dateString      
+  }
+};
+
+export const formatText = (text) => {
+    if (!text) return null;
+    return text.split("\n").map((line, index) => {
+      if (line.trim().startsWith(">")) {
+        return (
+          <span key={index} style={{ color: "#789922" }}>
+            {line}
+            <br />
+          </span>
+        );
+      } else {
+        return (
+          <span key={index}>
+            {line}
+            <br />
+          </span>
+        );
+      }
+    });
+  };

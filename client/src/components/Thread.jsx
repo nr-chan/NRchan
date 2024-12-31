@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,URL, board_img} from '../Defs'
+import {links, board_list,URL, board_img,formatDate,formatText} from '../Defs'
 
 export default function Component() {
     const { id } = useParams();
@@ -52,22 +52,7 @@ export default function Component() {
       }
     };
     
-    const formatDate = (dateString) => {
-      try{
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-        }).format(date);
-      }catch{
-        return dateString      
-      }
-    };
-
+    
     const handleMouseUp = () => {
       setIsDragging(false);
     };
@@ -86,11 +71,13 @@ export default function Component() {
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
+    
     const createthread = async () => {
       const replydata={
         content:comment,
         replyto:replyto,
     }
+
     const formData = new FormData();
     formData.append("username", name); 
     formData.append("image", file); 
@@ -334,7 +321,7 @@ export default function Component() {
             </div>
             
             <h2 className="font-bold text-[#800000] mt-2">{threadData.subject}</h2>
-            <p className="mt-2">{threadData.content}</p>
+            <p className="mt-2">{formatText(threadData.content)}</p>
       </article>
       
 
@@ -373,7 +360,7 @@ export default function Component() {
               <button className="text-red-500" onClick={() => {
                   deleteReply(reply._id);
               }}>[delete]</button>
-               <p className="whitespace-pre-line">{reply.content}</p>
+               <p className="whitespace-pre-line">{formatText(reply.content)}</p>
             </div>
             </div>
 
