@@ -1,4 +1,4 @@
-const MAX_UPLOADS = 3;
+const MAX_UPLOADS = 200;
 
 const uploadCounts = {};
 
