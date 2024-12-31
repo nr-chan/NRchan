@@ -12,7 +12,7 @@ export default function Board() {
   const [comment, setComment] = useState(null);
   const [banner, setBanner] = useState(null);
   const [token, setToken] = useState("");
-
+  const [userIP, setUserIP] = useState("");
 
   const fetchThreads=async()=>{
     const response = await fetch(`${URL}/board/${id}`);
@@ -44,6 +44,9 @@ export default function Board() {
     try {
         const response = await fetch(`${URL}/thread`, {
             method: "POST",
+            headers: {
+              ip: userIP,
+            },
             body: formData, 
         });
 
@@ -58,7 +61,15 @@ export default function Board() {
     }
   };
 
+
+  const getIP = async () => {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const json = await response.json();
+    setUserIP(json.ip);
+  }
+
   useEffect(() => {
+    getIP();
     fetchThreads();
     // setThreads(boardData.politics);
      if (!banner) {
