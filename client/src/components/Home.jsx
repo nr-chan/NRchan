@@ -39,13 +39,13 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
+    <div className="bg-[#FFFFEE]">
       {/* Header */}
       <header className="flex justify-center p-2">
         <img 
           src={`${URL}/images/banner.png`} 
           alt="NRchan Logo" 
-          className="h-16"
+          className="h-28"
         />
       </header>
 

@@ -295,11 +295,11 @@ export default function Board() {
                   </span>
                   <span className="text-[#34345C]">{formatDate(thread.created)}</span>
                   <br />
-                  <a
-                    href={`http://localhost:5174/thread/${thread._id}`}
+                  View this thread  <a
+                    href={"/thread/"+thread._id}
                     className="text-[#34345C]"
                   >
-                    View this thread [click here]
+                     [click here]
                   </a>
                 </div>
               </div>
@@ -316,6 +316,9 @@ export default function Board() {
                   >
                     <span className="font-bold text-[#117743]">
                       {reply.username || "Anonymous"}{" "}
+                    </span>
+                    <span className="font-bold text-grey-600">
+                        (ID: {reply.posterID}){" "}
                     </span>
                     <span className="text-[#34345C]">{formatDate(reply.created)}</span>
                     {reply.image && (
