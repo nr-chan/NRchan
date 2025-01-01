@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { links, board_list, URL, board_img,formatText,formatDate } from "../Defs";
 
 export default function Board() {
+  const nav = useNavigate();
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
   const [file, setFile] = useState(null);
@@ -13,11 +14,17 @@ export default function Board() {
   const [token, setToken] = useState("");
   const [userIP, setUserIP] = useState("");
   const [collapsedThreads, setCollapsedThreads] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const threadsPerPage = 5;
   
   const fetchThreads = async () => {
     const response = await fetch(`${URL}/board/${id}`);
+    if(response.status !== 200 || !board_list.includes(id)){
+      nav('/404')
+    }
     const data = await response.json();
     setThreads(data);
+    console.log(data)
   };
 
   const handleFileChange = (e) => {
@@ -85,6 +92,19 @@ export default function Board() {
       setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
     }
   }, [id]);
+
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= Math.ceil(threads.length / threadsPerPage)) {
+      setCurrentPage(page);
+    }
+  };
+
+  const totalPages = Math.ceil(threads.length / threadsPerPage);
+  const currentThreads = threads.slice(
+    (currentPage - 1) * threadsPerPage,
+    currentPage * threadsPerPage
+  );
 
   return (
   <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
@@ -201,7 +221,7 @@ export default function Board() {
 
     {/* Threads */}
     <div className="max-w-[768px] mx-auto">
-      {threads.map((thread) => (
+      {currentThreads.map((thread) => (
         <div key={thread._id} className="mb-4">
           {collapsedThreads[thread._id] ? (
             <article className="bg-[#F0E0D6] border border-[#D9BFB7] p-2">
@@ -274,7 +294,7 @@ export default function Board() {
 
               {/* Replies */}
               <div className="mt-4">
-                {thread.replies.map((reply) => (
+                {thread.replies.slice(-3).map((reply) => (
                   <div
                     key={reply._id}
                     className="border border-[#D9BFB7] p-2 mb-2"
@@ -283,7 +303,7 @@ export default function Board() {
                       {reply.username || "Anonymous"}{" "}
                     </span>
                     <span className="font-bold text-grey-600">
-                        (ID: {reply.posterID}){" "}
+                      (ID: {reply.posterID}){" "}
                     </span>
                     <span className="text-[#34345C]">{formatDate(reply.created)}</span>
                     {reply.image && (
@@ -296,7 +316,7 @@ export default function Board() {
                         />
                       </div>
                     )}
-                    <p className="mt-2">{reply.content}</p>
+                    <p className="mt-2">{formatText(reply.content)}</p>
                   </div>
                 ))}
               </div>
@@ -305,6 +325,35 @@ export default function Board() {
         </div>
       ))}
     </div>
+    <div className="flex justify-center mt-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50"
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-3 py-1 mx-1 border ${
+                currentPage === i + 1
+                  ? "bg-[#800000] text-white"
+                  : "bg-[#F0E0D6]"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
   </div>
  );
 }
