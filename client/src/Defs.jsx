@@ -29,23 +29,46 @@ export const formatDate = (dateString) => {
   }
 };
 
-export const formatText = (text) => {
-    if (!text) return null;
-    return text.split("\n").map((line, index) => {
+export const formatText = (content) => {
+  if (!content) return null;
+
+  const parts = content.split(/```/);
+
+  return parts.map((part, index) => {
+    // Handle code blocks (odd indexes)
+    if (index % 2 === 1) {
+      if (parts.length % 2 === 0 && index === parts.length - 1) {
+        part = "```" + part;
+        return <span key={index}>{part}</span>;
+      }
+      return (
+        <code
+          key={index}
+          className="block bg-gray-800 text-white rounded-md p-2"
+        >
+          {part}
+        </code>
+      );
+    }
+
+    // Handle regular text (even indexes)
+    return part.split("\n").map((line, lineIndex) => {
       if (line.trim().startsWith(">")) {
         return (
-          <span key={index} style={{ color: "#789922" }}>
+          <span key={`${index}-${lineIndex}`} style={{ color: "#789922" }}>
             {line}
             <br />
           </span>
         );
       } else {
         return (
-          <span key={index}>
+          <span key={`${index}-${lineIndex}`}>
             {line}
             <br />
           </span>
         );
       }
     });
-  };
+  });
+};
+

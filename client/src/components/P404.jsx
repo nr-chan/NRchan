@@ -27,13 +27,21 @@ export default function P404() {
                   }
                 </div>
               </div>
-              <div className="text-center my-2">
-      <div className="text-[40px] font-bold text-[#CC1105] mb-1">
-        WOMP WOMP KID
-      </div>
-      <div className="font-bold text-[80px] text-[#117743]">
-        404
-      </div>
+            {/* Header */}
+            <header className="flex justify-center p-2">
+              <img 
+                src={`${URL}/images/banner.png`} 
+                alt="NRchan Logo" 
+                className="h-28"
+              />
+            </header>
+      <div className="text-center  my-2">
+        <div className="text-[40px] font-bold text-[#800000] mt-20">
+          WOMP WOMP KID
+        </div>
+        <div className="font-bold text-[80px] text-[#117743]">
+          404
+        </div>
       </div>
     </div>
   );

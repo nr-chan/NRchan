@@ -170,31 +170,6 @@ export default function Component() {
     }
   },[id]);
 
-  function formatText(content) {
-    if (!content) return null;
-
-    const parts = content.split(/```/);
-  
-    return parts.map((part, index) => {
-      // Odd indexes contain code blocks
-      if (index % 2 === 1 ) {
-        if(parts.length%2==0 && index==parts.length-1){
-          part="```" + part;
-          return <span key={index}>{part}</span>;
-        }
-        return (
-
-            <code className="block bg-gray-800 text-white rounded-md p-2">
-              {part}
-            </code>
-        );
-      }
-      // Even indexes contain regular text
-      return <span key={index}>{part}</span>;
-    });
-  }
-  
-
 
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
