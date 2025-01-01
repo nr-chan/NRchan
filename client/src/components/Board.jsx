@@ -361,7 +361,7 @@ export default function Board() {
 
               {/* Replies */}
               <div className="mt-4">
-                {thread.replies.map((reply) => (
+                {thread.replies.slice(-3).map((reply) => (
                   <div
                     key={reply._id}
                     className="border border-[#D9BFB7] p-2 mb-2"
