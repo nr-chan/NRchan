@@ -19,6 +19,10 @@ export default function Component() {
     const nav = useNavigate();
     const [token, setToken] = useState("");
     const [userIP, setUserIP] = useState("");
+    const [selectedPosts, setSelectedPosts] = useState(new Set());
+    const [deletePassword, setDeletePassword] = useState('');
+    const [fileOnlyDelete, setFileOnlyDelete] = useState(false);
+  
     const toggleImageSize = (id) => {
       setExpandedImages((prev) => ({
         ...prev,
@@ -83,22 +87,23 @@ export default function Component() {
     formData.append("image", file); 
     formData.append("replyto",replyto);
     formData.append("content", comment);
-    const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
-      method: "POST",
-      headers: {
-        ip: userIP,
-      },
-      body: formData
-    });
 
-    if (response.status === 200) {
-      console.log('File uploaded successfully');
-      setFile(null);
-      fetchThreads();
-      // Fetch resumes again after successful upload
-    } else {
-        console.error('Error uploading file:', response.statusText);
-    }
+    const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
+        method: "POST",
+        headers: {
+          ip: userIP,
+        },
+        body: formData
+      });
+
+      if (response.status === 200) {
+        console.log('File uploaded successfully');
+        setFile(null);
+        fetchThreads();
+        // Fetch resumes again after successful upload
+      } else {
+          console.error('Error uploading file:', response.statusText);
+      }
     };
 
     const deleteThread = async (threadID) => {
@@ -142,7 +147,7 @@ export default function Component() {
     const logout = () => {
         localStorage.removeItem("nrtoken");
         setToken("");
-      }
+    }
 
     const fetchThreads=async()=>{
         const response = await fetch(`${URL}/thread/${id}`);
@@ -158,6 +163,11 @@ export default function Component() {
         const json = await response.json();
         setUserIP(json.ip);
     }
+        
+    const isLoggedIn = async()=>{
+        return ( token==="" || token===null ) ? false : true;
+    }
+
     useEffect(() => {
         fetchThreads();
         getIP();
@@ -165,11 +175,39 @@ export default function Component() {
     },[]);
     
     useEffect(() => {
-     if (!banner) {
-      setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
-    }
-  },[id]);
+      if (!banner) {
+        setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
+      }
+    },[id]);
 
+    const handleCheckboxChange = (postId) => {
+      setSelectedPosts(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(postId)) {
+          newSet.delete(postId);
+        } else {
+          newSet.add(postId);
+        }
+        return newSet;
+      }); 
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedPosts.size === 0) {
+            alert('Please select posts to delete');
+            return;
+        }
+
+        if (!deletePassword) {
+            alert('Please enter a password');
+            return;
+        }
+        //POST Request to delete 
+        fetchThreads();
+        setSelectedPosts(new Set());
+        setDeletePassword('');
+
+  }
 
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
@@ -310,13 +348,18 @@ export default function Component() {
                 )
               )}
               <div>
-              <span className="font-bold text-[#117743]">{threadData.username?threadData.username:"Anonymous"} </span>
+              <input 
+                  type="checkbox"
+                  checked={selectedPosts.has(threadData._id)}
+                  onChange={() => handleCheckboxChange(threadData._id)}
+              />
+              <span className="font-bold text-[#117743]"> {threadData.username?threadData.username:"Anonymous"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
               <span className="text-[#34345C]">{formatDate(threadData.created)}</span>
               <br/>
-              <button className="text-red-500" onClick={()=>{setReplyto(null)
+              <button className="text-red-500 pr-2" onClick={()=>{setReplyto(null)
                   setFormVisible(true);
-              }}>[reply]</button>
+              }}>[Reply]</button>
               <button className="text-red-500" onClick={() => {
                   deleteThread(threadData._id);
               }}>[delete]</button>
@@ -332,14 +375,18 @@ export default function Component() {
       {threadData.replies && threadData.replies.map((reply) => (
         <div className='flex ml-4'>
 
-        <span>{`>> `}</span>
+        <span className='text-[1.5rem] text-gray-400'>{`>> `}</span>
         <span>
-        <article key={reply._id} className="bg-[#F0E0D6]  pl-10 pr-10 pt-4 pb-4 mb-3 ml-1  ">
+        <article key={reply._id} className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1  ">
           <div>
-          <span className="font-bold text-[#117743]">{reply.username?reply.username : "Anonymous"} </span>
+          <input 
+            type="checkbox"
+            checked={selectedPosts.has(reply._id)}
+            onChange={() => handleCheckboxChange(reply._id)}
+          />
+          <span className="font-bold text-[#117743]"> {reply.username?reply.username : "Anonymous"} </span>
           <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
                 <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
-                {/* <a href="#" className="text-[#34345C]">{thread.fileName}</a> */}
             </div>
             <div className="flex items-start mb-2">
               {reply.image && (<img
@@ -371,7 +418,42 @@ export default function Component() {
         </span>
         </div>
       ))}
-
+    
+    <div className="bottom-0 left-0 right-0 border-t border-[#800000] p-2">
+        <form className="flex items-center gap-4 justify-end" onSubmit={(e) => {
+            e.preventDefault();
+            handleBulkDelete();
+        }}>
+            <input 
+                type="hidden" 
+                name="mode" 
+                value="usrdel"
+            />
+            <span>Delete Post(s):</span>
+            <label className="flex items-center gap-1">
+                <input 
+                    type="checkbox"
+                    name="onlyimgdel"
+                    checked={fileOnlyDelete}
+                    onChange={(e) => setFileOnlyDelete(e.target.checked)}
+                />
+                File Only
+            </label>
+            <input 
+                type="password"
+                placeholder="Password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="px-2 py-1 border border-[#800000]"
+            />
+            <button
+                type="submit"
+                className="bg-[#EA8] border border-[#800000] px-4 py-1 hover:bg-[#F0E0D6]"
+            >
+                Delete
+            </button>
+        </form>
+      </div>
     </div>
   );
 }

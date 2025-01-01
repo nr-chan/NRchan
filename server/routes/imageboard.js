@@ -284,40 +284,4 @@ router.post('/reply/:id/reply', upload.single('image'), async (req, res) => {
   }
 });
 
-// Admin routes (would need proper authentication in production)
-
-// Delete thread
-router.delete('/thread/:id', async (req, res) => {
-  try {
-    await Thread.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Thread deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Toggle thread sticky
-router.patch('/thread/:id/sticky', async (req, res) => {
-  try {
-    const thread = await Thread.findById(req.params.id);
-    thread.sticky = !thread.sticky;
-    await thread.save();
-    res.json(thread);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Toggle thread lock
-router.patch('/thread/:id/lock', async (req, res) => {
-  try {
-    const thread = await Thread.findById(req.params.id);
-    thread.locked = !thread.locked;
-    await thread.save();
-    res.json(thread);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 module.exports = router;
