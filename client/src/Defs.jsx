@@ -4,7 +4,9 @@ export const links=['Programming', 'Competitive Programming', 'Nerd', 'Semester'
 
 export const board_img=['fumo','lurking','joint','bhabha'];
 
-export const URL = "https://nrchan.onrender.com"
+export const URL = import.meta.env.VITE_API_URL
+
+console.log(URL)
 
 export const fetchThreads=async()=>{
     const response = await fetch(`${URL}/thread/${id}`);

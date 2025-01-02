@@ -240,6 +240,68 @@ router.delete('/admin/thread/:id', adminAuth, async (req, res) => {
   }
 });
 
+
+router.post('/lock/:id', adminAuth, async (req, res) => {
+  try {
+    const thread = await Thread.findById(req.params.id);
+    
+    if (!thread) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    const updatedThread = await Thread.findByIdAndUpdate(
+      thread._id,
+      { $set: { locked: !thread.locked } },
+      { new: true } 
+    );
+    
+    res.json({ 
+      message: `Thread ${updatedThread.locked ? 'locked' : 'unlocked'} successfully`,
+      adminAction: {
+        type: 'thread_lock_toggle',
+        admin: req.admin._id,
+        threadId: thread._id,
+        newStatus: updatedThread.locked,
+        timestamp: new Date()
+      }
+    });
+  } catch (err) {
+    console.error('Error toggling thread lock:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/pin/:id', adminAuth, async (req, res) => {
+  try {
+    const thread = await Thread.findById(req.params.id);
+    
+    if (!thread) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    const updatedThread = await Thread.findByIdAndUpdate(
+      thread._id,
+      { $set: { sticky: !thread.sticky } },
+      { new: true } 
+    );
+    
+    res.json({ 
+      message: `Thread ${updatedThread.sticky ? 'Pinned' : 'Unpinned'} successfully`,
+      adminAction: {
+        type: 'thread_pin_toggle',
+        admin: req.admin._id,
+        threadId: thread._id,
+        newStatus: updatedThread.locked,
+        timestamp: new Date()
+      }
+    });
+  } catch (err) {
+    console.error('Error toggling thread pin:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 router.delete('/admin/reply/:id', adminAuth, async (req, res) => {
   try {
     const reply = await Reply.findById(req.params.id);
