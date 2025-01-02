@@ -389,15 +389,27 @@ export default function Component() {
                 <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
             </div>
             <div className="flex items-start mb-2">
-              {reply.image && (<img
-                src={`${reply.image}`}
-                className="mr-4 border cursor-pointer"
-                style={{
-                  width: expandedImages[reply._id] ? "250px" : "150px",
-                  height: "auto",
-                }}
-                onClick={() => toggleImageSize(reply._id)}
-              />)}
+            {reply.image && reply.image.endsWith('.mp4') ? (
+                <video 
+                  controls 
+                  className="mr-4 border" 
+                  style={{ width: `${150+sz}px`, height: "auto" }}
+                  onClick={()=>{resize()}}
+                >
+                  <source src={`${reply.image}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                reply.image && (
+                  <img
+                    src={`${reply.image}`}
+                    alt={`Thread image for ${reply.title}`}
+                    className="mr-4 border"
+                    style={{ width: `${150+sz}px`, height: "auto" }}
+                    onClick={()=>{resize()}}
+                  />
+                )
+              )}
               <div>
               
               <span className="text-[#34345C]">{formatDate(reply.created)}</span>

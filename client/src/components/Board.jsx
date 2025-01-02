@@ -374,16 +374,25 @@ export default function Board() {
                       (ID: {reply.posterID}){" "}
                     </span>
                     <span className="text-[#34345C]">{formatDate(reply.created)}</span>
-                    {reply.image && (
-                      <div className="mt-2">
-                        <img
-                          src={reply.image}
-                          alt="Reply"
-                          className="border"
-                          style={{ width: "100px", height: "auto" }}
-                        />
-                      </div>
-                    )}
+                    {reply.image && reply.image.endsWith(".mp4") ? (
+                  <video
+                    controls
+                    className="mr-4 border"
+                    style={{ width: "150px", height: "auto" }}
+                  >
+                    <source src={`${reply.image}`} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  reply.image && (
+                    <img
+                      src={`${reply.image}`}
+                      alt={`reply image for ${reply.title}`}
+                      className="mr-4 border"
+                      style={{ width: "150px", height: "auto" }}
+                    />
+                  )
+                )}
                     <p className="mt-2">{formatText(reply.content)}</p>
                   </div>
                 ))}
