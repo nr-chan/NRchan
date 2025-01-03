@@ -1,15 +1,29 @@
-export const board_list=['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt','pol'];
-
-export const links=['Programming', 'Competitive Programming', 'Nerd', 'Semester','Video Games', 'Khelkud', 'Arambh','Comics & Cartoons', 'Technology', 'Sports','Photography', 'Music', 'Graphic Design','Randi', 'Dick', 'Confess', 'GIF', 'Rant','politics']
+export const board_list = ['p', 'mm', 'v', 'c', 'a', 'Sp', 'Ph', 'm', 'f', 'par', 'ka', 'np', 'GIF', 'Rnt', 'pol','cs'];
+export const links = [
+  'Programming', 
+  'Meth-Math', 
+  'Video Games', 
+  'Cricket', 
+  'Arambh', 
+  'Sports', 
+  'Photography', 
+  'Music', 
+  'Food', 
+  'Paranormal', 
+  'Khoobsurat Aurate', 
+  'Nasha Paani', 
+  'GIF', 
+  'Rant', 
+  'Politics',
+  'CS Trends'
+]
 
 export const board_img=['fumo','lurking','joint','bhabha'];
 
-export const URL = import.meta.env.VITE_API_URL
-
-console.log(URL)
+export const API_URL = import.meta.env.VITE_API_URL
 
 export const fetchThreads=async()=>{
-    const response = await fetch(`${URL}/thread/${id}`);
+    const response = await fetch(`${API_URL}/thread/${id}`);
     const data = await response.json();
     console.log(data);
     setThreadData(data);

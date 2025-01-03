@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState} from 'react';
 
-import {links, board_list,URL, board_img} from '../Defs'
+import {board_list,API_URL} from '../Defs'
 
 export default function P404() {
-    const [token, setToken] = useState("");
+  const [token, setToken] = useState("");
   return (
     <div className="min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px]">
               <div className="bg-[#fedcba] p-1 text-xs flex flex-wrap gap-1 border-b border-[#d9bfb7]">
@@ -30,7 +29,7 @@ export default function P404() {
             {/* Header */}
             <header className="flex justify-center p-2">
               <img 
-                src={`${URL}/images/banner.png`} 
+                src={`${API_URL}/images/banner.png`} 
                 alt="NRchan Logo" 
                 className="h-28"
               />
