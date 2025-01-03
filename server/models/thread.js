@@ -5,7 +5,14 @@ const ThreadSchema = new mongoose.Schema({
   board: { type: String, required: true },
   subject: String,
   content: { type: String, required: true },
-  image: String,
+  image: {
+    url: String,
+    size: Number,
+    width: Number,
+    height: Number,
+    thumbnailWidth: Number,
+    thumbnailHeight: Number
+  },
   created: { type: Date, default: Date.now },
   lastBump: { type: Date, default: Date.now },
   replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reply' }],

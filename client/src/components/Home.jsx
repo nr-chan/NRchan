@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import {links, board_list,API_URL} from '../Defs'
+import {links, board_list,API_URL,getSmallImageUrl} from '../Defs'
+import ThreadImage from './Image';
 
 const Home = () => {
   const nav = useNavigate();
@@ -14,6 +15,7 @@ const Home = () => {
     try {
       const response = await fetch(`${API_URL}/recent`);
       const data = await response.json();
+      console.log(data);
       setThreads(data.data);
     } catch (error) {
       console.error('Error fetching recent threads:', error);
@@ -90,7 +92,7 @@ const Home = () => {
 
 
      {/* Popular Threads Section */}
-      <div className="max-w-[720px] mx-auto m-4">
+      <div className="max-w-[720px] mx-auto py-4">
         <div className="bg-[#FCA] border border-[#B86] py-1 px-2 flex justify-between items-center">
           <h2 className="text-[15px] font-bold">Popular Threads</h2>
         </div>
@@ -102,7 +104,7 @@ const Home = () => {
                   {/* Thread Image */}
                     <div className="h-32 bg-[#F0E0D6] flex items-center justify-center">
                       {thread.image ? (
-                        thread.image.endsWith('.mp4') ? (
+                        thread.image.url.endsWith('.mp4') ? (
                           <video
                             className="max-h-full max-w-full object-contain"
                             controls={false}
@@ -110,14 +112,14 @@ const Home = () => {
                             onMouseOver={(e) => e.target.play()}
                             onMouseOut={(e) => e.target.pause()}
                           >
-                            <source src={`${thread.image}`} type="video/mp4" />
+                            <source src={`${thread.image.url}`} type="video/mp4" />
                           </video>
                         ) : (
                           <img 
-                            src={`${thread.image}`} 
-                            alt={thread.subject || 'Thread image'} 
-                            className="max-h-full max-w-full object-contain"
-                          />
+                          src={`${getSmallImageUrl(thread.image.url)}`} 
+                          alt={thread.subject || 'Thread image'} 
+                          className="max-h-full max-w-full object-contain"
+                        />
                         )
                       ) : (
                         <div className="text-center text-[11px] text-gray-500">No Image</div>

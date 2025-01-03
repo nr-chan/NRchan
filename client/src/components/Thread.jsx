@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ThreadImage from './Image';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,API_URL, board_img,formatDate,formatText} from '../Defs'
+import {links, board_list,API_URL, board_img,formatDate,formatText, getFileSize} from '../Defs'
 
 export default function Component() {
     const { id } = useParams();
@@ -16,7 +17,6 @@ export default function Component() {
     const [formPosition, setFormPosition] = useState({ x: 50, y: 50 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-    const [expandedImages, setExpandedImages] = useState({});
     const nav = useNavigate();
     const [token, setToken] = useState("");
     const [userIP, setUserIP] = useState("");
@@ -237,7 +237,7 @@ export default function Component() {
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
 
       {/* Board header */}
-      <div className="text-center my-4">
+      <div className="text-center py-4">
         <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
@@ -324,12 +324,14 @@ export default function Component() {
       )}
 
       {/* Thread */}
-      <article key={threadData.id} className="p-2 mb-4 bg-[#F0E0D6]">
+      <article key={threadData.id} className="p-2 m-4 bg-[#F0E0D6]">
             <div>
               <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
+                {threadData.image && ( <span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
+              </span>) }
             </div>
             <div className="flex items-start mb-2">
-              {threadData.image && threadData.image.endsWith('.mp4') ? (
+              {threadData.image && threadData.image.url.endsWith('.mp4') ? (
                 <video 
                   controls 
                   className="mr-4 border" 
@@ -340,15 +342,7 @@ export default function Component() {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                threadData.image && (
-                  <img
-                    src={`${threadData.image}`}
-                    alt={`Thread image for ${threadData.title}`}
-                    className="mr-4 border"
-                    style={{ width: `${150+sz}px`, height: "auto" }}
-                    onClick={()=>{resize()}}
-                  />
-                )
+                <ThreadImage imageData={threadData.image}/>
               )}
               <div>
               <input 
@@ -375,25 +369,46 @@ export default function Component() {
       
 
       {/* Replies */}
-      {threadData.replies &&
-        threadData.replies.map((reply) => (
-          <div className="flex ml-4" key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
-            <span className="text-[1.5rem] text-gray-400">{`>> `}</span>
-            <span>
-              <article className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1">
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={selectedPosts.has(reply._id)}
-                    onChange={() => handleCheckboxChange(reply._id)}
-                  />
-                  <span className="font-bold text-[#117743]">
-                    {reply.username && reply.username !== 'Anonymous' ? reply.username : 'Anon'}
-                  </span>
-                  <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
-                  <span className="text-[#34345C]">{formatDate(reply.created)}</span>
-                  <div className="font-bold text-[#800000] m-2">ReplyID: {reply._id} </div>
-                  {reply.parentReply && (
+      {threadData.replies && threadData.replies.map((reply) => (
+        <div className="flex ml-4" key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
+
+        <span className='text-[1.2rem] text-gray-400'>{`>>`}</span>
+        <span>
+        <article key={reply._id} className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1  ">
+          <div>
+          <input 
+            type="checkbox"
+            checked={selectedPosts.has(reply._id)}
+            onChange={() => handleCheckboxChange(reply._id)}
+          />
+          <span className="font-bold text-[#117743]"> {reply.username?reply.username : "Anonymous"} </span>
+          <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
+                <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
+                {reply.image && ( <span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height})
+              </span>) }
+            </div>
+            <div className="flex items-start mb-2">
+            {reply.image && reply.image.url.endsWith('.mp4') ? (
+                <video 
+                  controls 
+                  className="mr-4 border" 
+                  style={{ width: `${150+sz}px`, height: "auto" }}
+                  onClick={()=>{resize()}}
+                >
+                  <source src={`${reply.image.url}`} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                reply.image && (<div className="mr-4">
+                        <ThreadImage imageData={reply.image} />
+                </div>)
+              )}
+              <div>
+              
+              <span className="text-[#34345C]">{formatDate(reply.created)}</span>
+
+              <br/>
+              {reply.parentReply && (
                     <div
                       className="font-bold text-[#276221] m-2 mt-6 cursor-pointer"
                       onClick={() => scrollToReply(reply.parentReply._id)}
@@ -401,59 +416,21 @@ export default function Component() {
                       {`>>${reply.parentReply._id}`}
                     </div>
                   )}
-                </div>
-                <div className="flex items-start mb-2">
-                  {reply.image && reply.image.endsWith('.mp4') ? (
-                    <video
-                      controls
-                      className="mr-4 border"
-                      style={{ width: `${150 + (expandedImages[reply._id] ? 100 : 0)}px`, height: 'auto' }}
-                      onClick={() => {
-                        toggleImageSize(reply._id);
-                      }}
-                    >
-                      <source src={`${reply.image}`} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
-                    reply.image && (
-                      <img
-                        src={`${reply.image}`}
-                        alt={`Thread image for ${reply.title}`}
-                        className="mr-4 border"
-                        style={{ width: `${150 + (expandedImages[reply._id] ? 100 : 0)}px`, height: 'auto' }}
-                        onClick={() => {
-                          toggleImageSize(reply._id);
-                        }}
-                      />
-                    )
-                  )}
-                  <div>
-                    <br />
-                    <button
-                      className="text-red-500"
-                      onClick={() => {
-                        setReplyto(reply._id);
-                        setFormVisible(true);
-                      }}
-                    >
-                      [reply]
-                    </button>
-                    <button
-                      className="text-red-500"
-                      onClick={() => {
-                        deleteReply(reply._id);
-                      }}
-                    >
-                      [delete]
-                    </button>
-                    <p className="whitespace-pre-line">{formatText(reply.content)}</p>
-                  </div>
-                </div>
-              </article>
-            </span>
-          </div>
-        ))}
+              {/* {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)} */}
+              <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
+                  setFormVisible(true);
+              }}>[reply]</button>
+              <button className="text-red-500" onClick={() => {
+                  deleteReply(reply._id);
+              }}>[delete]</button>
+               <p className="whitespace-pre-line">{formatText(reply.content)}</p>
+            </div>
+            </div>
+
+        </article>
+        </span>
+        </div>
+      ))}
     
     <div className="bottom-0 left-0 right-0 border-t border-[#800000] p-2">
         <form className="flex items-center gap-4 justify-end" onSubmit={(e) => {
