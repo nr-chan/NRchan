@@ -6,7 +6,7 @@ export default function Component() {
     const { id } = useParams();
     const [file, setFile] = useState(null);
     const fileInputRef = useRef(null);
-    const [name, setName] = useState("Anonymous");
+    const [name, setName] = useState("Anon");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
     const [threadData, setThreadData] = useState({});
@@ -161,10 +161,7 @@ export default function Component() {
             console.log("Error deleting the reply", json);
           }
       }
-    const logout = () => {
-        localStorage.removeItem("nrtoken");
-        setToken("");
-    }
+
 
     const fetchThreads=async()=>{
         const response = await fetch(`${API_URL}/thread/${id}`);
@@ -181,9 +178,6 @@ export default function Component() {
         setUserIP(json.ip);
     }
         
-    const isLoggedIn = async()=>{
-        return ( token==="" || token===null ) ? false : true;
-    }
 
     useEffect(() => {
         fetchThreads();
@@ -234,27 +228,6 @@ export default function Component() {
 
   return (
     <div className="bg-[#FFFFEE] min-h-screen font-sans text-sm">
-      {/* Top navigation */}
-      <div className="bg-[#fedcba] p-1 text-xs flex flex-wrap gap-1 border-b border-[#d9bfb7]">
-      <nav className="bg-[#fedcba]flex flex-wrap">
-        {board_list.map(board => (
-          <a key={board} href={`/board/${board}`} className="mr-1 text-[#800000] hover:underline">{board} /</a>
-        ))}
-        <a href="/" className="text-[#800000] hover:underline">[Home]</a>
-      </nav>
-        <div className="ml-auto">
-          <a href="#" className="text-[#800000] hover:underline mr-2">Settings</a>
-          <a href="#" className="text-[#800000] hover:underline mr-2">Search</a>
-          <a href="#" className="text-[#800000] hover:underline mr-2">Mobile</a>
-          <a href="#" className="text-[#800000] hover:underline mr-2">Home</a>
-          {(token === "" || token === null)
-            ?
-            <a href="#" onClick={() => {nav('/login')}} className="text-[#800000] hover:underline">Login</a>
-            :
-            <a href="#" onClick={logout} className="text-[#800000] hover:underline">Logout</a>
-          }
-        </div>
-      </div>
 
       {/* Board header */}
       <div className="text-center my-4">
@@ -290,7 +263,7 @@ export default function Component() {
             <input
               type="text"
               placeholder="Name"
-              defaultValue={"Anonymous"}
+              defaultValue={"Anon"}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]"
@@ -376,7 +349,7 @@ export default function Component() {
                   checked={selectedPosts.has(threadData._id)}
                   onChange={() => handleCheckboxChange(threadData._id)}
               />
-              <span className="font-bold text-[#117743]"> {threadData.username?threadData.username:"Anonymous"} </span>
+              <span className="font-bold text-[#117743]"> {(threadData.username && threadData.username!="Anonymous")?threadData.username:"Anon"} </span>
               <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
               <span className="text-[#34345C]">{formatDate(threadData.created)}</span>
               <br/>
@@ -407,9 +380,12 @@ export default function Component() {
             checked={selectedPosts.has(reply._id)}
             onChange={() => handleCheckboxChange(reply._id)}
           />
-          <span className="font-bold text-[#117743]"> {reply.username?reply.username : "Anonymous"} </span>
+          
+          <span className="font-bold text-[#117743]"> {(reply.username && reply.username!="Anonymous")?reply.username:"Anon"} </span>
           <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
-                <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
+          <span className="text-[#34345C]">{formatDate(reply.created)}</span>
+                <div className="font-bold text-[#800000] m-2">ReplyID: {reply._id} </div>
+                {reply.parentReply && (<div className="font-bold text-[#276221] m-2 mt-6"> {`>>`}{reply.parentReply._id}   </div>)}
             </div>
             <div className="flex items-start mb-2">
             {reply.image && reply.image.endsWith('.mp4') ? (
@@ -435,10 +411,10 @@ export default function Component() {
               )}
               <div>
               
-              <span className="text-[#34345C]">{formatDate(reply.created)}</span>
+              
 
               <br/>
-              {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)}
+              
               <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
                   setFormVisible(true);
               }}>[reply]</button>
