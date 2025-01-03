@@ -338,7 +338,7 @@ export default function Component() {
                   style={{ width: `${150+sz}px`, height: "auto" }}
                   onClick={()=>{resize()}}
                 >
-                  <source src={`${threadData.image}`} type="video/mp4" />
+                  <source src={`${threadData.image.url}`} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               ) : (
