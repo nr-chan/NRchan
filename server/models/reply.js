@@ -4,7 +4,14 @@ const mongoose = require("mongoose")
 const ReplySchema = new mongoose.Schema({
   username:String,
   content: { type: String, required: true },
-  image: String,
+  image: {
+    url: String,
+    size: Number,
+    width: Number,
+    height: Number,
+    thumbnailWidth: Number,
+    thumbnailHeight: Number
+  },
   created: { type: Date, default: Date.now },
   parentReply: { type: mongoose.Schema.Types.ObjectId, ref: 'Reply', default: null },
   threadID: { type: mongoose.Schema.Types.ObjectId, ref: 'Thread', required: true },

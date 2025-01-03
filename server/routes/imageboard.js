@@ -12,7 +12,7 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_, file, cb) => {
-    const allowedFileTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mkv/;
+    const allowedFileTypes = /jpeg|jpg|png|gif|heic|mp4|mov|avi|mkv|webm/;
     const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedFileTypes.test(file.mimetype);
     if (extname && mimetype) {
@@ -87,7 +87,6 @@ router.get('/recent/', async(_, res) => {
         const pipeline = [
             {
                 $facet: {
-                    // Get recent threads
                     'threads': [
                         {
                             $project: {
@@ -109,7 +108,6 @@ router.get('/recent/', async(_, res) => {
                             $limit: 10
                         }
                     ],
-                    // Get recent replies
                     'replies': [
                         {
                             $lookup: {
@@ -143,7 +141,6 @@ router.get('/recent/', async(_, res) => {
                     ]
                 }
             },
-            // Combine threads and replies
             {
                 $project: {
                     combined: {
@@ -154,7 +151,6 @@ router.get('/recent/', async(_, res) => {
             {
                 $unwind: '$combined'
             },
-            // Sort all results by lastBump/created
             {
                 $sort: {
                     'combined.lastBump': -1,
@@ -166,7 +162,6 @@ router.get('/recent/', async(_, res) => {
             }
         ];
 
-        // Execute the aggregation pipeline on the threads collection
         const results = await Thread.aggregate(pipeline);
 
         if (!results || results.length === 0) {
@@ -176,7 +171,6 @@ router.get('/recent/', async(_, res) => {
             });
         }
 
-        // Format the final response
         const formattedResults = results.map(item => item.combined);
 
         return res.status(200).json({
@@ -220,11 +214,10 @@ router.get('/thread/:id', async (req, res) => {
 router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
-    console.log(thread);
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
-
+    
     if (thread.locked) {
       return res.status(403).json({ error: 'Thread is locked' });
     }
@@ -235,7 +228,6 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
       const key = `uploads/${fileName}`;
       imageUrl = await uploadToR2(req.file, key);
     }
-
 
     const reply = new Reply({
       username: req.body.username,
@@ -250,7 +242,6 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
     await reply.save();
     thread.replies.push(reply._id);
     thread.lastBump = Date.now();
-    console.log(reply);
     await thread.save();
 
     res.json(reply);

@@ -88,3 +88,14 @@ export const formatText = (content) => {
   });
 };
 
+export const getSmallImageUrl = (url) => {
+  const lastDotIndex = url.lastIndexOf('.');
+  return `${url.substring(0, lastDotIndex)}s${url.substring(lastDotIndex)}`;
+};
+
+
+export const getFileSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
