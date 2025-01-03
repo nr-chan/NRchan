@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import {links, board_list,API_URL} from '../Defs'
+import ThreadImage from './Image';
 
 const Home = () => {
   const nav = useNavigate();
@@ -102,7 +103,7 @@ const Home = () => {
                   {/* Thread Image */}
                     <div className="h-32 bg-[#F0E0D6] flex items-center justify-center">
                       {thread.image ? (
-                        thread.image.endsWith('.mp4') ? (
+                        thread.image.url.endsWith('.mp4') ? (
                           <video
                             className="max-h-full max-w-full object-contain"
                             controls={false}
@@ -113,11 +114,7 @@ const Home = () => {
                             <source src={`${thread.image}`} type="video/mp4" />
                           </video>
                         ) : (
-                          <img 
-                            src={`${thread.image}`} 
-                            alt={thread.subject || 'Thread image'} 
-                            className="max-h-full max-w-full object-contain"
-                          />
+                            <ThreadImage allowExpand={false} imageData={thread.image} />
                         )
                       ) : (
                         <div className="text-center text-[11px] text-gray-500">No Image</div>

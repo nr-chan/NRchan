@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ThreadImage from './Image';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,API_URL, board_img,formatDate,formatText} from '../Defs'
+import {links, board_list,API_URL, board_img,formatDate,formatText, getFileSize} from '../Defs'
 
 export default function Component() {
     const { id } = useParams();
@@ -347,9 +348,11 @@ export default function Component() {
       <article key={threadData.id} className="p-2 mb-4 bg-[#F0E0D6]">
             <div>
               <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
+                {threadData.image && ( <span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
+              </span>) }
             </div>
             <div className="flex items-start mb-2">
-              {threadData.image && threadData.image.endsWith('.mp4') ? (
+              {threadData.image && threadData.image.url.endsWith('.mp4') ? (
                 <video 
                   controls 
                   className="mr-4 border" 
@@ -360,15 +363,7 @@ export default function Component() {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                threadData.image && (
-                  <img
-                    src={`${threadData.image}`}
-                    alt={`Thread image for ${threadData.title}`}
-                    className="mr-4 border"
-                    style={{ width: `${150+sz}px`, height: "auto" }}
-                    onClick={()=>{resize()}}
-                  />
-                )
+                <ThreadImage imageData={threadData.image}/>
               )}
               <div>
               <input 
@@ -396,9 +391,9 @@ export default function Component() {
 
       {/* Replies */}
       {threadData.replies && threadData.replies.map((reply) => (
-        <div className='flex ml-4'>
+        <div className='flex ml-1'>
 
-        <span className='text-[1.5rem] text-gray-400'>{`>> `}</span>
+        <span className='text-[1.2rem] text-gray-400'>{`>>`}</span>
         <span>
         <article key={reply._id} className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1  ">
           <div>
@@ -410,9 +405,11 @@ export default function Component() {
           <span className="font-bold text-[#117743]"> {reply.username?reply.username : "Anonymous"} </span>
           <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
                 <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
+                {reply.image && ( <span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height})
+              </span>) }
             </div>
             <div className="flex items-start mb-2">
-            {reply.image && reply.image.endsWith('.mp4') ? (
+            {reply.image && reply.image.url.endsWith('.mp4') ? (
                 <video 
                   controls 
                   className="mr-4 border" 
@@ -423,15 +420,9 @@ export default function Component() {
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                reply.image && (
-                  <img
-                    src={`${reply.image}`}
-                    alt={`Thread image for ${reply.title}`}
-                    className="mr-4 border"
-                    style={{ width: `${150+sz}px`, height: "auto" }}
-                    onClick={()=>{resize()}}
-                  />
-                )
+                reply.image && (<div className="mr-4">
+                        <ThreadImage imageData={reply.image} />
+                </div>)
               )}
               <div>
               
