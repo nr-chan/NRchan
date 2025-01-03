@@ -172,8 +172,10 @@ export default function Board() {
     <img
       src={`${API_URL}/images/${banner}.png`}
       alt="Board banner"
-      className="inline-block"
+      className="inline-block border-black border"
     />
+    <hr className='h-[0px] border-[#8a4f4b] my-4'/>
+
   </div>
 
       {/* Board Title */}
@@ -235,6 +237,7 @@ export default function Board() {
         </table>
       </div>
 
+      <hr className='h-[0px] border-[#8a4f4b] my-4'/>
       {/* Threads */}
       <div className="max-w-[768px] mx-auto">
         {currentThreads.map((thread) => (

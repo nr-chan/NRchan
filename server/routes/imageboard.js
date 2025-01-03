@@ -6,6 +6,7 @@ const Reply = require('../models/reply');
 const Thread = require('../models/thread');
 const uploadToR2  = require('../utils/uploadService');
 const rateLimiter = require('../utils/rateLimit');
+const ipToID = require('../utils/ipToId');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -22,13 +23,6 @@ const upload = multer({
     }
   },
 });
-
-
-// Helper function to generate anonymous poster ID
-const generatePosterID = () => {
-  return Math.random().toString(36).substring(2, 8);
-};
-
 
 // Get all boards
 router.get('/boards', (_, res) => {
@@ -64,13 +58,15 @@ router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => 
       const key = `uploads/${fileName}`;
       imageUrl = await uploadToR2(req.file, key);
     }
+    
+    const posterID = await ipToID(req); 
 
     const thread = new Thread({
       username: req.body.username,
       board: req.body.board,
       subject: req.body.subject,
       content: req.body.content,
-      posterID: generatePosterID(),
+      posterID: posterID,
       image: imageUrl,
     });
 
@@ -229,11 +225,12 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
       imageUrl = await uploadToR2(req.file, key);
     }
 
+    const posterID = await ipToID(req); 
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,
       image: imageUrl,
-      posterID: generatePosterID(),
+      posterID: posterID,
       threadID:thread._id,
     });
     if(req.body.replyto !='null'){
@@ -259,10 +256,11 @@ router.post('/reply/:id/reply', upload.single('image'), async (req, res) => {
       return res.status(404).json({ error: 'Reply not found' });
     }
 
+    const posterID = await ipToID(req); 
     const reply = new Reply({
       content: req.body.content,
       image: req.file ? req.file.filename : null,
-      posterID: generatePosterID()
+      posterID: posterID
     });
 
     await reply.save();

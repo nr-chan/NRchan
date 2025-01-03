@@ -238,10 +238,12 @@ export default function Component() {
 
       {/* Board header */}
       <div className="text-center py-4">
-        <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
+        <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto border border-black" />
+        <hr className='h-[0px] border-[#8a4f4b] my-4'/>
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 
+        <hr className='h-[0px] border-[#8a4f4b] my-2'/>
       {/* form */}
       {formVisible && (
         <div 
@@ -457,7 +459,7 @@ export default function Component() {
                 placeholder="Password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                className="px-2 py-1 border border-[#800000]"
+                className="px-2 py-1 border border-[#8a4f4b]"
             />
             <button
                 type="submit"
