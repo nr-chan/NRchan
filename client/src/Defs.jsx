@@ -29,21 +29,46 @@ export const fetchThreads=async()=>{
     setThreadData(data);
 }
 
+
+
 export const formatDate = (dateString) => {
-  try{
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    }).format(date);
-  }catch{
-    return dateString      
+  try {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diff = now - past; // Difference in milliseconds
+
+    // Time units in milliseconds
+    const msInMinute = 60 * 1000;
+    const msInHour = 60 * msInMinute;
+    const msInDay = 24 * msInHour;
+    const msInWeek = 7 * msInDay;
+    const msInMonth = 30 * msInDay;
+
+    if (diff < msInMinute) {
+      const seconds = Math.floor(diff / 1000);
+      return `${seconds} seconds ago`;
+    } else if (diff < msInHour) {
+      const minutes = Math.floor(diff / msInMinute);
+      return `${minutes} minutes ago`;
+    } else if (diff < msInDay) {
+      const hours = Math.floor(diff / msInHour);
+      return `${hours} hours ago`;
+    } else if (diff < msInWeek) {
+      const days = Math.floor(diff / msInDay);
+      return `${days} days ago`;
+    } else if (diff < msInMonth) {
+      const weeks = Math.floor(diff / msInWeek);
+      return `${weeks} weeks ago`;
+    } else {
+      const months = Math.floor(diff / msInMonth);
+      return `${months} months ago`;
+    }
+  } catch {
+    return dateString;
   }
 };
+
+
 
 export const formatText = (content) => {
   if (!content) return null;
