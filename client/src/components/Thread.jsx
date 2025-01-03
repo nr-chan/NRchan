@@ -328,11 +328,11 @@ export default function Component() {
       {/* Thread */}
       <article key={threadData.id} className="p-2 m-4 bg-[#F0E0D6]">
             <div>
-              <span className="font-bold text-[#800000]">ThreadID: {threadData._id} </span>
+              <span className="font-bold text-[#800000]">No: {threadData._id} </span>
                 {threadData.image && ( <span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
               </span>) }
             </div>
-            <div className="flex items-start mb-2">
+            <div className="flex items-start m-2">
               {threadData.image && threadData.image.url.endsWith('.mp4') ? (
                 <video 
                   controls 
@@ -353,7 +353,7 @@ export default function Component() {
                   onChange={() => handleCheckboxChange(threadData._id)}
               />
               <span className="font-bold text-[#117743]"> {(threadData.username && threadData.username!="Anonymous")?threadData.username:"Anon"} </span>
-              <span className="font-bold text-grey-600">(ID: {threadData.posterID}) </span>
+              <span className="font-bold text-grey-600">({threadData.posterID}) </span>
               <span className="text-[#34345C]">{formatDate(threadData.created)}</span>
               <br/>
               <button className="text-red-500 pr-2" onClick={()=>{setReplyto(null)
@@ -376,7 +376,7 @@ export default function Component() {
 
         <span className='text-[1.2rem] text-gray-400'>{`>>`}</span>
         <span>
-        <article key={reply._id} className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1  ">
+        <article key={reply._id} className="bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1 mr-4 ">
           <div>
           <input 
             type="checkbox"
@@ -384,12 +384,15 @@ export default function Component() {
             onChange={() => handleCheckboxChange(reply._id)}
           />
           <span className="font-bold text-[#117743]"> {reply.username?reply.username : "Anonymous"} </span>
-          <span className="font-bold text-grey-600">(ID: {reply.posterID}) </span>
-                <span className="font-bold text-[#800000]">ReplyID: {reply._id} </span>
-                {reply.image && ( <span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height})
+          <span className="font-bold text-grey-600">({reply.posterID}) </span>
+                <span className="font-bold text-[#800000]">
+                    <button onClick={()=>{setReplyto(reply._id)
+                        setFormVisible(true);
+                    }}>No: {reply._id}</button>
+                </span> {reply.image && ( <span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height})
               </span>) }
             </div>
-            <div className="flex items-start mb-2">
+            <div className="flex items-start mt-2">
             {reply.image && reply.image.url.endsWith('.mp4') ? (
                 <video 
                   controls 
@@ -412,19 +415,18 @@ export default function Component() {
               <br/>
               {reply.parentReply && (
                     <div
-                      className="font-bold text-[#276221] m-2 mt-6 cursor-pointer"
+                      className="font-bold text-[#276221] m-2 mt-2 cursor-pointer"
                       onClick={() => scrollToReply(reply.parentReply._id)}
                     >
                       {`>>${reply.parentReply._id}`}
                     </div>
                   )}
               {/* {reply.parentReply && (<span className="font-bold text-[#276221] mr-5"> {`>>`}{reply.parentReply._id}   </span>)} */}
-              <button className="text-red-500" onClick={()=>{setReplyto(reply._id)
-                  setFormVisible(true);
-              }}>[reply]</button>
-              <button className="text-red-500" onClick={() => {
+              
+              {token && <button className="text-red-500" onClick={() => {
                   deleteReply(reply._id);
-              }}>[delete]</button>
+                }}>[delete]</button>
+              }
                <p className="whitespace-pre-line">{formatText(reply.content)}</p>
             </div>
             </div>
