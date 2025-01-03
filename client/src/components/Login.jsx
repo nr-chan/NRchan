@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { URL } from '../Defs'
+import { API_URL } from '../Defs'
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -9,7 +9,7 @@ const Login = () => {
   const [status, setStatus] = useState('');
 
   const handleSubmit = async () => {
-    const response = await fetch(`${URL}/admin/login`, {
+    const response = await fetch(`${API_URL}/admin/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

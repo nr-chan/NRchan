@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams,useNavigate } from "react-router-dom";
-import { links, board_list, URL, board_img,formatText,formatDate } from "../Defs";
+import { links, board_list, API_URL, board_img,formatText,formatDate } from "../Defs";
 
 export default function Board() {
   const nav = useNavigate();
   const { id } = useParams();
   const [threads, setThreads] = useState([]);
   const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
   const [name, setName] = useState("Anonymous");
   const [subject, setSubject] = useState(null);
   const [comment, setComment] = useState(null);
@@ -18,7 +19,7 @@ export default function Board() {
   const threadsPerPage = 5;
   
   const fetchThreads = async () => {
-    const response = await fetch(`${URL}/board/${id}`);
+    const response = await fetch(`${API_URL}/board/${id}`);
     if(response.status !== 200 || !board_list.includes(id)){
       nav('/404')
     }
@@ -30,15 +31,30 @@ export default function Board() {
   const logout = () => {
     localStorage.removeItem("nrtoken");
     setToken("");
-  }
+  } 
 
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        setFile(file);
+        if (fileInputRef.current) {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          fileInputRef.current.files = dataTransfer.files;
+        }
+        break;
+      }
+    }
+  };
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
   const handleLockThread = async (threadId) => {
     try {
-      const response = await fetch(`${URL}/lock/${threadId}`, {
+      const response = await fetch(`${API_URL}/lock/${threadId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -57,7 +73,7 @@ export default function Board() {
 
   const handlePinThread = async (threadId) => {
     try {
-      const response = await fetch(`${URL}/pin/${threadId}`, {
+      const response = await fetch(`${API_URL}/pin/${threadId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,7 +110,7 @@ export default function Board() {
     formData.append("content", comment);
 
     try {
-      const response = await fetch(`${URL}/thread`, {
+      const response = await fetch(`${API_URL}/thread`, {
         method: "POST",
         headers: {
           ip: userIP,
@@ -133,6 +149,12 @@ export default function Board() {
     if (!banner) {
       setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
     }
+
+    window.addEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
   }, [id]);
 
 
@@ -191,7 +213,7 @@ export default function Board() {
   {/* Banner */}
   <div className="text-center my-2">
     <img
-      src={`${URL}/images/${banner}.png`}
+      src={`${API_URL}/images/${banner}.png`}
       alt="Board banner"
       className="inline-block"
     />
@@ -244,7 +266,12 @@ export default function Board() {
         <tr>
           <td className="bg-[#EA8]">File</td>
           <td>
-            <input type="file" onChange={handleFileChange} />
+             <input 
+              type="file" 
+              onChange={handleFileChange}
+              ref={fileInputRef}
+            />
+            {file && <span className="ml-2">Selected: {file.name}</span>}          
           </td>
         </tr>
       </tbody>
@@ -263,7 +290,7 @@ export default function Board() {
                 className="text-[#800000] font-bold"
               >
                 <img alt="H" className="extButton threadHideButton"
-                  src={`${URL}/images/plus.png`}
+                  src={`${API_URL}/images/plus.png`}
                 />
               </button>
               <span className="font-bold">ThreadID: {thread._id}</span>
@@ -294,7 +321,7 @@ export default function Board() {
                   className="text-[#800000] font-bold"
                 >
                   <img alt="H" className="extButton threadHideButton"
-                    src={`${URL}/images/minus.png`}
+                    src={`${API_URL}/images/minus.png`}
                   />
                 </button>
                 <span className="font-bold">ThreadID: {thread._id}</span>

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {links, board_list,URL, board_img,formatDate,formatText} from '../Defs'
+import {links, board_list,API_URL, board_img,formatDate,formatText} from '../Defs'
 
 export default function Component() {
     const { id } = useParams();
     const [file, setFile] = useState(null);
+    const fileInputRef = useRef(null);
     const [name, setName] = useState("Anonymous");
     const [comment, setComment] = useState(null);
     const [replyto, setReplyto] = useState(null);
@@ -38,6 +39,22 @@ export default function Component() {
         setSz(100);
       }
     }
+    
+    const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        setFile(file);
+        if (fileInputRef.current) {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          fileInputRef.current.files = dataTransfer.files;
+        }
+        break;
+      }
+    }
+  };
 
     const handleMouseDown = (e) => {
       setIsDragging(true);
@@ -88,7 +105,7 @@ export default function Component() {
     formData.append("replyto",replyto);
     formData.append("content", comment);
 
-    const response = await fetch(`${URL}/thread/${threadData._id}/reply`, {
+    const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
         method: "POST",
         headers: {
           ip: userIP,
@@ -111,7 +128,7 @@ export default function Component() {
             alert("Login as an admin to delete a thread");
             return;
           }
-          const resposne = await fetch(`${URL}/admin/thread/${threadID}`, {
+          const resposne = await fetch(`${API_URL}/admin/thread/${threadID}`, {
             method: "DELETE",
             headers: {
               "Authorization": 'bearer ' + token,
@@ -130,7 +147,7 @@ export default function Component() {
             alert("Login as an admin to delete a reply");
             return;
           }
-          const resposne = await fetch(`${URL}/admin/reply/${replyID}`, {
+          const resposne = await fetch(`${API_URL}/admin/reply/${replyID}`, {
             method: "DELETE",
             headers: {
               "Authorization": 'bearer ' + token,
@@ -150,7 +167,7 @@ export default function Component() {
     }
 
     const fetchThreads=async()=>{
-        const response = await fetch(`${URL}/thread/${id}`);
+        const response = await fetch(`${API_URL}/thread/${id}`);
         const data = await response.json();
         if(response.status !== 200){
           nav('/404')
@@ -178,6 +195,12 @@ export default function Component() {
       if (!banner) {
         setBanner(board_img[Math.floor(Math.random() * board_img.length)]);
       }
+      window.addEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+
     },[id]);
 
     const handleCheckboxChange = (postId) => {
@@ -235,7 +258,7 @@ export default function Component() {
 
       {/* Board header */}
       <div className="text-center my-4">
-        <img src={`${URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
+        <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt="Board Header" className="mx-auto" />
         <h1 className="text-4xl text-[#800000] font-bold mt-2">/{threadData.board}/ - {links[board_list.indexOf(threadData.board)]}</h1>
       </div>
 

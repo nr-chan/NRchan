@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import {links, board_list,URL} from '../Defs'
+import {links, board_list,API_URL} from '../Defs'
 
 const Home = () => {
   const nav = useNavigate();
@@ -12,7 +12,7 @@ const Home = () => {
 
  const fetchRecent = async () => {
     try {
-      const response = await fetch(`${URL}/recent`);
+      const response = await fetch(`${API_URL}/recent`);
       const data = await response.json();
       setThreads(data.data);
     } catch (error) {
@@ -21,16 +21,14 @@ const Home = () => {
   };
 
   const categories = [
-    { title: 'Academics', boards: ['Programming', 'Competitive Programming', 'Nerd', 'Semester','politics'] },
-    { title: 'Sports/ Games', boards: ['Video Games', 'Khelkud', 'Arambh'] },
-    { title: 'Interests', boards: ['Comics & Cartoons', 'Technology', 'Sports'] },
-    { title: 'Creative', boards: ['Photography', 'Music', 'Graphic Design'] },
-    { title: 'Adult (NSFW)', boards: ['Randi', 'Dick', 'Confess', 'GIF', 'Rant'] },
+    { title: 'Discussion', boards: ['Programming', 'Meth-Math','Politics','CS Trends'] },
+    { title: 'Sports/ Games', boards: ['Video Games', 'Cricket', 'Arambh'] },
+    { title: 'Random', boards: ['Photography', 'Music', 'Food',,'Paranormal'] },
+    { title: 'Adult (NSFW)', boards: ['Khoobsurat Aurate', 'Nasha Paani', 'GIF', 'Rant'] },
   ];
 
   const toboard = (board) => {
     nav(`/board/${board_list[links.indexOf(board)]}`);
-    console.log(board);
   }
 
 
@@ -43,7 +41,7 @@ const Home = () => {
       {/* Header */}
       <header className="flex justify-center p-2">
         <img 
-          src={`${URL}/images/banner.png`} 
+          src={`${API_URL}/images/banner.png`} 
           alt="NRchan Logo" 
           className="h-28"
         />
