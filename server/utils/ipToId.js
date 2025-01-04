@@ -15,7 +15,7 @@ const ipToID = async (req) => {
         const hash = crypto.createHash('sha1')
           .update(ipv4)
           .digest('hex');
-        
+
         resolve(hash.slice(0, 6));
       } catch (error) {
         console.error('Error generating ID:', error);

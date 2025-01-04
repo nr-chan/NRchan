@@ -14,10 +14,10 @@ const AdminSchema = new mongoose.Schema({
   role: { type: String, enum: ['super_admin', 'admin'], default: 'admin' },
   created: { type: Date, default: Date.now },
   lastLogin: { type: Date },
-  createdBy: {type: mongoose.Schema.Types.ObjectId , ref: 'Admin' }
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }
 });
 
-AdminSchema.pre('save', async function(next) {
+AdminSchema.pre('save', async function (next) {
   if (!this._id) {
     let id;
     let exists;
@@ -27,7 +27,7 @@ AdminSchema.pre('save', async function(next) {
     } while (exists);
     this._id = id;
   }
-  
+
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
   }
@@ -46,7 +46,7 @@ const adminAuth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, String(JWT_SECRET));
     const admin = await Admin.findById(decoded.adminId);
-    
+
     if (!admin) {
       return res.status(401).json({ error: 'Invalid admin' });
     }
@@ -54,7 +54,7 @@ const adminAuth = async (req, res, next) => {
     req.admin = admin;
     next();
   } catch (err) {
-    res.status(401).json({ error: err});
+    res.status(401).json({ error: err });
   }
 };
 
@@ -70,7 +70,7 @@ const superAdminAuth = (req, res, next) => {
 router.post('/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     const admin = await Admin.findOne({ username });
     if (!admin) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -148,7 +148,7 @@ router.get('/admin/list', adminAuth, async (_, res) => {
 router.delete('/admin/:id', adminAuth, superAdminAuth, async (req, res) => {
   try {
     const adminToDelete = await Admin.findById(req.params.id);
-    
+
     if (!adminToDelete) {
       return res.status(404).json({ error: 'Admin not found' });
     }
@@ -168,13 +168,13 @@ router.delete('/admin/:id', adminAuth, superAdminAuth, async (req, res) => {
 router.patch('/admin/:id/role', adminAuth, superAdminAuth, async (req, res) => {
   try {
     const { role } = req.body;
-    
+
     if (!['admin', 'super_admin'].includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
     const adminToUpdate = await Admin.findById(req.params.id);
-    
+
     if (!adminToUpdate) {
       return res.status(404).json({ error: 'Admin not found' });
     }
@@ -225,8 +225,8 @@ router.delete('/admin/thread/:id', adminAuth, async (req, res) => {
 
     await Reply.deleteMany({ threadID: thread._id });
     await Thread.findByIdAndDelete(thread._id);
-    
-    res.json({ 
+
+    res.json({
       message: 'Thread deleted successfully',
       adminAction: {
         type: 'thread_delete',
@@ -244,7 +244,7 @@ router.delete('/admin/thread/:id', adminAuth, async (req, res) => {
 router.post('/lock/:id', adminAuth, async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
-    
+
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
@@ -252,10 +252,10 @@ router.post('/lock/:id', adminAuth, async (req, res) => {
     const updatedThread = await Thread.findByIdAndUpdate(
       thread._id,
       { $set: { locked: !thread.locked } },
-      { new: true } 
+      { new: true }
     );
-    
-    res.json({ 
+
+    res.json({
       message: `Thread ${updatedThread.locked ? 'locked' : 'unlocked'} successfully`,
       adminAction: {
         type: 'thread_lock_toggle',
@@ -274,7 +274,7 @@ router.post('/lock/:id', adminAuth, async (req, res) => {
 router.post('/pin/:id', adminAuth, async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
-    
+
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
@@ -282,10 +282,10 @@ router.post('/pin/:id', adminAuth, async (req, res) => {
     const updatedThread = await Thread.findByIdAndUpdate(
       thread._id,
       { $set: { sticky: !thread.sticky } },
-      { new: true } 
+      { new: true }
     );
-    
-    res.json({ 
+
+    res.json({
       message: `Thread ${updatedThread.sticky ? 'Pinned' : 'Unpinned'} successfully`,
       adminAction: {
         type: 'thread_pin_toggle',
@@ -315,8 +315,8 @@ router.delete('/admin/reply/:id', adminAuth, async (req, res) => {
 
     await Reply.findByIdAndDelete(reply._id);
     await Reply.deleteMany({ parentReply: reply._id });
-    
-    res.json({ 
+
+    res.json({
       message: 'Reply deleted successfully',
       adminAction: {
         type: 'reply_delete',
