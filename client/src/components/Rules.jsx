@@ -1,0 +1,170 @@
+import { API_URL } from "../Defs";
+
+export default function Rules() {
+  return (
+    <div className="min-h-screen bg-[#FFFFEE]">
+      <header className="flex items-center justify-center gap-2 py-4">
+        <img
+          src={`${API_URL}/images/banner.png`}
+          alt="NRchan Logo"
+          className="h-28"
+        />
+      </header>
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="border border-red-800 bg-white text-sm">
+          <h2 className="mb-2 bg-[#fca] text-lg font-bold text-red-800 pl-2">Rules</h2>
+          <p className="p-2">
+            By using this website (the "site"), you agree that you'll follow these rules, and understand that if we reasonably
+            think you haven't followed these rules, we may (at our own discretion) terminate your access to the site:
+          </p>
+        </div>
+        <div className="mt-4 flex gap-4">
+          {/* Boards Column */}
+          <div className="w-64 border border-black h-fit">
+            <div className="bg-[#99cc66] p-2">
+              <h3 className="font-bold text-[#006600]">Boards</h3>
+            </div>
+            <div className="bg-[#eeffee]">
+              <ul className="py-3 px-8 text-sm space-y-1">
+                {/* ... board links ... */}
+                <li><a href="#" className="text-blue-700 hover:underline">Global Rules</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Image Boards</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Programming</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Meth-Math</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Video Games</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Cricket</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Arambh</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Sports</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Photography</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Music</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Food</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Paranormal</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Khoobsurat Aurate</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Nasha Paani</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">GIF</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Rant</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">Politics</a></li>
+                <li><a href="#" className="text-blue-700 hover:underline">CS Trends</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Rules Columns Container */}
+          <div className="flex-1 flex flex-col gap-4">
+            {/* Global Rules Column */}
+            <div className="border border-black min-w-[300px]">
+              <div className="bg-[#5599aa] p-2">
+                <h3 className="font-bold text-white">Global Rules</h3>
+              </div>
+              <div className="bg-[#eeffff] py-5 px-8">
+                <ol className="list-decimal space-y-4 text-sm">
+                  <li>You will not upload, post, discuss, request, or link to anything that violates local or national laws.</li>
+                  <li>You will immediately cease and not continue to access the site if you are under the age of 18.</li>
+                  <li>You will not post or request personal information ("dox") or calls to invasion ("raids"). Inciting or participating in cross-board raids is also not permitted.</li>
+                  <li>You will not engage in spamming, flooding, or advertising (all forms of referral links, offers, soliciting, etc.).</li>
+                  <li>Impersonating a NR-chan administrator, moderator, or janitor is strictly forbidden.</li>
+                  <li>Do not use avatars or attach signatures to your posts.</li>
+                  <li>Automated actions, such as using bots or posting from proxies, VPNs, or Tor exit nodes, are prohibited.</li>
+                  <li>All board-specific rules must be followed.</li>
+                  <li>The content of this website is for mature audiences only and may not be suitable for minors. If you are a minor or it is illegal for you to access mature images and language, do not proceed.</li>
+                  <li>This website is presented to you AS IS, with no warranty, express or implied. By clicking "I Agree," you agree not to hold NR-Chan responsible for any damages from your use of the website, and you understand that the content posted is not owned or generated by NR-chan, but rather by NR-chan's users.</li>
+                  <li> NR-Chan takes no responsibility for what is posted to our servers. However, we do our best to moderate and remove all illegal content as quickly as possible. Nothing should be posted here that is illegal to view in India. This includes (but is not limited to) CSAM (Child Sexual Abuse Material), which is individuals under the age of 18 nude, partially nude, in underwear, or in suggestive poses. </li>
+                  <li>The stories and discussions posted here are works of fiction and falsehood, none of which are to be taken literally under any circumstances. NR-Chan and its staff are not responsible in any way for false advice, misleading information, or any other falsities, including those that may cause any sort of physical or mental injuries, or damage to property.</li>
+                  <li>NR-Chan's administrators and moderators have to the right to deny access as they choose. You are in no way guaranteed access to the site. The interpretations of the rules are up to the staff. Failure to comply with these rules, regulations, and policies will result in a ban of your IP address and/or being reported to your ISP if necessary.</li>
+                  <li>Images uploaded and comments posted are the responsibility of the poster. The views and opinions posted to NR-Chan's website do not represent the views and opinions of the NR-Chan's administration, nor its staff members. If you have any questions regarding the interpretation of our rules, regulations, and policies, please email us.</li>
+                </ol>
+                <p className="pt-4">Remember: The use of NR-Chan is a privilege, not a right. The NR-Chan moderation team reserves the right to revoke access and remove content for any reason without notice.</p>
+              </div>
+            </div>
+
+            {/* Image Boards Rules Column */}
+            <div className="border border-black min-w-[300px]">
+              <div className="bg-[#5599aa] p-2">
+                <h3 className="font-bold text-white">Image Boards Rules</h3>
+              </div>
+              <div className="bg-[#eeffff] py-5 px-8">
+                {/* Programming Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Programming</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Discussions should be focused on programming languages, algorithms, and development tools.</li>
+                    <li>No off-topic content like memes or non-technical discussions.</li>
+                  </ul>
+                </div>
+                
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Math Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Meth-Math</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Focus on mathematical problems, theorems, and discussions.</li>
+                    <li>Non-mathematical content or jokes are not allowed.</li>
+                  </ul>
+                </div>
+                
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Video Games Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Video Games</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Discussions about gaming news, updates, or game mechanics are allowed.</li>
+                    <li>Do not share pirated content or illegal game copies.</li>
+                  </ul>
+                </div>
+
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Cricket Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Cricket</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Cricket news, player updates, and match discussions are encouraged.</li>
+                    <li>Cricket shitposting is allowed</li>
+                    <li>Off-topic content should be avoided in this board.</li>
+                  </ul>
+                </div>
+
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Photography Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Photography</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Share and discuss photography techniques, gear, and photos.</li>
+
+
+                    <li>Respect copyright laws when sharing photographs.</li>
+                  </ul>
+                </div>
+
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Music Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Music</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Music discussions, song recommendations, and album reviews are allowed.</li>
+                    <li>Do not share pirated music or illegal downloads.</li>
+                  </ul>
+                </div>
+
+                <hr className="border-[#006] pb-4"/>
+
+                {/* Music Rules */}
+                <div className="mb-6">
+                  <h4 className="font-bold text-[#006600]">Food</h4>
+                  <ul className="list-disc ml-8 space-y-2 text-sm">
+                    <li>Images and discussion should relate to food and cooking.</li>
+                    <li>Recipes are welcome! Feel free to talk about your favorite dishes and discuss past cooking experiences.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

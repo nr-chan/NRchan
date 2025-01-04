@@ -4,7 +4,7 @@ const path = require('path');
 const router = express.Router();
 const Reply = require('../models/reply');
 const Thread = require('../models/thread');
-const uploadToR2  = require('../utils/uploadService');
+const uploadToR2 = require('../utils/uploadService');
 const rateLimiter = require('../utils/rateLimit');
 const ipToID = require('../utils/ipToId');
 
@@ -26,7 +26,7 @@ const upload = multer({
 
 // Get all boards
 router.get('/boards', (_, res) => {
-  res.json(['p','cp', 'n', 's','v', 'k', 'a','c', 'T', 'Sp', 'Ph', 'm', 'G','r', 'd', 'Con', 'GIF', 'Rnt']); // Example boards
+  res.json(['p', 'cp', 'n', 's', 'v', 'k', 'a', 'c', 'T', 'Sp', 'Ph', 'm', 'G', 'r', 'd', 'Con', 'GIF', 'Rnt']); // Example boards
 });
 
 // Get threads from a board
@@ -58,8 +58,8 @@ router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => 
       const key = `uploads/${fileName}`;
       imageUrl = await uploadToR2(req.file, key);
     }
-    
-    const posterID = await ipToID(req); 
+
+    const posterID = await ipToID(req);
 
     const thread = new Thread({
       username: req.body.username,
@@ -78,110 +78,110 @@ router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => 
   }
 });
 
-router.get('/recent/', async(_, res) => {
-    try {
-        const pipeline = [
+router.get('/recent/', async (_, res) => {
+  try {
+    const pipeline = [
+      {
+        $facet: {
+          'threads': [
             {
-                $facet: {
-                    'threads': [
-                        {
-                            $project: {
-                                _id: 1,
-                                type: { $literal: 'thread' },
-                                board: 1,
-                                subject: 1,
-                                content: 1,
-                                image: 1,
-                                created: 1,
-                                lastBump: 1,
-                                posterID: 1
-                            }
-                        },
-                        {
-                            $sort: { lastBump: -1 }
-                        },
-                        {
-                            $limit: 10
-                        }
-                    ],
-                    'replies': [
-                        {
-                            $lookup: {
-                                from: 'threads',
-                                localField: 'threadID',
-                                foreignField: '_id',
-                                as: 'thread'
-                            }
-                        },
-                        {
-                            $unwind: '$thread'
-                        },
-                        {
-                            $project: {
-                                _id: 1,
-                                type: { $literal: 'reply' },
-                                board: '$thread.board',
-                                content: 1,
-                                image: 1,
-                                created: 1,
-                                threadID: 1,
-                                posterID: 1
-                            }
-                        },
-                        {
-                            $sort: { created: -1 }
-                        },
-                        {
-                            $limit: 10
-                        }
-                    ]
-                }
+              $project: {
+                _id: 1,
+                type: { $literal: 'thread' },
+                board: 1,
+                subject: 1,
+                content: 1,
+                image: 1,
+                created: 1,
+                lastBump: 1,
+                posterID: 1
+              }
             },
             {
-                $project: {
-                    combined: {
-                        $concatArrays: ['$threads', '$replies']
-                    }
-                }
+              $sort: { lastBump: -1 }
             },
             {
-                $unwind: '$combined'
-            },
-            {
-                $sort: {
-                    'combined.lastBump': -1,
-                    'combined.created': -1
-                }
-            },
-            {
-                $limit: 10
+              $limit: 10
             }
-        ];
-
-        const results = await Thread.aggregate(pipeline);
-
-        if (!results || results.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No recent posts found'
-            });
+          ],
+          'replies': [
+            {
+              $lookup: {
+                from: 'threads',
+                localField: 'threadID',
+                foreignField: '_id',
+                as: 'thread'
+              }
+            },
+            {
+              $unwind: '$thread'
+            },
+            {
+              $project: {
+                _id: 1,
+                type: { $literal: 'reply' },
+                board: '$thread.board',
+                content: 1,
+                image: 1,
+                created: 1,
+                threadID: 1,
+                posterID: 1
+              }
+            },
+            {
+              $sort: { created: -1 }
+            },
+            {
+              $limit: 10
+            }
+          ]
         }
+      },
+      {
+        $project: {
+          combined: {
+            $concatArrays: ['$threads', '$replies']
+          }
+        }
+      },
+      {
+        $unwind: '$combined'
+      },
+      {
+        $sort: {
+          'combined.lastBump': -1,
+          'combined.created': -1
+        }
+      },
+      {
+        $limit: 10
+      }
+    ];
 
-        const formattedResults = results.map(item => item.combined);
+    const results = await Thread.aggregate(pipeline);
 
-        return res.status(200).json({
-            success: true,
-            count: formattedResults.length,
-            data: formattedResults
-        });
-
-    } catch (error) {
-        console.error('Error fetching recent posts:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+    if (!results || results.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No recent posts found'
+      });
     }
+
+    const formattedResults = results.map(item => item.combined);
+
+    return res.status(200).json({
+      success: true,
+      count: formattedResults.length,
+      data: formattedResults
+    });
+
+  } catch (error) {
+    console.error('Error fetching recent posts:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
 });
 
 // Get specific thread with replies
@@ -213,7 +213,7 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
-    
+
     if (thread.locked) {
       return res.status(403).json({ error: 'Thread is locked' });
     }
@@ -225,15 +225,15 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
       imageUrl = await uploadToR2(req.file, key);
     }
 
-    const posterID = await ipToID(req); 
+    const posterID = await ipToID(req);
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,
       image: imageUrl,
       posterID: posterID,
-      threadID:thread._id,
+      threadID: thread._id,
     });
-    if(req.body.replyto !='null'){
+    if (req.body.replyto != 'null') {
       reply.parentReply = req.body.replyto;
     }
     await reply.save();
@@ -256,7 +256,7 @@ router.post('/reply/:id/reply', upload.single('image'), async (req, res) => {
       return res.status(404).json({ error: 'Reply not found' });
     }
 
-    const posterID = await ipToID(req); 
+    const posterID = await ipToID(req);
     const reply = new Reply({
       content: req.body.content,
       image: req.file ? req.file.filename : null,

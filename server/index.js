@@ -14,20 +14,20 @@ const PORT = process.env.PORT || 3000;
 
 app.use(helmet(
     {
-      crossOriginResourcePolicy: false,
+        crossOriginResourcePolicy: false,
 
-}
+    }
+));
 
-)); 
 app.use(cors({
-    origin: '*',  
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'ip', 'Authorization']
-})); 
+}));
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 100 
+    windowMs: 15 * 60 * 1000,
+    max: 100
 });
 
 
@@ -37,9 +37,9 @@ app.use(express.urlencoded({ extended: true }));
 
 const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000;
 app.use('/images', express.static(path.join(__dirname, 'images'), { maxAge: sixMonthsInMs }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {maxAge:sixMonthsInMs}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: sixMonthsInMs }));
 
-mongoose.connect(process.env.MONGODB_URI , {})
+mongoose.connect(process.env.MONGODB_URI, {})
     .then(() => console.log('MongoDB connected successfully'))
     .catch(err => console.error('MongoDB connection error:', err));
 
@@ -51,12 +51,12 @@ mongoose.connection.on('error', err => {
 
 // Use routes
 app.use('/', imageboardRoutes);
-app.use('/',adminRoutes);
+app.use('/', adminRoutes);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {
     console.error(err.stack);
-    
+
     // Handle multer errors
     if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -71,7 +71,7 @@ app.use((err, _req, res, _) => {
     }
 
     res.status(500).json({
-        error: process.env.NODE_ENV === 'production' 
+        error: process.env.NODE_ENV === 'production'
             ? 'An unexpected error occurred'
             : err.message
     });
@@ -94,7 +94,7 @@ const server = app.listen(PORT, () => {
 
 function gracefulShutdown() {
     console.log('Received kill signal, shutting down gracefully');
-    server.close(async() => {
+    server.close(async () => {
         console.log('Closed out remaining connections');
         await mongoose.connection.close();
         process.exit(0);
