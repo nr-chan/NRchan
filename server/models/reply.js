@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 // MongoDB Schemas
 const ReplySchema = new mongoose.Schema({
-  username:String,
+  username: String,
   content: { type: String, required: true },
   image: {
     url: String,

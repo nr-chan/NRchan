@@ -5,12 +5,12 @@ const path = require('path');
 require('dotenv').config();
 
 const r2Client = new S3Client({
-    region: "auto",
-    endpoint: process.env.R2_ENDPOINT,
-    credentials: {
-        accessKeyId: process.env.CLOUDFLAREACCESSKEYID,
-        secretAccessKey: process.env.SECRETACCESSKEY,
-    },
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLAREACCESSKEYID,
+    secretAccessKey: process.env.SECRETACCESSKEY,
+  },
 });
 
 const getRandomSize = () => {
@@ -20,15 +20,15 @@ const getRandomSize = () => {
 
 const uploadToR2 = async (file, key) => {
   const isImage = file.mimetype.startsWith('image/');
-  
+
   if (isImage) {
     try {
       const image = sharp(file.buffer);
       const metadata = await image.metadata();
-      
+
       const thumbnailSize = getRandomSize();
       const aspectRatio = metadata.width / metadata.height;
-      
+
       let resizeOptions;
       if (aspectRatio >= 1) {
         resizeOptions = {
@@ -41,18 +41,18 @@ const uploadToR2 = async (file, key) => {
           height: thumbnailSize
         };
       }
-      
+
       const smallBuffer = await image
         .resize(resizeOptions.width, resizeOptions.height, {
           withoutEnlargement: true,
           fit: 'inside'
         })
         .toBuffer();
-      
+
       const extension = path.extname(key);
       const baseKey = key.slice(0, -extension.length);
       const smallKey = `${baseKey}s${extension}`;
-      
+
       const originalParams = {
         Bucket: process.env.BUCKETNAME,
         Key: key,
@@ -60,7 +60,7 @@ const uploadToR2 = async (file, key) => {
         ContentType: file.mimetype,
         ACL: 'public-read'
       };
-      
+
       const smallParams = {
         Bucket: process.env.BUCKETNAME,
         Key: smallKey,
@@ -68,7 +68,7 @@ const uploadToR2 = async (file, key) => {
         ContentType: file.mimetype,
         ACL: 'public-read'
       };
-      
+
       await Promise.all([
         r2Client.send(new PutObjectCommand(originalParams)),
         r2Client.send(new PutObjectCommand(smallParams))
@@ -82,7 +82,7 @@ const uploadToR2 = async (file, key) => {
         thumbnailWidth: resizeOptions.width,
         thumbnailHeight: resizeOptions.height
       };
-      
+
     } catch (error) {
       console.error('Image Processing/Upload Error:', error);
       throw new Error('Failed to process or upload image');
@@ -95,7 +95,7 @@ const uploadToR2 = async (file, key) => {
       ContentType: file.mimetype,
       ACL: 'public-read'
     };
-    
+
     try {
       await r2Client.send(new PutObjectCommand(params));
       return {

@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-
-const Admin = ()=>{
+const Admin = () => {
 
 }
 
-export default Admin;
+export default Admin
