@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import ThreadImage from './Image'
 import { useNavigate, useParams } from 'react-router-dom'
 import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize } from '../Defs'
+import Cookie from './Cookie'
+import Cookies from "js-cookie";
 
 export default function Component () {
   const { id } = useParams()
@@ -23,6 +25,7 @@ export default function Component () {
   const [selectedPosts, setSelectedPosts] = useState(new Set())
   const [deletePassword, setDeletePassword] = useState('')
   const replyRefs = useRef({})
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   const scrollToReply = (replyId) => {
     if (replyRefs.current[replyId]) {
@@ -176,6 +179,11 @@ export default function Component () {
   }, [])
 
   useEffect(() => {
+    // If no cookie is set, show the disclaimer
+    const hasAgreed = Cookies.get("agreedToRules");
+    if (!hasAgreed) {
+      setShowDisclaimer(true);
+    }
     if (!banner) {
       setBanner(bannerImg[Math.floor(Math.random() * bannerImg.length)])
     }
@@ -213,10 +221,13 @@ export default function Component () {
     setSelectedPosts(new Set())
     setDeletePassword('')
   }
+  const handleAgree = () => {
+    setShowDisclaimer(false); // Close disclaimer when user agrees
+  };
 
   return (
     <div className='bg-[#FFFFEE] min-h-screen font-sans text-sm'>
-
+      {showDisclaimer && <Cookie onAgree={handleAgree} />}
       {/* Board header */}
       <div className='text-center py-4'>
         <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
