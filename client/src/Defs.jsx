@@ -120,3 +120,40 @@ export const getFileSize = (bytes) => {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
+
+function normalizeToHex(input) {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = input.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  // Convert the hash to a hex string and extract the last 6 characters
+  const hex = (hash & 0xFFFFFF).toString(16).toUpperCase();
+  return hex.padStart(6, '0'); // Ensure it's always 6 characters
+}
+
+function calculateTextColor(hex) {
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  return luminance > 128 ? 'black' : 'white';
+}
+
+export function DynamicColorText({ posterID }) {
+  let hex = normalizeToHex(posterID)
+
+  const bgColor = `#${hex}`;
+
+  const textColor = calculateTextColor(hex);
+    
+  return (
+    <span
+      className="font-bold px-1 rounded"
+      style={{ backgroundColor: bgColor, color: textColor }}
+    >
+      {posterID}
+    </span>
+  );
+}

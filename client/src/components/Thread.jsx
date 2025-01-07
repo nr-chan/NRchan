@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ThreadImage from './Image'
 import { useNavigate, useParams } from 'react-router-dom'
-import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize } from '../Defs'
+
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
+import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
 
 export default function Component () {
   const { id } = useParams()
@@ -349,8 +350,7 @@ export default function Component () {
               onChange={() => handleCheckboxChange(threadData._id)}
             />
             <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
-            <span className='font-bold text-grey-600'>({threadData.posterID}) </span>
-            <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
+            <DynamicColorText posterID={ threadData.posterID || 'FFFFFF' }/> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
             <br />
             <button
               className='text-red-500 pr-2' onClick={() => {
@@ -387,8 +387,7 @@ export default function Component () {
                 />
                 <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
                 {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
-                <span className='font-bold text-grey-600'>({reply.posterID}) </span>
-                <span className='font-bold text-[#800000]'>
+                <DynamicColorText posterID={ reply.posterID || 'FFFFFF' }/> <span className='font-bold text-[#800000]'>
                   <button onClick={() => {
                     setReplyto(reply._id)
                     setFormVisible(true)

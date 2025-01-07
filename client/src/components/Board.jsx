@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize } from '../Defs'
+import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText } from '../Defs'
 import ThreadImage from './Image'
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
@@ -348,10 +348,8 @@ export default function Board () {
                       <span className='font-bold text-[#117743]'>
                         {thread.username ? thread.username : 'Anonymous'}{' '}
                       </span>
-                      <span className='font-bold text-grey-600'>
-                        (ID: {thread.posterID}){' '}
-                      </span>
-                      <span className='text-[#34345C]'>{formatDate(thread.created)}</span>
+                      <DynamicColorText posterID={ thread.posterID || 'FFFFFF' }/> 
+                      <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
                       <br />
                       View this thread
                       <a href={'/thread/' + thread._id} className='text-[#34345C]'>
@@ -374,10 +372,8 @@ export default function Board () {
                         <span className='font-bold text-[#117743]'>
                           {reply.username || 'Anonymous'}{' '}
                         </span>
-                        <span className='font-bold text-grey-600'>
-                          (ID: {reply.posterID}){' '}
-                        </span>
-                        <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
+                        <DynamicColorText posterID={ reply.posterID || 'FFFFFF' }/> 
+                        <span className='ml-1 text-[#34345C]'>{formatDate(reply.created)}</span>
 
                         {reply.image && (
                           <div className='mt-2'>
