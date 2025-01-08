@@ -16,7 +16,7 @@ export default function Board () {
   const [comment, setComment] = useState(null)
   const [banner, setBanner] = useState(null)
   const [token, setToken] = useState('')
-  const [userIP, setUserIP] = useState('')
+  const [uuid, setuuid] = useState(localStorage.getItem('uuid'));
   const [collapsedThreads, setCollapsedThreads] = useState({})
   const [currentPage, setCurrentPage] = useState(1)
   const threadsPerPage = 5
@@ -112,7 +112,7 @@ export default function Board () {
       const response = await fetch(`${API_URL}/thread`, {
         method: 'POST',
         headers: {
-          ip: userIP
+          uuid: uuid
         },
         body: formData
       })
@@ -126,11 +126,14 @@ export default function Board () {
       console.error('Network error:', error)
     }
   }
-
-  const getIP = async () => {
-    const response = await fetch('https://api.ipify.org?format=json')
-    const json = await response.json()
-    setUserIP(json.ip)
+  
+  const getuuid = async () => {
+    if(!uuid){
+      const response = await fetch(`${API_URL}/getuuid`);
+      const json = await response.json()
+      localStorage.setItem('uuid', json.uuid);
+      setuuid(json.uuid);
+    }
   }
 
   const toggleThreadCollapse = (threadId) => {
@@ -141,7 +144,7 @@ export default function Board () {
   }
 
   useEffect(() => {
-    getIP()
+    getuuid();
     fetchThreads()
     setToken(localStorage.getItem('nrtoken'))
     const hasAgreed = Cookies.get("agreedToRules");

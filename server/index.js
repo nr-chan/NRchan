@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const imageboardRoutes = require('./routes/imageboard');
 const adminRoutes = require('./routes/admin');
+const getuuid = require('./routes/getuuid');
 
 require('dotenv').config();
 
@@ -22,7 +23,7 @@ app.use(helmet(
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'ip', 'Authorization']
+    allowedHeaders: ['Content-Type', 'ip', 'Authorization', 'uuid']
 }));
 
 const limiter = rateLimit({
@@ -52,6 +53,7 @@ mongoose.connection.on('error', err => {
 // Use routes
 app.use('/', imageboardRoutes);
 app.use('/', adminRoutes);
+app.use('/', getuuid);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {
