@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function Component () {
   const { id } = useParams()
@@ -27,6 +28,7 @@ export default function Component () {
   const [deletePassword, setDeletePassword] = useState('')
   const replyRefs = useRef({})
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null)
 
   const scrollToReply = (replyId) => {
     if (replyRefs.current[replyId]) {
@@ -95,11 +97,17 @@ export default function Component () {
   }
 
   const createthread = async () => {
+    if (!captchaToken) {
+        alert('Please complete the captcha');
+        return;
+    }
+
     const formData = new FormData()
     formData.append('username', name)
     formData.append('image', file)
     formData.append('replyto', replyto)
     formData.append('content', comment)
+    formData.append('captchaToken', captchaToken)
 
     const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
       method: 'POST',
@@ -111,7 +119,8 @@ export default function Component () {
 
     if (response.status === 200) {
       console.log('File uploaded successfully')
-      setFile(null)
+      setFile(null);
+      setCaptchaToken(null);
       fetchThreads()
       // Fetch resumes again after successful upload
     } else {
@@ -242,71 +251,73 @@ export default function Component () {
       <hr className='h-[0px] border-[#8a4f4b] my-2' />
       {/* form */}
       {formVisible && (
+      <div
+        className='fixed bg-[#F0E0D6] border border-[#800000] shadow-lg rounded-sm'
+        style={{
+          left: formPosition.x,
+          top: formPosition.y,
+          width: '450px',
+          zIndex: 1000
+        }}
+      >
         <div
-          className='fixed bg-[#F0E0D6] border border-[#800000] shadow-lg rounded-sm'
-          style={{
-            left: formPosition.x,
-            top: formPosition.y,
-            width: '300px',
-            zIndex: 1000
-          }}
+          className='bg-[#EA8] border-b border-[#800000] p-1 flex justify-between items-center cursor-move'
+          onMouseDown={handleMouseDown}
         >
-          <div
-            className='bg-[#EA8] border-b border-[#800000] p-1 flex justify-between items-center cursor-move'
-            onMouseDown={handleMouseDown}
+          <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
+          <button
+            onClick={() => setFormVisible(false)}
+            className='hover:text-[#800000] px-1'
           >
-            <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
-            <button
-              onClick={() => setFormVisible(false)}
-              className='hover:text-[#800000] px-1'
-            >
-              ×
-            </button>
-          </div>
-
-          <div className='p-2 space-y-2'>
-            <input
-              type='text'
-              placeholder='Name'
-              defaultValue='Anon'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
-            />
-
-            <textarea
-              placeholder='Comment'
-              onChange={(e) => setComment(e.target.value)}
-              className='w-full bg-white border border-[#AAA] px-1 h-24 text-sm resize-y'
-            />
-            <input
-              type='text'
-              placeholder='Reply to'
-              defaultValue={replyto}
-              value={replyto}
-              onChange={(e) => setReplyto(e.target.value)}
-              className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
-            />
-
-            <div className='flex items-center justify-between bg-[#F0E0D6]'>
-              <div className='flex-grow flex items-center'>
-                <button
-                  className='bg-[white] border border-[#AAA] text-sm px-2 py-0.5'
-                  onClick={() => document.getElementById('fileInput').click()}
-                >
-                  Choose file
-                </button>
-                <input
-                  id='fileInput'
-                  type='file'
-                  onChange={handleFileChange}
-                  className='hidden'
-                />
-                <span className='text-sm ml-2'>
-                  {file ? file.name : 'No file chosen'}
-                </span>
-              </div>
-
+            ×
+          </button>
+        </div>
+        <div className='p-2 space-y-2'>
+          <input
+            type='text'
+            placeholder='Name'
+            defaultValue='Anon'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
+          />
+          <textarea
+            placeholder='Comment'
+            onChange={(e) => setComment(e.target.value)}
+            className='w-full bg-white border border-[#AAA] px-1 h-24 text-sm resize-y'
+          />
+          <input
+            type='text'
+            placeholder='Reply to'
+            defaultValue={replyto}
+            value={replyto}
+            onChange={(e) => setReplyto(e.target.value)}
+            className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
+          />
+          <div className='space-y-2'>
+            <div className='flex items-center'>
+              <button
+                className='bg-[white] border border-[#AAA] text-sm px-2 py-0.5'
+                onClick={() => document.getElementById('fileInput').click()}
+              >
+                Choose file
+              </button>
+              <input
+                id='fileInput'
+                type='file'
+                onChange={handleFileChange}
+                className='hidden'
+              />
+              <span className='text-sm ml-2'>
+                {file ? file.name : 'No file chosen'}
+              </span>
+            </div>
+            <div className='flex items-center justify-between gap-2'>
+              <Turnstile
+                siteKey='0x4AAAAAAA44_77bjedP1XYW' 
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken(null)}
+              />              
               <button
                 onClick={() => {
                   createthread()
@@ -319,8 +330,8 @@ export default function Component () {
             </div>
           </div>
         </div>
+      </div>
       )}
-
       {/* Thread */}
       <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
         <div>
