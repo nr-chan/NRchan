@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText } from '../Defs'
 import ThreadImage from './Image'
+import Cookie from './Cookie'
+import Cookies from "js-cookie";
 
 export default function Board () {
   const nav = useNavigate()
@@ -18,6 +20,7 @@ export default function Board () {
   const [collapsedThreads, setCollapsedThreads] = useState({})
   const [currentPage, setCurrentPage] = useState(1)
   const threadsPerPage = 5
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/board/${id}`)
@@ -141,7 +144,12 @@ export default function Board () {
     getIP()
     fetchThreads()
     setToken(localStorage.getItem('nrtoken'))
+    const hasAgreed = Cookies.get("agreedToRules");
 
+    // If no cookie is set, show the disclaimer
+    if (!hasAgreed) {
+      setShowDisclaimer(true);
+    }
     if (!banner) {
       setBanner(bannerImg[Math.floor(Math.random() * bannerImg.length)])
     }
@@ -164,9 +172,14 @@ export default function Board () {
     (currentPage - 1) * threadsPerPage,
     currentPage * threadsPerPage
   )
+  const handleAgree = () => {
+    setShowDisclaimer(false); // Close disclaimer when user agrees
+  };
+
 
   return (
     <div className='min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px] pb-8'>
+      {showDisclaimer && <Cookie onAgree={handleAgree} />}
       {/* Banner */}
       <div className='text-center my-2'>
         <img
