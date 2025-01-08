@@ -4,6 +4,7 @@ import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSi
 import ThreadImage from './Image'
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function Board () {
   const nav = useNavigate()
@@ -21,6 +22,7 @@ export default function Board () {
   const [currentPage, setCurrentPage] = useState(1)
   const threadsPerPage = 5
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/board/${id}`)
@@ -90,6 +92,11 @@ export default function Board () {
   }
 
   const createthread = async () => {
+    if (!captchaToken) {
+        alert('Please complete the captcha');
+        return;
+    }
+
     const formData = new FormData()
 
     if (!subject || !subject.trim()) {
@@ -107,6 +114,7 @@ export default function Board () {
     formData.append('board', id)
     formData.append('subject', subject)
     formData.append('content', comment)
+    formData.append('captchaToken', captchaToken)
 
     try {
       const response = await fetch(`${API_URL}/thread`, {
@@ -118,6 +126,7 @@ export default function Board () {
       })
 
       if (response.status === 200) {
+        setCaptchaToken(null);
         fetchThreads()
       } else {
         console.error('Error uploading file:', response.statusText)
@@ -201,58 +210,71 @@ export default function Board () {
 
       {/* Post Form */}
       <div className='max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2'>
-        <table className='w-full'>
-          <tbody>
-            <tr>
-              <td className='bg-[#EA8]'>Name</td>
-              <td>
-                <input
-                  type='text'
-                  defaultValue='Anonymous'
-                  onChange={(e) => setName(e.target.value)}
-                  className='w-full bg-[#F0E0D6] border border-[#AAA]'
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className='bg-[#EA8]'>Subject</td>
-              <td className='flex'>
-                <input
-                  type='text'
-                  onChange={(e) => setSubject(e.target.value)}
-                  className='flex-grow bg-[#F0E0D6] border border-[#AAA]'
-                />
-                <button
-                  type='submit'
-                  onClick={() => createthread()}
-                  className='ml-2 bg-[#EA8] border border-[#800000] px-2 hover:bg-[#F0E0D6]'
-                >Post
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className='bg-[#EA8]'>Comment</td>
-              <td>
-                <textarea
-                  className='w-full h-24 bg-[#F0E0D6] border border-[#AAA]'
-                  onChange={(e) => setComment(e.target.value)}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className='bg-[#EA8]'>File</td>
-              <td>
-                <input
-                  type='file'
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                />
-                {file && <span className='ml-2'>Selected: {file.name}</span>}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <table className='w-full'>
+    <tbody>
+      <tr>
+        <td className='bg-[#EA8]'>Name</td>
+        <td>
+          <input
+            type='text'
+            defaultValue='Anonymous'
+            onChange={(e) => setName(e.target.value)}
+            className='w-full bg-[#F0E0D6] border border-[#AAA]'
+          />
+        </td>
+      </tr>
+      <tr>
+        <td className='bg-[#EA8]'>Subject</td>
+        <td>
+          <input
+            type='text'
+            onChange={(e) => setSubject(e.target.value)}
+            className='w-full bg-[#F0E0D6] border border-[#AAA]'
+          />
+        </td>
+      </tr>
+      <tr>
+        <td className='bg-[#EA8]'>Comment</td>
+        <td>
+          <textarea
+            className='w-full h-24 bg-[#F0E0D6] border border-[#AAA]'
+            onChange={(e) => setComment(e.target.value)}
+          />
+        </td>
+      </tr>
+      <tr>
+        <td className='bg-[#EA8]'>File</td>
+        <td>
+          <input
+            type='file'
+            onChange={handleFileChange}
+            ref={fileInputRef}
+          />
+          {file && <span className='ml-2'>Selected: {file.name}</span>}
+        </td>
+      </tr>
+      <tr>
+        <td className='bg-[#EA8]'></td>
+        <td>
+          <div className='flex items-center justify-between py-2'>
+            <Turnstile
+              siteKey='0x4AAAAAAA44_77bjedP1XYW' 
+              onSuccess={(token) => setCaptchaToken(token)}
+              onError={() => setCaptchaToken(null)}
+            />
+            <button
+              type='submit'
+              onClick={() => createthread()}
+              className='bg-[#EA8] border border-[#800000] px-2 hover:bg-[#F0E0D6]'
+            >
+              Post
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
       <hr className='h-[0px] border-[#8a4f4b] my-4' />
       {/* Threads */}

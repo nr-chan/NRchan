@@ -7,6 +7,7 @@ const Thread = require('../models/thread');
 const uploadToR2 = require('../utils/uploadService');
 const rateLimiter = require('../utils/rateLimit');
 const uuidToPosterId = require('../utils/uuidToPosterId');
+const validateCaptcha = require('../utils/validateCaptcha');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -44,6 +45,12 @@ router.get('/board/:board', async (req, res) => {
 
 router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => {
   try {
+    const isValid = await validateCaptcha(req.body.captchaToken)
+
+    if (!isValid) {
+        return res.status(400).send({ error: 'Invalid CAPTCHA' })
+    }
+
     if (!req.body.content) {
       return res.status(400).json({ error: 'Content is required' });
     }
@@ -209,6 +216,12 @@ router.get('/thread/:id', async (req, res) => {
 // Reply to thread
 router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req, res) => {
   try {
+    const isValid = await validateCaptcha(req.body.captchaToken)
+
+    if (!isValid) {
+        return res.status(400).send({ error: 'Invalid CAPTCHA' })
+    }
+
     const thread = await Thread.findById(req.params.id);
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
