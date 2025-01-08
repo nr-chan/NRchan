@@ -22,7 +22,7 @@ export default function Component () {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const nav = useNavigate()
   const [token, setToken] = useState('')
-  const [userIP, setUserIP] = useState('')
+  const [uuid, setuuid] = useState(localStorage.getItem('uuid'));
   const [selectedPosts, setSelectedPosts] = useState(new Set())
   const [deletePassword, setDeletePassword] = useState('')
   const replyRefs = useRef({})
@@ -104,7 +104,7 @@ export default function Component () {
     const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
       method: 'POST',
       headers: {
-        ip: userIP
+        uuid: uuid
       },
       body: formData
     })
@@ -167,15 +167,18 @@ export default function Component () {
     setThreadData(data)
   }
 
-  const getIP = async () => {
-    const response = await fetch('https://api.ipify.org?format=json')
-    const json = await response.json()
-    setUserIP(json.ip)
+  const getuuid = async () => {
+    if(!uuid){
+      const response = await fetch(`${API_URL}/getuuid`);
+      const json = await response.json()
+      localStorage.setItem('uuid', json.uuid);
+      setuuid(json.uuid);
+    }
   }
 
   useEffect(() => {
     fetchThreads()
-    getIP()
+    getuuid();
     setToken(localStorage.getItem('nrtoken'))
   }, [])
 

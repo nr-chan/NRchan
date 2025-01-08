@@ -1,19 +1,18 @@
 const crypto = require('crypto');
+const {validate, version} = require('uuid');
 
-const ipToID = async (req) => {
+const uuidToPosterId = async (req) => {
   return new Promise((resolve) => {
-    const ip = req.headers['ip'];
 
-    if (!ip) {
-      return resolve('000000'); //default value
+    const uuid = req.headers['uuid'];
+    if (!validate(uuid) || version(uuid) != 4) {
+      return resolve('000000');
     }
-
-    const ipv4 = ip.includes('::ffff:') ? ip.split('::ffff:')[1] : ip;
 
     setImmediate(() => {
       try {
         const hash = crypto.createHash('sha1')
-          .update(ipv4)
+          .update(uuid)
           .digest('hex');
 
         resolve(hash.slice(0, 6));
@@ -25,4 +24,4 @@ const ipToID = async (req) => {
   });
 };
 
-module.exports = ipToID;
+module.exports = uuidToPosterId;

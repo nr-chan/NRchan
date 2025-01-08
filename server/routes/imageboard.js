@@ -6,7 +6,7 @@ const Reply = require('../models/reply');
 const Thread = require('../models/thread');
 const uploadToR2 = require('../utils/uploadService');
 const rateLimiter = require('../utils/rateLimit');
-const ipToID = require('../utils/ipToId');
+const uuidToPosterId = require('../utils/uuidToPosterId');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -59,7 +59,7 @@ router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => 
       imageUrl = await uploadToR2(req.file, key);
     }
 
-    const posterID = await ipToID(req);
+    const posterID = await uuidToPosterId(req);
 
     const thread = new Thread({
       username: req.body.username,
@@ -225,7 +225,7 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
       imageUrl = await uploadToR2(req.file, key);
     }
 
-    const posterID = await ipToID(req);
+    const posterID = await uuidToPosterId(req);
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,
@@ -256,7 +256,7 @@ router.post('/reply/:id/reply', upload.single('image'), async (req, res) => {
       return res.status(404).json({ error: 'Reply not found' });
     }
 
-    const posterID = await ipToID(req);
+    const posterID = await uuidToPosterId(req);
     const reply = new Reply({
       content: req.body.content,
       image: req.file ? req.file.filename : null,
