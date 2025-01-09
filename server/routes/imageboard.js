@@ -9,6 +9,7 @@ const uploadToR2 = require('../utils/uploadService');
 const rateLimiter = require('../utils/rateLimit');
 const uuidToPosterId = require('../utils/uuidToPosterId');
 const validateCaptcha = require('../utils/validateCaptcha');
+const BannedUUdi = require('../models/bannedUser');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -68,7 +69,10 @@ router.post('/thread', rateLimiter, upload.single('image'), async (req, res) => 
     }
 
     const posterID = await uuidToPosterId(req);
-
+    const result = await BannedUUdi.findOne(posterID);
+    if(result){
+      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    }
     const thread = new Thread({
       username: req.body.username,
       board: req.body.board,
@@ -240,6 +244,11 @@ router.post('/thread/:id/reply', rateLimiter, upload.single('image'), async (req
     }
 
     const posterID = await uuidToPosterId(req);
+    const result = await BannedUUdi.findOne(posterID);
+    if(result){
+      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    }
+    
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,
