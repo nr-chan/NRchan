@@ -98,8 +98,8 @@ export default function Component() {
 
   const createthread = async () => {
     if (!captchaToken) {
-        alert('Please complete the captcha');
-        return;
+      alert('Please complete the captcha');
+      return;
     }
 
     const formData = new FormData()
@@ -168,57 +168,6 @@ export default function Component() {
   }
 
 
-  const deleteThreadByUser = async (threadID) => {
-    if (!uuid) {
-      alert('Unable to delete thread: User UUID not found.');
-      return;
-    }
-    try {
-      const response = await fetch(`${API_URL}/thread/${threadID}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uuid }),
-      });
-      if (response.status === 200) {
-        console.log('Thread deleted successfully');
-        fetchThreads();
-      } else {
-        const json = await response.json();
-        console.error('Error deleting thread:', json.error);
-      }
-    } catch (err) {
-      console.error('Error: ', err.message);
-    }
-  };
-
-
-  const deleteReplyByUser = async (replyID) => {
-    if (!uuid) {
-      alert('Unable to delete thread: User UUID not found.');
-      return;
-    }
-    try {
-      const response = await fetch(`${API_URL}/reply/${replyID}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uuid }),
-      });
-      if (response.status() === 200) {
-        console.log('Reply deleted successfully');
-        fetchThreads();
-      } else {
-        const json = await response.json();
-        console.error('Error deleting reply:', json.error);
-      }
-    } catch (err) {
-      console.error('Error: ', err.message);
-    }
-  };
-
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/thread/${id}`)
     const data = await response.json()
@@ -236,6 +185,58 @@ export default function Component() {
       setuuid(json.uuid);
     }
   }
+  const deleteThreadByUser = async (threadID) => {
+    if (!uuid) {
+      alert('Unable to delete thread: User UUID not found.');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/thread/${threadID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'uuid': uuid,
+        },
+      });
+      if (response.status === 200) {
+        console.log('Thread deleted successfully');
+        fetchThreads();
+      } else {
+        const json = await response.json();
+        console.error('Error deleting thread:', json.error);
+      }
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
+  }
+
+
+  const deleteReplyByUser = async (replyID) => {
+    if (!uuid) {
+      alert('Unable to delete thread: User UUID not found.');
+      return;
+    }
+    console.log("UUID sent: ", uuid);
+    try {
+      const response = await fetch(`${API_URL}/reply/${replyID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'uuid': uuid,
+        },
+      });
+      if (response.status === 200) {
+        console.log('Reply deleted successfully');
+        fetchThreads();
+      } else {
+        const json = await response.json();
+        console.error('Error deleting reply:', json.error);
+      }
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
+  }
+
 
   useEffect(() => {
     fetchThreads()
@@ -303,86 +304,86 @@ export default function Component() {
       <hr className='my-2 h-[0px] border-[#8a4f4b]' />
       {/* form */}
       {formVisible && (
-      <div
-        className='fixed bg-[#F0E0D6] border border-[#800000] shadow-lg rounded-sm'
-        style={{
-          left: formPosition.x,
-          top: formPosition.y,
-          width: '450px',
-          zIndex: 1000
-        }}
-      >
         <div
-          className='bg-[#EA8] border-b border-[#800000] p-1 flex justify-between items-center cursor-move'
-          onMouseDown={handleMouseDown}
+          className='fixed rounded-sm border shadow-lg bg-[#F0E0D6] border-[#800000]'
+          style={{
+            left: formPosition.x,
+            top: formPosition.y,
+            width: '450px',
+            zIndex: 1000
+          }}
         >
-          <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
-          <button
-            onClick={() => setFormVisible(false)}
-            className='hover:text-[#800000] px-1'
+          <div
+            className='flex justify-between items-center p-1 border-b cursor-move bg-[#EA8] border-[#800000]'
+            onMouseDown={handleMouseDown}
           >
-            ×
-          </button>
-        </div>
-        <div className='p-2 space-y-2'>
-          <input
-            type='text'
-            placeholder='Name'
-            defaultValue='Anon'
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
-          />
-          <textarea
-            placeholder='Comment'
-            onChange={(e) => setComment(e.target.value)}
-            className='w-full bg-white border border-[#AAA] px-1 h-24 text-sm resize-y'
-          />
-          <input
-            type='text'
-            placeholder='Reply to'
-            defaultValue={replyto}
-            value={replyto}
-            onChange={(e) => setReplyto(e.target.value)}
-            className='w-full bg-white border border-[#AAA] px-1 text-sm h-[20px]'
-          />
-          <div className='space-y-2'>
-            <div className='flex items-center'>
-              <button
-                className='bg-[white] border border-[#AAA] text-sm px-2 py-0.5'
-                onClick={() => document.getElementById('fileInput').click()}
-              >
-                Choose file
-              </button>
-              <input
-                id='fileInput'
-                type='file'
-                onChange={handleFileChange}
-                className='hidden'
-              />
-              <span className='text-sm ml-2'>
-                {file ? file.name : 'No file chosen'}
-              </span>
-            </div>
-            <div className='flex items-center justify-between gap-2'>
-              <Turnstile
-                siteKey='0x4AAAAAAA44_77bjedP1XYW' 
-                onSuccess={(token) => setCaptchaToken(token)}
-                onError={() => setCaptchaToken(null)}
-              />              
-              <button
-                onClick={() => {
-                  createthread()
-                  setFormVisible(false)
-                }}
-                className='py-1 px-2 text-sm border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
-              >
-                Post
-              </button>
+            <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
+            <button
+              onClick={() => setFormVisible(false)}
+              className='px-1 hover:text-[#800000]'
+            >
+              ×
+            </button>
+          </div>
+          <div className='p-2 space-y-2'>
+            <input
+              type='text'
+              placeholder='Name'
+              defaultValue='Anon'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
+            />
+            <textarea
+              placeholder='Comment'
+              onChange={(e) => setComment(e.target.value)}
+              className='px-1 w-full h-24 text-sm bg-white border resize-y border-[#AAA]'
+            />
+            <input
+              type='text'
+              placeholder='Reply to'
+              defaultValue={replyto}
+              value={replyto}
+              onChange={(e) => setReplyto(e.target.value)}
+              className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
+            />
+            <div className='space-y-2'>
+              <div className='flex items-center'>
+                <button
+                  className='py-0.5 px-2 text-sm border bg-[white] border-[#AAA]'
+                  onClick={() => document.getElementById('fileInput').click()}
+                >
+                  Choose file
+                </button>
+                <input
+                  id='fileInput'
+                  type='file'
+                  onChange={handleFileChange}
+                  className='hidden'
+                />
+                <span className='ml-2 text-sm'>
+                  {file ? file.name : 'No file chosen'}
+                </span>
+              </div>
+              <div className='flex gap-2 justify-between items-center'>
+                <Turnstile
+                  siteKey='0x4AAAAAAA44_77bjedP1XYW'
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onError={() => setCaptchaToken(null)}
+                />
+                <button
+                  onClick={() => {
+                    createthread()
+                    setFormVisible(false)
+                  }}
+                  className='py-1 px-2 text-sm border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
+                >
+                  Post
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       )}
       {/* Thread */}
       <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
@@ -427,7 +428,13 @@ export default function Component() {
             </button>
             <button
               className='text-red-500' onClick={() => {
-                deleteThread(threadData._id)
+                if (token) {
+
+                  deleteThread(threadData._id)
+                } else {
+
+                  deleteThreadByUser(threadData._id)
+                }
               }}
             >[delete]
             </button>
@@ -483,13 +490,19 @@ export default function Component() {
                 <div>
 
                   <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
-                  {token &&
-                    <button
-                      className='pl-2 text-red-500'
-                      onClick={() => { deleteReply(reply._id) }}
-                    >
-                      [delete]
-                    </button>}
+
+                  <button
+                    className='pl-2 text-red-500'
+                    onClick={() => {
+                      if (token) {
+                        deleteReply(reply._id)
+                      } else {
+                        deleteReplyByUser(reply._id)
+                      }
+                    }}
+                  >
+                    [delete]
+                  </button>
                   <br />
                   {reply.parentReply && (
                     <div

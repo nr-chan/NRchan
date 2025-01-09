@@ -109,4 +109,21 @@ const uploadToR2 = async (file, key) => {
   }
 };
 
+// const deleteImage = async (url) => {
+//   if (!url) return;
+//
+//   const key = 'uploads/' + url.split('/').pop();
+//   console.log(key)
+//   try {
+//     const deleteCommand = new DeleteObjectCommand({
+//       Bucket: process.env.BUCKETNAME,
+//       Key: key
+//     });
+//
+//     await r2Client.send(deleteCommand);
+//     console.log(`Image ${key} deleted successfully.`);
+//   } catch (err) {
+//     console.error("Error deleting image:", err);
+//   }
+// };
 module.exports = uploadToR2;
