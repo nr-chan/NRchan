@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
 import { Turnstile } from '@marsidev/react-turnstile';
 
-export default function Component () {
+export default function Component() {
   const { id } = useParams()
   const [file, setFile] = useState(null)
   const fileInputRef = useRef(null)
@@ -167,6 +167,58 @@ export default function Component () {
     }
   }
 
+
+  const deleteThreadByUser = async (threadID) => {
+    if (!uuid) {
+      alert('Unable to delete thread: User UUID not found.');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/thread/${threadID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uuid }),
+      });
+      if (response.status === 200) {
+        console.log('Thread deleted successfully');
+        fetchThreads();
+      } else {
+        const json = await response.json();
+        console.error('Error deleting thread:', json.error);
+      }
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
+  };
+
+
+  const deleteReplyByUser = async (replyID) => {
+    if (!uuid) {
+      alert('Unable to delete thread: User UUID not found.');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/reply/${replyID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uuid }),
+      });
+      if (response.status() === 200) {
+        console.log('Reply deleted successfully');
+        fetchThreads();
+      } else {
+        const json = await response.json();
+        console.error('Error deleting reply:', json.error);
+      }
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
+  };
+
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/thread/${id}`)
     const data = await response.json()
@@ -177,7 +229,7 @@ export default function Component () {
   }
 
   const getuuid = async () => {
-    if(!uuid){
+    if (!uuid) {
       const response = await fetch(`${API_URL}/getuuid`);
       const json = await response.json()
       localStorage.setItem('uuid', json.uuid);
@@ -239,16 +291,16 @@ export default function Component () {
   };
 
   return (
-    <div className='bg-[#FFFFEE] min-h-screen font-sans text-sm'>
+    <div className='min-h-screen font-sans text-sm bg-[#FFFFEE]'>
       {showDisclaimer && <Cookie onAgree={handleAgree} />}
       {/* Board header */}
-      <div className='text-center py-4'>
+      <div className='py-4 text-center'>
         <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
-        <hr className='h-[0px] border-[#8a4f4b] my-4' />
-        <h1 className='text-4xl text-[#800000] font-bold mt-2'>/{threadData.board}/ - {links[boardList.indexOf(threadData.board)]}</h1>
+        <hr className='my-4 h-[0px] border-[#8a4f4b]' />
+        <h1 className='mt-2 text-4xl font-bold text-[#800000]'>/{threadData.board}/ - {links[boardList.indexOf(threadData.board)]}</h1>
       </div>
 
-      <hr className='h-[0px] border-[#8a4f4b] my-2' />
+      <hr className='my-2 h-[0px] border-[#8a4f4b]' />
       {/* form */}
       {formVisible && (
       <div
@@ -323,7 +375,7 @@ export default function Component () {
                   createthread()
                   setFormVisible(false)
                 }}
-                className='bg-[#EA8] border border-[#800000] px-2 py-1 text-sm hover:bg-[#F0E0D6]'
+                className='py-1 px-2 text-sm border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
               >
                 Post
               </button>
@@ -353,10 +405,10 @@ export default function Component () {
                 <source src={`${threadData.image.url}`} type='video/mp4' />
                 Your browser does not support the video tag.
               </video>
-              )
+            )
             : (
               <ThreadImage imageData={threadData.image} />
-              )}
+            )}
           <div>
             <input
               type='checkbox'
@@ -364,10 +416,10 @@ export default function Component () {
               onChange={() => handleCheckboxChange(threadData._id)}
             />
             <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
-            <DynamicColorText posterID={ threadData.posterID || 'FFFFFF' }/> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
+            <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
             <br />
             <button
-              className='text-red-500 pr-2' onClick={() => {
+              className='pr-2 text-red-500' onClick={() => {
                 setReplyto(null)
                 setFormVisible(true)
               }}
@@ -382,7 +434,7 @@ export default function Component () {
           </div>
         </div>
 
-        <h2 className='font-bold text-[#800000] mt-2'>{threadData.subject}</h2>
+        <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
         <p className='mt-2'>{formatText(threadData.content)}</p>
       </article>
 
@@ -390,9 +442,9 @@ export default function Component () {
       {threadData.replies && threadData.replies.map((reply) => (
         <div className='flex ml-2' key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
 
-          <span className='text-[1.2rem] text-gray-400'>{'>>'}</span>
+          <span className='text-gray-400 text-[1.2rem]'>{'>>'}</span>
           <span>
-            <article key={reply._id} className='bg-[#F0E0D6] pl-5 pr-5 pt-4 pb-4 mb-3 ml-1 mr-4 '>
+            <article key={reply._id} className='pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[#F0E0D6]'>
               <div>
                 <input
                   type='checkbox'
@@ -401,7 +453,7 @@ export default function Component () {
                 />
                 <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
                 {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
-                <DynamicColorText posterID={ reply.posterID || 'FFFFFF' }/> <span className='font-bold text-[#800000]'>
+                <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
                   <button onClick={() => {
                     setReplyto(reply._id)
                     setFormVisible(true)
@@ -422,18 +474,18 @@ export default function Component () {
                       <source src={`${reply.image.url}`} type='video/mp4' />
                       Your browser does not support the video tag.
                     </video>
-                    )
+                  )
                   : (
-                      reply.image && (
-                        <ThreadImage imageData={reply.image} />
-                      )
-                    )}
+                    reply.image && (
+                      <ThreadImage imageData={reply.image} />
+                    )
+                  )}
                 <div>
 
                   <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
                   {token &&
                     <button
-                      className='text-red-500 pl-2'
+                      className='pl-2 text-red-500'
                       onClick={() => { deleteReply(reply._id) }}
                     >
                       [delete]
@@ -441,7 +493,7 @@ export default function Component () {
                   <br />
                   {reply.parentReply && (
                     <div
-                      className='font-bold text-[#276221] m-2 mt-2 cursor-pointer'
+                      className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
                       onClick={() => scrollToReply(reply.parentReply._id)}
                     >
                       {`>>${reply.parentReply._id}`}
@@ -457,9 +509,9 @@ export default function Component () {
         </div>
       ))}
 
-      <div className='bottom-0 left-0 right-0 border-t border-[#800000] p-2'>
+      <div className='right-0 bottom-0 left-0 p-2 border-t border-[#800000]'>
         <form
-          className='flex items-center gap-4 justify-center' onSubmit={(e) => {
+          className='flex gap-4 justify-center items-center' onSubmit={(e) => {
             e.preventDefault()
             handleBulkDelete()
           }}
@@ -475,11 +527,11 @@ export default function Component () {
             placeholder='Password'
             value={deletePassword}
             onChange={(e) => setDeletePassword(e.target.value)}
-            className='px-2 py-1 border border-[#8a4f4b]'
+            className='py-1 px-2 border border-[#8a4f4b]'
           />
           <button
             type='submit'
-            className='bg-[#EA8] border border-[#800000] px-4 py-1 hover:bg-[#F0E0D6]'
+            className='py-1 px-4 border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
           >
             Delete
           </button>

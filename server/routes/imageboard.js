@@ -286,4 +286,44 @@ router.post('/reply/:id/reply', upload.single('image'), async (req, res) => {
   }
 });
 
+//Delete thread
+router.delete('/thread/:id', async (req, res) => {
+  try {
+    const posterID = await uuidToPosterId(req);
+    const thread = await Thread.findById(req.params.id);
+
+    if (!thread) {
+      return res.status(404).json({ error: 'Thread not found' })
+    }
+
+    if (thread.posterID !== posterID) {
+      return res.status(403).json({ error: 'You are not authorized to delete this thread' });
+    }
+    await Reply.deleteMany({ threadID: thread._id });
+    await thread.deleteOne();
+
+    res.json({ message: 'Thread and associated replies deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+
+router.delete('/reply/:id', async (req, res) => {
+  try {
+    const posterID = await uuidToPosterId(req);
+    const reply = await Reply.findById(req.params.id);
+    if (!reply) {
+      return res.status(404).json({ error: 'Reply not found' });
+    }
+    if (reply.posterID !== posterID) {
+      return res.status(403).json({ error: 'You are not authorized to delete this reply' });
+    }
+    await reply.deleteOne();
+    res.json({ message: 'Reply deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
