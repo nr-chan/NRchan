@@ -258,7 +258,7 @@ export default function Board () {
         <td>
           <div className='flex items-center justify-between py-2'>
             <Turnstile
-              siteKey='0x4AAAAAAA44_77bjedP1XYW' 
+              siteKey={import.meta.env.VITE_SITE_KEY}
               onSuccess={(token) => setCaptchaToken(token)}
               onError={() => setCaptchaToken(null)}
             />

@@ -341,8 +341,7 @@ router.delete('/reply/:id', async (req, res) => {
     // console.log('PosterID from UUID:', posterID); // Debugging log
     // console.log('Reply posterID:', reply ? reply.posterID : 'Reply not found'); // Debugging log
     // console.log("pid1:", reply.posterID);
-    // console.log("pid2:", posterID);
-    // console.log("pid3: ", uuidToPosterId("7afa20e8-335d-4f86-b40e-fe66889125e8"));
+    // console.log("pid2:", posterID); console.log("pid3: ", uuidToPosterId("7afa20e8-335d-4f86-b40e-fe66889125e8"));
     if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
     }
