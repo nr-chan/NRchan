@@ -4,6 +4,7 @@ const router = express.Router();
 const path = require('path');
 const Thread = require('../models/thread');
 const Reply = require('../models/reply');
+const BannedUUdi = require('../models/bannedUser');
 const rateLimiter = require('../utils/rateLimit');
 const uuidToPosterId = require('../utils/uuidToPosterId');
 const uploadToR2 = require('../utils/uploadService');
@@ -49,6 +50,10 @@ router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
     }
 
     const posterID = await uuidToPosterId(req);
+    const result = await BannedUUdi.findOne({uuid: posterID});
+    if(result){
+      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    }
 
     const thread = new Thread({
       username: req.body.username,
@@ -115,6 +120,10 @@ router.post('/:id/reply', rateLimiter, upload.single('image'), async (req, res) 
     }
 
     const posterID = await uuidToPosterId(req);
+    const result = await BannedUUdi.findOne({uuid: posterID});
+    if(result){
+      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    }
     const reply = new Reply({
       username: req.body.username,
       content: req.body.content,

@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const imageboardRoutes = require('./routes/imageboard');
 const adminRoutes = require('./routes/admin');
 const bannedUUID = require('./routes/banUUID');
 const getuuidRoutes = require('./routes/getuuid');
@@ -57,7 +56,6 @@ mongoose.connection.on('error', err => {
 // Import routes
 
 // Use routes
-//app.use('/', imageboardRoutes);
 app.use('/board', boardRoutes);
 app.use('/boards', boardsRoutes);
 app.use('/recent', recentRoutes);
