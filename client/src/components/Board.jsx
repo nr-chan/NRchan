@@ -55,7 +55,7 @@ export default function Board () {
 
   const handleLockThread = async (threadId) => {
     try {
-      const response = await fetch(`${API_URL}/lock/${threadId}`, {
+      const response = await fetch(`${API_URL}/admin/lock/${threadId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -74,7 +74,7 @@ export default function Board () {
 
   const handlePinThread = async (threadId) => {
     try {
-      const response = await fetch(`${API_URL}/pin/${threadId}`, {
+      const response = await fetch(`${API_URL}/admin/pin/${threadId}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
