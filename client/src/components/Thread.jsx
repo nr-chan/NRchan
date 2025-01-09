@@ -370,7 +370,7 @@ export default function Component() {
               </div>
               <div className='flex gap-2 justify-between items-center'>
                 <Turnstile
-                  siteKey='0x4AAAAAAA44_77bjedP1XYW'
+                  siteKey={import.meta.env.VITE_SITE_KEY}
                   onSuccess={(token) => setCaptchaToken(token)}
                   onError={() => setCaptchaToken(null)}
                 />
