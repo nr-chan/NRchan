@@ -1,49 +1,8 @@
 const express = require('express');
-const multer = require('multer');
 const router = express.Router();
 const Reply = require('../models/reply');
+const BannedUUdi = require('../models/bannedUser');
 const uuidToPosterId = require('../utils/uuidToPosterId');
-
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (_, file, cb) => {
-    const allowedFileTypes = /jpeg|jpg|png|gif|heic|mp4|mov|avi|mkv|webm/;
-    const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedFileTypes.test(file.mimetype);
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Error: Only images and videos are allowed.'));
-    }
-  },
-});
-
-// Reply to reply
-router.post('/:id/reply', upload.single('image'), async (req, res) => {
-  try {
-    const parentReply = await Reply.findById(req.params.id);
-    if (!parentReply) {
-      return res.status(404).json({ error: 'Reply not found' });
-    }
-
-    const posterID = await uuidToPosterId(req);
-    const reply = new Reply({
-      content: req.body.content,
-      image: req.file ? req.file.filename : null,
-      posterID: posterID
-    });
-
-    await reply.save();
-    parentReply.replies.push(reply._id);
-    await parentReply.save();
-
-    res.json(reply);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 //delete reply
 router.delete('/:id', async (req, res) => {
@@ -54,6 +13,12 @@ router.delete('/:id', async (req, res) => {
       return res.status(400).json({ error: 'UUID is required' });
     }
     const posterID = await uuidToPosterId(req);
+    const result = await BannedUUdi.findOne(posterID);
+    console.log("result", result);
+    if(result){
+      console.log("result", result);
+      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    }
     const reply = await Reply.findById(req.params.id);
     // console.log('Reply details:', reply);
     // console.log('PosterID from UUID:', posterID); // Debugging log

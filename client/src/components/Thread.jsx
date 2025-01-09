@@ -272,7 +272,7 @@ export default function Component() {
     })
   }
   const banUUID = async(uuid_ban)=>{
-    const response = await fetch(`${API_URL}/banUUID${uuid_ban}`);
+    const response = await fetch(`${API_URL}/banUUID/${uuid_ban}`);
   } 
 
   const handleBulkDelete = async () => {
@@ -523,7 +523,7 @@ export default function Component() {
                 </div>
               </div>
 
-              {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(threadData.posterID) }}>
+              {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(reply.posterID) }}>
                 [ ban uuid ]
               </div>}
             </article>
