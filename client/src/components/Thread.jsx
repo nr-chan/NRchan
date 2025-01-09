@@ -271,6 +271,9 @@ export default function Component() {
       return newSet
     })
   }
+  const banUUID = async(uuid_ban)=>{
+    const response = await fetch(`${API_URL}/banUUID${uuid_ban}`);
+  } 
 
   const handleBulkDelete = async () => {
     if (selectedPosts.size === 0) {
@@ -443,6 +446,9 @@ export default function Component() {
 
         <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
         <p className='mt-2'>{formatText(threadData.content)}</p>
+        {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(threadData.posterID) }}>
+          [ ban uuid ]
+        </div>}
       </article>
 
       {/* Replies */}
@@ -517,6 +523,9 @@ export default function Component() {
                 </div>
               </div>
 
+              {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(threadData.posterID) }}>
+                [ ban uuid ]
+              </div>}
             </article>
           </span>
         </div>

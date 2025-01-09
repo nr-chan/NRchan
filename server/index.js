@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const imageboardRoutes = require('./routes/imageboard');
 const adminRoutes = require('./routes/admin');
 const getuuid = require('./routes/getuuid');
+const boards = require('./routes/boards');
+const bannedUUID = require('./routes/banUUID');
 
 require('dotenv').config();
 
@@ -54,6 +56,8 @@ mongoose.connection.on('error', err => {
 app.use('/', imageboardRoutes);
 app.use('/', adminRoutes);
 app.use('/', getuuid);
+app.use('/', boards);
+app.use('/', bannedUUID);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {

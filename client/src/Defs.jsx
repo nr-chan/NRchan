@@ -21,7 +21,7 @@ export const links = [
 
 export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha']
 
-export const API_URL = import.meta.env.VITE_API_URL
+export const API_URL = "http://localhost:3000"
 
 export const fetchThreads = async () => {
   const response = await fetch(`${API_URL}/thread/${id}`)
