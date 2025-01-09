@@ -6,7 +6,12 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const imageboardRoutes = require('./routes/imageboard');
 const adminRoutes = require('./routes/admin');
-const getuuid = require('./routes/getuuid');
+const getuuidRoutes = require('./routes/getuuid');
+const boardRoutes = require('./routes/board');
+const boardsRoutes = require('./routes/boards');
+const recentRoutes = require('./routes/recent');
+const replyRoutes = require('./routes/reply');
+const threadRoutes = require('./routes/thread');
 
 require('dotenv').config();
 
@@ -51,9 +56,14 @@ mongoose.connection.on('error', err => {
 // Import routes
 
 // Use routes
-app.use('/', imageboardRoutes);
-app.use('/', adminRoutes);
-app.use('/', getuuid);
+//app.use('/', imageboardRoutes);
+app.use('/board', boardRoutes);
+app.use('/boards', boardsRoutes);
+app.use('/recent', recentRoutes);
+app.use('/reply', replyRoutes);
+app.use('/thread', threadRoutes);
+app.use('/admin', adminRoutes);
+app.use('/getuuid', getuuidRoutes);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {

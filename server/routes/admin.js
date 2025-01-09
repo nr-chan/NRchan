@@ -67,7 +67,7 @@ const superAdminAuth = (req, res, next) => {
 };
 
 // Admin login
-router.post('/admin/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -104,7 +104,7 @@ router.post('/admin/login', async (req, res) => {
 });
 
 // Create new admin (super_admin only)
-router.post('/admin/create', adminAuth, superAdminAuth, async (req, res) => {
+router.post('/create', adminAuth, superAdminAuth, async (req, res) => {
   try {
     const { username, password, role } = req.body;
 
@@ -134,7 +134,7 @@ router.post('/admin/create', adminAuth, superAdminAuth, async (req, res) => {
 });
 
 // Get all admins (admin+ only)
-router.get('/admin/list', adminAuth, async (_, res) => {
+router.get('/list', adminAuth, async (_, res) => {
   try {
     const admins = await Admin.find({}, '-password')
       .sort({ created: -1 });
@@ -145,7 +145,7 @@ router.get('/admin/list', adminAuth, async (_, res) => {
 });
 
 // Delete admin (super_admin only)
-router.delete('/admin/:id', adminAuth, superAdminAuth, async (req, res) => {
+router.delete('/:id', adminAuth, superAdminAuth, async (req, res) => {
   try {
     const adminToDelete = await Admin.findById(req.params.id);
 
@@ -165,7 +165,7 @@ router.delete('/admin/:id', adminAuth, superAdminAuth, async (req, res) => {
 });
 
 // Update admin role (super_admin only)
-router.patch('/admin/:id/role', adminAuth, superAdminAuth, async (req, res) => {
+router.patch('/:id/role', adminAuth, superAdminAuth, async (req, res) => {
   try {
     const { role } = req.body;
 
@@ -197,7 +197,7 @@ router.patch('/admin/:id/role', adminAuth, superAdminAuth, async (req, res) => {
 });
 
 // Change admin password
-router.patch('/admin/password', adminAuth, async (req, res) => {
+router.patch('/password', adminAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -216,7 +216,7 @@ router.patch('/admin/password', adminAuth, async (req, res) => {
 });
 
 // Admin-specific board management routes
-router.delete('/admin/thread/:id', adminAuth, async (req, res) => {
+router.delete('/thread/:id', adminAuth, async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
     if (!thread) {
@@ -302,7 +302,7 @@ router.post('/pin/:id', adminAuth, async (req, res) => {
 });
 
 
-router.delete('/admin/reply/:id', adminAuth, async (req, res) => {
+router.delete('/reply/:id', adminAuth, async (req, res) => {
   try {
     const reply = await Reply.findById(req.params.id);
     if (!reply) {
