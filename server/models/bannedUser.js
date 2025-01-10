@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
-// Define the schema
-const BannedUUdiSchema = new mongoose.Schema({
-    uuid: String
+const BannedUUIDSchema = new mongoose.Schema({
+    uuid: {
+        type: String,
+        unique: true
+    }
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
-// Create and export the model
-const BannedUUdi = mongoose.model('bannedUUID', BannedUUdiSchema);
+const BannedUUID = mongoose.model('banneduser', BannedUUIDSchema);
 
-module.exports = BannedUUdi;
+module.exports = BannedUUID;

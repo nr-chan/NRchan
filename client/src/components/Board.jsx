@@ -5,6 +5,7 @@ import ThreadImage from './Image'
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { Turnstile } from '@marsidev/react-turnstile'
+import NRCButton from './NRCButton';
 
 export default function Board () {
   const nav = useNavigate()
@@ -247,6 +248,7 @@ export default function Board () {
         <td>
           <input
             type='file'
+            className='px-2'
             onChange={handleFileChange}
             ref={fileInputRef}
           />
@@ -256,19 +258,13 @@ export default function Board () {
       <tr>
         <td className='bg-[#EA8]'></td>
         <td>
-          <div className='flex items-center justify-between py-2'>
+          <div className='px-2 items-center justify-between py-2'>
             <Turnstile
               siteKey={import.meta.env.VITE_SITE_KEY}
               onSuccess={(token) => setCaptchaToken(token)}
               onError={() => setCaptchaToken(null)}
             />
-            <button
-              type='submit'
-              onClick={() => createthread()}
-              className='bg-[#EA8] border border-[#800000] px-2 hover:bg-[#F0E0D6]'
-            >
-              Post
-            </button>
+            <NRCButton label={"Post"} addClass='px-2 py-1' onClick={()=>createthread()}/>
           </div>
         </td>
       </tr>
@@ -293,25 +289,23 @@ export default function Board () {
                       src={`${API_URL}/images/plus.png`}
                     />
                   </button>
-                  <span className='font-bold'>ThreadID: {thread._id}</span>
+                  <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
                   {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                   </span>)}
                   {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
                   {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
                   {token && (
                     <>
-                      <button
+                      <NRCButton
+                        label={thread.locked ? 'Unlock' : 'Lock'}
+                        addClass='font-bold mb-2'
                         onClick={() => handleLockThread(thread._id)}
-                        className='text-[#800000] font-bold hover:underline'
-                      >
-                        {thread.locked ? 'Unlock' : 'Lock'}
-                      </button>
-                      <button
+                      />
+                      <NRCButton
+                        label={thread.sticky ? 'Unpin' : 'Pin'}
+                        addClass='font-bold mb-2'
                         onClick={() => handlePinThread(thread._id)}
-                        className='text-[#800000] font-bold hover:underline'
-                      >
-                        {thread.sticky ? 'Unpin' : 'Pin'}
-                      </button>
+                      />
                     </>
                   )}
                 </div>
@@ -327,7 +321,7 @@ export default function Board () {
                         src={`${API_URL}/images/minus.png`}
                       />
                     </button>
-                    <span className='font-bold'>ThreadID: {thread._id}</span>
+                    <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                     </span>
                     )}
@@ -335,18 +329,16 @@ export default function Board () {
                     {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
                     {token && (
                       <>
-                        <button
+                        <NRCButton
+                          label={thread.locked ? 'Unlock' : 'Lock'}
+                          addClass='font-bold mb-2'
                           onClick={() => handleLockThread(thread._id)}
-                          className='text-[#800000] font-bold hover:underline'
-                        >
-                          {thread.locked ? 'Unlock' : 'Lock'}
-                        </button>
-                        <button
+                        />
+                        <NRCButton
+                          label={thread.sticky ? 'Unpin' : 'Pin'}
+                          addClass='font-bold mb-2'
                           onClick={() => handlePinThread(thread._id)}
-                          className='text-[#800000] font-bold hover:underline'
-                        >
-                          {thread.sticky ? 'Unpin' : 'Pin'}
-                        </button>
+                        />
                       </>
                     )}
                   </div>
@@ -376,9 +368,11 @@ export default function Board () {
                       <DynamicColorText posterID={ thread.posterID || 'FFFFFF' }/> 
                       <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
                       <br />
-                      View this thread
-                      <a href={'/thread/' + thread._id} className='text-[#34345C]'>
-                        [click here]
+                      To view complete thread
+                      <a href={'/thread/' + thread._id}>
+                        <NRCButton
+                          label={"Click here"}
+                          onClick={()=>{}}/>
                       </a>
                     </div>
                   </div>

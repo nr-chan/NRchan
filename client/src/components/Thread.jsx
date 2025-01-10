@@ -6,6 +6,7 @@ import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
 import { Turnstile } from '@marsidev/react-turnstile';
+import NRCButton from './NRCButton';
 
 export default function Component() {
   const { id } = useParams()
@@ -60,35 +61,52 @@ export default function Component() {
     }
   }
 
-  const handleMouseDown = (e) => {
+  const handleStart = (e) => {
     setIsDragging(true)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    
     setDragOffset({
-      x: e.clientX - formPosition.x,
-      y: e.clientY - formPosition.y
+      x: clientX - formPosition.x,
+      y: clientY - formPosition.y
     })
   }
 
-  const handleMouseMove = (e) => {
+  const handleMove = (e) => {
     if (isDragging) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY
+      
       setFormPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
+        x: clientX - dragOffset.x,
+        y: clientY - dragOffset.y
       })
     }
   }
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setIsDragging(false)
   }
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
+      // Mouse events
+      window.addEventListener('mousemove', handleMove)
+      window.addEventListener('mouseup', handleEnd)
+      
+      // Touch events
+      window.addEventListener('touchmove', handleMove)
+      window.addEventListener('touchend', handleEnd)
     }
+    
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+      // Cleanup mouse events
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleEnd)
+      
+      // Cleanup touch events
+      window.removeEventListener('touchmove', handleMove)
+      window.removeEventListener('touchend', handleEnd)
     }
   }, [isDragging])
 
@@ -216,7 +234,7 @@ export default function Component() {
       alert('Unable to delete thread: User UUID not found.');
       return;
     }
-    console.log("UUID sent: ", uuid);
+    // console.log("UUID sent: ", uuid);
     try {
       const response = await fetch(`${API_URL}/reply/${replyID}`, {
         method: 'DELETE',
@@ -271,9 +289,9 @@ export default function Component() {
       return newSet
     })
   }
-  const banUUID = async(uuid_ban)=>{
+  const banUUID = async (uuid_ban) => {
     const response = await fetch(`${API_URL}/banUUID/${uuid_ban}`);
-  } 
+  }
 
   const handleBulkDelete = async () => {
     if (selectedPosts.size === 0) {
@@ -312,21 +330,18 @@ export default function Component() {
           style={{
             left: formPosition.x,
             top: formPosition.y,
-            width: '450px',
+            width: 'min(400px, 85vw)',
             zIndex: 1000
           }}
         >
           <div
             className='flex justify-between items-center p-1 border-b cursor-move bg-[#EA8] border-[#800000]'
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleStart}
+            onTouchStart={handleStart}
+
           >
             <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
-            <button
-              onClick={() => setFormVisible(false)}
-              className='px-1 hover:text-[#800000]'
-            >
-              ×
-            </button>
+            <NRCButton label={"×"} onClick={() => setFormVisible(false)}/>
           </div>
           <div className='p-2 space-y-2'>
             <input
@@ -351,47 +366,41 @@ export default function Component() {
               className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
             />
             <div className='space-y-2'>
-              <div className='flex items-center'>
-                <button
-                  className='py-0.5 px-2 text-sm border bg-[white] border-[#AAA]'
-                  onClick={() => document.getElementById('fileInput').click()}
-                >
-                  Choose file
-                </button>
+              <div className='flex items-center flex-wrap gap-2'>
+                <NRCButton label={"Choose file"} onClick={() =>
+                  document.getElementById('fileInput').click()
+                }/>
                 <input
                   id='fileInput'
                   type='file'
                   onChange={handleFileChange}
                   className='hidden'
                 />
-                <span className='ml-2 text-sm'>
+                <span className='text-sm mt-2 break-all'>
                   {file ? file.name : 'No file chosen'}
                 </span>
               </div>
-              <div className='flex gap-2 justify-between items-center'>
+              <div className='flex gap-2 justify-between items-center flex-col sm:flex-row'>
                 <Turnstile
+                  options={{
+                    theme: 'light',
+                  }}
                   siteKey={import.meta.env.VITE_SITE_KEY}
                   onSuccess={(token) => setCaptchaToken(token)}
                   onError={() => setCaptchaToken(null)}
                 />
-                <button
-                  onClick={() => {
+                <NRCButton label={"Post"} addClass='px-2 py-1' onClick={() => {
                     createthread()
                     setFormVisible(false)
-                  }}
-                  className='py-1 px-2 text-sm border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
-                >
-                  Post
-                </button>
+                }}/>
               </div>
             </div>
           </div>
         </div>
-      )}
-      {/* Thread */}
+      )}            {/* Thread */}
       <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
         <div>
-          <span className='font-bold text-[#800000]'>No: {threadData._id} </span>
+          <span className='font-bold text-[#800000]'>No: {threadData._id && threadData._id.slice(-6)} </span>
           {threadData.image &&
             (<span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
             </span>
@@ -422,32 +431,29 @@ export default function Component() {
             <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
             <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
             <br />
-            <button
-              className='pr-2 text-red-500' onClick={() => {
+            <div className='flex'>
+              <NRCButton label={"Reply"} onClick={()=>{
                 setReplyto(null)
                 setFormVisible(true)
-              }}
-            >[Reply]
-            </button>
-            <button
-              className='text-red-500' onClick={() => {
+              }}/>
+              <NRCButton label={"Delete"} onClick={() => {
                 if (token) {
-
                   deleteThread(threadData._id)
                 } else {
-
                   deleteThreadByUser(threadData._id)
                 }
-              }}
-            >[delete]
-            </button>
+              }}/>
+            </div>
           </div>
         </div>
 
         <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
         <p className='mt-2'>{formatText(threadData.content)}</p>
-        {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(threadData.posterID) }}>
-          [ ban uuid ]
+        {token && <div className='mt-2 flex justify-end'>
+          <NRCButton
+            label={"Ban uuid"}
+            onClick={() => {banUUID(threadData.posterID) }}
+          />
         </div>}
       </article>
 
@@ -467,13 +473,10 @@ export default function Component() {
                 <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
                 {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
                 <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
-                  <button onClick={() => {
-                    setReplyto(reply._id)
-                    setFormVisible(true)
-                  }}
-                  >No: {reply._id}
-                  </button>
+                No: {reply._id.slice(-6)}
                 </span>
+                <span className='ml-2 text-[#34345C]'>{formatDate(reply.created)}</span>
+
               </div>
               <div className='flex items-start mt-2'>
                 {reply.image && reply.image.url.endsWith('.mp4')
@@ -481,7 +484,7 @@ export default function Component() {
                     <video
                       controls
                       className='border'
-                      style={{ width: `${150 + sz}px`, height: 'auto' }}
+                      style={{ width: `${200 + sz}px`, height: 'auto' }}
                       onClick={() => { resize() }}
                     >
                       <source src={`${reply.image.url}`} type='video/mp4' />
@@ -494,37 +497,40 @@ export default function Component() {
                     )
                   )}
                 <div>
+                  <div className='flex'>
 
-                  <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
-
-                  <button
-                    className='pl-2 text-red-500'
-                    onClick={() => {
+                    <NRCButton label={"Reply"} onClick={()=>{
+                      setReplyto(reply._id)
+                      setFormVisible(true)
+                    }}/>
+                    <NRCButton label={"Delete"} onClick={()=>{
                       if (token) {
                         deleteReply(reply._id)
                       } else {
                         deleteReplyByUser(reply._id)
                       }
-                    }}
-                  >
-                    [delete]
-                  </button>
+                    }}/>
+
+                  </div>
+
                   <br />
                   {reply.parentReply && (
                     <div
                       className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
                       onClick={() => scrollToReply(reply.parentReply._id)}
                     >
-                      {`>>${reply.parentReply._id}`}
+                      {`>>${reply.parentReply._id.slice(-6)}`}
                     </div>
                   )}
 
                   <p className='whitespace-pre-line'>{formatText(reply.content)}</p>
                 </div>
               </div>
-
-              {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(reply.posterID) }}>
-                [ ban uuid ]
+              {token && <div className='mt-2 flex justify-end'>
+                <NRCButton
+                  label={"Ban uuid"}
+                  onClick={() => {banUUID(reply.posterID) }}
+                />
               </div>}
             </article>
           </span>
@@ -551,12 +557,7 @@ export default function Component() {
             onChange={(e) => setDeletePassword(e.target.value)}
             className='py-1 px-2 border border-[#8a4f4b]'
           />
-          <button
-            type='submit'
-            className='py-1 px-4 border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
-          >
-            Delete
-          </button>
+          <NRCButton label={"Delete"} addClass="py-1 px-4 mb-2" onClick={()=>{}}/>
         </form>
       </div>
     </div>

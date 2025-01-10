@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const sharp = require('sharp');
 const path = require('path');
 
@@ -73,7 +73,7 @@ const uploadToR2 = async (file, key) => {
         r2Client.send(new PutObjectCommand(originalParams)),
         r2Client.send(new PutObjectCommand(smallParams))
       ]);
-      console.log()
+
       return {
         url: `https://pub-6b96f417093a486da53cc210ae449e47.r2.dev/${key}`,
         size: file.size,
@@ -109,21 +109,42 @@ const uploadToR2 = async (file, key) => {
   }
 };
 
-// const deleteImage = async (url) => {
-//   if (!url) return;
-//
-//   const key = 'uploads/' + url.split('/').pop();
-//   console.log(key)
-//   try {
-//     const deleteCommand = new DeleteObjectCommand({
-//       Bucket: process.env.BUCKETNAME,
-//       Key: key
-//     });
-//
-//     await r2Client.send(deleteCommand);
-//     console.log(`Image ${key} deleted successfully.`);
-//   } catch (err) {
-//     console.error("Error deleting image:", err);
-//   }
-// };
-module.exports = uploadToR2;
+const deleteImage = async (url) => {
+
+  if (typeof url !== 'string') {
+    return;
+  }
+  
+  const fileName = url.split('/').pop();
+  const ext = url.split('.').pop();
+
+  const key = `uploads/${fileName}`;
+  const keySmall = `uploads/${fileName.split('.')[0]}s.${ext}`
+
+  if (!key || key === 'uploads/') {
+    return;
+  }
+
+  try {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.BUCKETNAME,
+      Key: key
+    });
+
+    await r2Client.send(deleteCommand);
+    
+    const deleteCommandSmall = new DeleteObjectCommand({
+      Bucket: process.env.BUCKETNAME,
+      Key: keySmall
+    });
+
+    await r2Client.send(deleteCommandSmall);
+
+
+  } catch (err) {
+    console.error("Error deleting image:", err);
+  }
+};
+
+
+module.exports = {uploadToR2, deleteImage};

@@ -4,10 +4,11 @@ const router = express.Router();
 const path = require('path');
 const Thread = require('../models/thread');
 const Reply = require('../models/reply');
-const BannedUUdi = require('../models/bannedUser');
+const BannedUUID = require('../models/bannedUser');
 const rateLimiter = require('../utils/rateLimit');
 const uuidToPosterId = require('../utils/uuidToPosterId');
-const uploadToR2 = require('../utils/uploadService');
+const {uploadToR2} = require('../utils/uploadService');
+const {deleteImage} = require('../utils/uploadService');
 const validateCaptcha = require('../utils/validateCaptcha');
 
 const storage = multer.memoryStorage();
@@ -50,9 +51,9 @@ router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
     }
 
     const posterID = await uuidToPosterId(req);
-    const result = await BannedUUdi.findOne({uuid: posterID});
-    if(result){
-      return res.status(404).json({ error: 'You have banned cause of your actions' });
+    const result = await BannedUUID.findOne({ uuid: posterID });
+    if (result) {
+      return res.status(403).json({ error: 'You have banned cause of your actions' });
     }
 
     const thread = new Thread({
@@ -120,8 +121,8 @@ router.post('/:id/reply', rateLimiter, upload.single('image'), async (req, res) 
     }
 
     const posterID = await uuidToPosterId(req);
-    const result = await BannedUUdi.findOne({uuid: posterID});
-    if(result){
+    const result = await BannedUUID.findOne({ uuid: posterID });
+    if (result) {
       return res.status(404).json({ error: 'You have banned cause of your actions' });
     }
     const reply = new Reply({
@@ -165,10 +166,12 @@ router.delete('/:id', async (req, res) => {
       return res.status(403).json({ error: 'You are not authorized to delete this thread' });
     }
     await Reply.deleteMany({ threadID: thread._id });
-    await thread.deleteOne();
-    //r2 cleanup    
-    // await deleteImage(thread.image.url);
 
+    if (thread.image){
+        await deleteImage(thread.image.url);
+    }
+
+    await thread.deleteOne();
 
     res.json({ message: 'Thread and associated replies deleted successfully' });
   } catch (err) {
