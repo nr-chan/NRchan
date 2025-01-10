@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const sharp = require('sharp');
 const path = require('path');
 
@@ -109,21 +109,33 @@ const uploadToR2 = async (file, key) => {
   }
 };
 
-// const deleteImage = async (url) => {
-//   if (!url) return;
-//
-//   const key = 'uploads/' + url.split('/').pop();
-//   console.log(key)
-//   try {
-//     const deleteCommand = new DeleteObjectCommand({
-//       Bucket: process.env.BUCKETNAME,
-//       Key: key
-//     });
-//
-//     await r2Client.send(deleteCommand);
-//     console.log(`Image ${key} deleted successfully.`);
-//   } catch (err) {
-//     console.error("Error deleting image:", err);
-//   }
-// };
-module.exports = uploadToR2;
+const deleteImage = async (url) => {
+  if (!url) {
+    console.log('URL not found');
+    return;
+  }
+  if (typeof url !== 'string') {
+    console.log('Invalid URL type: ', typeof url);
+    return;
+  }
+
+
+  const key = 'uploads/' + url.split('/').pop();
+  if (!key || key === 'uploads/') {
+    console.log('Invalid key generated from url: ', url);
+    return;
+  }
+  console.log('key: ', key)
+  try {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.BUCKETNAME,
+      Key: key
+    });
+
+    await r2Client.send(deleteCommand);
+    console.log(`Image ${key} deleted successfully.`);
+  } catch (err) {
+    console.error("Error deleting image:", err);
+  }
+};
+module.exports = uploadToR2, deleteImage;

@@ -216,7 +216,7 @@ export default function Component() {
       alert('Unable to delete thread: User UUID not found.');
       return;
     }
-    console.log("UUID sent: ", uuid);
+    // console.log("UUID sent: ", uuid);
     try {
       const response = await fetch(`${API_URL}/reply/${replyID}`, {
         method: 'DELETE',
@@ -271,9 +271,9 @@ export default function Component() {
       return newSet
     })
   }
-  const banUUID = async(uuid_ban)=>{
+  const banUUID = async (uuid_ban) => {
     const response = await fetch(`${API_URL}/banUUID/${uuid_ban}`);
-  } 
+  }
 
   const handleBulkDelete = async () => {
     if (selectedPosts.size === 0) {
@@ -446,7 +446,7 @@ export default function Component() {
 
         <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
         <p className='mt-2'>{formatText(threadData.content)}</p>
-        {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(threadData.posterID) }}>
+        {token && <div className='flex justify-end mt-2' onClick={() => { banUUID(threadData.posterID) }}>
           [ ban uuid ]
         </div>}
       </article>
@@ -523,7 +523,7 @@ export default function Component() {
                 </div>
               </div>
 
-              {token && <div className='mt-2 flex justify-end' onClick={() => {banUUID(reply.posterID) }}>
+              {token && <div className='flex justify-end mt-2' onClick={() => { banUUID(reply.posterID) }}>
                 [ ban uuid ]
               </div>}
             </article>
