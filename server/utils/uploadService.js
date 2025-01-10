@@ -73,7 +73,7 @@ const uploadToR2 = async (file, key) => {
         r2Client.send(new PutObjectCommand(originalParams)),
         r2Client.send(new PutObjectCommand(smallParams))
       ]);
-      console.log()
+
       return {
         url: `https://pub-6b96f417093a486da53cc210ae449e47.r2.dev/${key}`,
         size: file.size,
@@ -110,22 +110,21 @@ const uploadToR2 = async (file, key) => {
 };
 
 const deleteImage = async (url) => {
-  if (!url) {
-    console.log('URL not found');
-    return;
-  }
+
   if (typeof url !== 'string') {
-    console.log('Invalid URL type: ', typeof url);
     return;
   }
+  
+  const fileName = url.split('/').pop();
+  const ext = url.split('.').pop();
 
+  const key = `uploads/${fileName}`;
+  const keySmall = `uploads/${fileName.split('.')[0]}s.${ext}`
 
-  const key = 'uploads/' + url.split('/').pop();
   if (!key || key === 'uploads/') {
-    console.log('Invalid key generated from url: ', url);
     return;
   }
-  console.log('key: ', key)
+
   try {
     const deleteCommand = new DeleteObjectCommand({
       Bucket: process.env.BUCKETNAME,
@@ -133,9 +132,19 @@ const deleteImage = async (url) => {
     });
 
     await r2Client.send(deleteCommand);
-    console.log(`Image ${key} deleted successfully.`);
+    
+    const deleteCommandSmall = new DeleteObjectCommand({
+      Bucket: process.env.BUCKETNAME,
+      Key: keySmall
+    });
+
+    await r2Client.send(deleteCommandSmall);
+
+
   } catch (err) {
     console.error("Error deleting image:", err);
   }
 };
-module.exports = uploadToR2, deleteImage;
+
+
+module.exports = {uploadToR2, deleteImage};

@@ -4,11 +4,11 @@ const router = express.Router();
 const path = require('path');
 const Thread = require('../models/thread');
 const Reply = require('../models/reply');
-const BannedUUdi = require('../models/bannedUser');
+const BannedUUID = require('../models/bannedUser');
 const rateLimiter = require('../utils/rateLimit');
 const uuidToPosterId = require('../utils/uuidToPosterId');
-const uploadToR2 = require('../utils/uploadService');
-const deleteImage = require('../utils/uploadService');
+const {uploadToR2} = require('../utils/uploadService');
+const {deleteImage} = require('../utils/uploadService');
 const validateCaptcha = require('../utils/validateCaptcha');
 
 const storage = multer.memoryStorage();
@@ -51,7 +51,7 @@ router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
     }
 
     const posterID = await uuidToPosterId(req);
-    const result = await BannedUUdi.findOne({ uuid: posterID });
+    const result = await BannedUUID.findOne({ uuid: posterID });
     if (result) {
       return res.status(403).json({ error: 'You have banned cause of your actions' });
     }
@@ -121,7 +121,7 @@ router.post('/:id/reply', rateLimiter, upload.single('image'), async (req, res) 
     }
 
     const posterID = await uuidToPosterId(req);
-    const result = await BannedUUdi.findOne({ uuid: posterID });
+    const result = await BannedUUID.findOne({ uuid: posterID });
     if (result) {
       return res.status(404).json({ error: 'You have banned cause of your actions' });
     }
@@ -167,12 +167,11 @@ router.delete('/:id', async (req, res) => {
     }
     await Reply.deleteMany({ threadID: thread._id });
 
-    console.log(thread);
-    await deleteImage(thread.image.url);
-    await thread.deleteOne();
-    //check
-    //r2 cleanup    
+    if (thread.image){
+        await deleteImage(thread.image.url);
+    }
 
+    await thread.deleteOne();
 
     res.json({ message: 'Thread and associated replies deleted successfully' });
   } catch (err) {

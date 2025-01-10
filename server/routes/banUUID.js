@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const BannedUUdi = require('../models/bannedUser');
+const BannedUUID = require('../models/bannedUser');
 
 router.get('/:id', async (req, res) => {
     try {
-        const uuid= req.params.id;
-        const ban = new BannedUUdi({
+        const uuid = req.params.id;
+        const ban = new BannedUUID({
             uuid: uuid
         })
         console.log(ban);
-        await ban.save(); 
+        await ban.save();
     } catch (err) {
         res.status(500).json({ error: err.message }); // Handle errors
     }
