@@ -248,6 +248,7 @@ export default function Board () {
         <td>
           <input
             type='file'
+            className='px-2'
             onChange={handleFileChange}
             ref={fileInputRef}
           />
@@ -257,7 +258,7 @@ export default function Board () {
       <tr>
         <td className='bg-[#EA8]'></td>
         <td>
-          <div className='flex items-center justify-between py-2'>
+          <div className='px-2 items-center justify-between py-2'>
             <Turnstile
               siteKey={import.meta.env.VITE_SITE_KEY}
               onSuccess={(token) => setCaptchaToken(token)}
@@ -288,7 +289,7 @@ export default function Board () {
                       src={`${API_URL}/images/plus.png`}
                     />
                   </button>
-                  <span className='font-bold'>ThreadID: {thread._id}</span>
+                  <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
                   {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                   </span>)}
                   {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
@@ -320,7 +321,7 @@ export default function Board () {
                         src={`${API_URL}/images/minus.png`}
                       />
                     </button>
-                    <span className='font-bold'>ThreadID: {thread._id}</span>
+                    <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                     </span>
                     )}
@@ -367,8 +368,7 @@ export default function Board () {
                       <DynamicColorText posterID={ thread.posterID || 'FFFFFF' }/> 
                       <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
                       <br />
-                      View this thread
-
+                      To view complete thread
                       <a href={'/thread/' + thread._id}>
                         <NRCButton
                           label={"Click here"}
