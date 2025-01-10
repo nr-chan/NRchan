@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText } from '../Defs'
+import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText, GetVoteCount } from '../Defs'
 import ThreadImage from './Image'
+import { VoteCount } from './Votes'
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { Turnstile } from '@marsidev/react-turnstile'
@@ -310,6 +311,7 @@ export default function Board() {
                       />
                     </button>
                     <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
+                    <VoteCount threadID={thread._id}/>
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                     </span>)}
                     {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
