@@ -29,6 +29,7 @@ export default function Component() {
   const replyRefs = useRef({})
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null)
+  const [loadingScreen, setLoadingScreen] = useState(false)
 
   const scrollToReply = (replyId) => {
     if (replyRefs.current[replyId]) {
@@ -102,12 +103,15 @@ export default function Component() {
       return;
     }
 
+
     const formData = new FormData()
     formData.append('username', name)
     formData.append('image', file)
     formData.append('replyto', replyto)
     formData.append('content', comment)
     formData.append('captchaToken', captchaToken)
+
+    setLoadingScreen(true);
 
     const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
       method: 'POST',
@@ -116,6 +120,7 @@ export default function Component() {
       },
       body: formData
     })
+    setLoadingScreen(false);
 
     if (response.status === 200) {
       console.log('File uploaded successfully')
@@ -133,12 +138,14 @@ export default function Component() {
       alert('Login as an admin to delete a thread')
       return
     }
+    setLoadingScreen(true);
     const resposne = await fetch(`${API_URL}/admin/thread/${threadID}`, {
       method: 'DELETE',
       headers: {
         Authorization: 'bearer ' + token
       }
     })
+    setLoadingScreen(false);
     if (resposne.status === 200) {
       console.log('Thread deleted successfully')
       nav(-1)
@@ -152,12 +159,14 @@ export default function Component() {
       alert('Login as an admin to delete a reply')
       return
     }
+    setLoadingScreen(true);
     const resposne = await fetch(`${API_URL}/admin/reply/${replyID}`, {
       method: 'DELETE',
       headers: {
         Authorization: 'bearer ' + token
       }
     })
+    setLoadingScreen(false);
     if (resposne.status === 200) {
       console.log('Reply deleted successfully')
       fetchThreads()
@@ -191,6 +200,7 @@ export default function Component() {
       return;
     }
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/thread/${threadID}`, {
         method: 'DELETE',
         headers: {
@@ -208,6 +218,9 @@ export default function Component() {
     } catch (err) {
       console.error('Error: ', err.message);
     }
+    finally {
+      setLoadingScreen(false);
+    }
   }
 
 
@@ -216,8 +229,8 @@ export default function Component() {
       alert('Unable to delete thread: User UUID not found.');
       return;
     }
-    // console.log("UUID sent: ", uuid);
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/reply/${replyID}`, {
         method: 'DELETE',
         headers: {
@@ -234,6 +247,8 @@ export default function Component() {
       }
     } catch (err) {
       console.error('Error: ', err.message);
+    } finally {
+      setLoadingScreen(false);
     }
   }
 
@@ -296,6 +311,15 @@ export default function Component() {
 
   return (
     <div className='min-h-screen font-sans text-sm bg-[#FFFFEE]'>
+      {loadingScreen && (
+        <div className="flex fixed top-0 left-0 z-50 justify-center items-center w-full h-full bg-black bg-opacity-50">
+          <img
+            src="https://raw.githubusercontent.com/gist/Unic-X/4d03e1c856c94e613826d662a067d7e8/raw/7e777de663b31e71235b175e6cebfbe456a25b9e/load.svg"
+            alt="Loading..."
+            className="w-16 h-16 animate-spin"
+          />
+        </div>
+      )}
       {showDisclaimer && <Cookie onAgree={handleAgree} />}
       {/* Board header */}
       <div className='py-4 text-center'>
@@ -403,7 +427,7 @@ export default function Component() {
               <video
                 controls
                 className='mr-4 border'
-                style={{ width: `${150 + sz}px`, height: 'auto' }}
+                style={{ width: `${300 + sz}px`, height: 'auto' }}
                 onClick={() => { resize() }}
               >
                 <source src={`${threadData.image.url}`} type='video/mp4' />
@@ -481,7 +505,7 @@ export default function Component() {
                     <video
                       controls
                       className='border'
-                      style={{ width: `${150 + sz}px`, height: 'auto' }}
+                      style={{ width: `${300 + sz}px`, height: 'auto' }}
                       onClick={() => { resize() }}
                     >
                       <source src={`${reply.image.url}`} type='video/mp4' />

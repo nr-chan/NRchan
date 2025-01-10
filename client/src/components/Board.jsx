@@ -6,7 +6,7 @@ import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { Turnstile } from '@marsidev/react-turnstile'
 
-export default function Board () {
+export default function Board() {
   const nav = useNavigate()
   const { id } = useParams()
   const [threads, setThreads] = useState([])
@@ -93,8 +93,8 @@ export default function Board () {
 
   const createthread = async () => {
     if (!captchaToken) {
-        alert('Please complete the captcha');
-        return;
+      alert('Please complete the captcha');
+      return;
     }
 
     const formData = new FormData()
@@ -135,9 +135,9 @@ export default function Board () {
       console.error('Network error:', error)
     }
   }
-  
+
   const getuuid = async () => {
-    if(!uuid){
+    if (!uuid) {
       const response = await fetch(`${API_URL}/getuuid`);
       const json = await response.json()
       localStorage.setItem('uuid', json.uuid);
@@ -190,103 +190,103 @@ export default function Board () {
 
 
   return (
-    <div className='min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px] pb-8'>
+    <div className='pb-8 min-h-screen font-sans bg-[#FFFFEE] text-[#800000] text-[10px]'>
       {showDisclaimer && <Cookie onAgree={handleAgree} />}
       {/* Banner */}
-      <div className='text-center my-2'>
+      <div className='my-2 text-center'>
         <img
           src={`${API_URL}/images/${banner}.png`}
           alt='Board banner'
-          className='inline-block border-black border'
+          className='inline-block border border-black'
         />
-        <hr className='h-[0px] border-[#8a4f4b] my-4' />
+        <hr className='my-4 h-[0px] border-[#8a4f4b]' />
 
       </div>
 
       {/* Board Title */}
-      <h1 className='text-center text-4xl text-[#800000] font-bold mt-2'>
+      <h1 className='mt-2 text-4xl font-bold text-center text-[#800000]'>
         /{id}/ - {links[boardList.indexOf(id)]}
       </h1>
 
       {/* Post Form */}
-      <div className='max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2'>
-  <table className='w-full'>
-    <tbody>
-      <tr>
-        <td className='bg-[#EA8]'>Name</td>
-        <td>
-          <input
-            type='text'
-            defaultValue='Anonymous'
-            onChange={(e) => setName(e.target.value)}
-            className='w-full bg-[#F0E0D6] border border-[#AAA]'
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>Subject</td>
-        <td>
-          <input
-            type='text'
-            onChange={(e) => setSubject(e.target.value)}
-            className='w-full bg-[#F0E0D6] border border-[#AAA]'
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>Comment</td>
-        <td>
-          <textarea
-            className='w-full h-24 bg-[#F0E0D6] border border-[#AAA]'
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>File</td>
-        <td>
-          <input
-            type='file'
-            onChange={handleFileChange}
-            ref={fileInputRef}
-          />
-          {file && <span className='ml-2'>Selected: {file.name}</span>}
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'></td>
-        <td>
-          <div className='flex items-center justify-between py-2'>
-            <Turnstile
-              siteKey={import.meta.env.VITE_SITE_KEY}
-              onSuccess={(token) => setCaptchaToken(token)}
-              onError={() => setCaptchaToken(null)}
-            />
-            <button
-              type='submit'
-              onClick={() => createthread()}
-              className='bg-[#EA8] border border-[#800000] px-2 hover:bg-[#F0E0D6]'
-            >
-              Post
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+      <div className='p-2 my-4 mx-auto border max-w-[468px] bg-[#F0E0D6] border-[#D9BFB7]'>
+        <table className='w-full'>
+          <tbody>
+            <tr>
+              <td className='bg-[#EA8]'>Name</td>
+              <td>
+                <input
+                  type='text'
+                  defaultValue='Anonymous'
+                  onChange={(e) => setName(e.target.value)}
+                  className='w-full border bg-[#F0E0D6] border-[#AAA]'
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className='bg-[#EA8]'>Subject</td>
+              <td>
+                <input
+                  type='text'
+                  onChange={(e) => setSubject(e.target.value)}
+                  className='w-full border bg-[#F0E0D6] border-[#AAA]'
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className='bg-[#EA8]'>Comment</td>
+              <td>
+                <textarea
+                  className='w-full h-24 border bg-[#F0E0D6] border-[#AAA]'
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className='bg-[#EA8]'>File</td>
+              <td>
+                <input
+                  type='file'
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                />
+                {file && <span className='ml-2'>Selected: {file.name}</span>}
+              </td>
+            </tr>
+            <tr>
+              <td className='bg-[#EA8]'></td>
+              <td>
+                <div className='flex justify-between items-center py-2'>
+                  <Turnstile
+                    siteKey={import.meta.env.VITE_SITE_KEY}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onError={() => setCaptchaToken(null)}
+                  />
+                  <button
+                    type='submit'
+                    onClick={() => createthread()}
+                    className='px-2 border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
+                  >
+                    Post
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <hr className='h-[0px] border-[#8a4f4b] my-4' />
+      <hr className='my-4 h-[0px] border-[#8a4f4b]' />
       {/* Threads */}
-      <div className='max-w-[768px] mx-auto'>
+      <div className='mx-auto max-w-[768px]'>
         {currentThreads.map((thread) => (
           <div key={thread._id} className='mb-4'>
-            <article className='bg-[#F0E0D6] border border-[#D9BFB7] p-2'>
+            <article className='p-2 border bg-[#F0E0D6] border-[#D9BFB7]'>
               {collapsedThreads[thread._id] ? (
-                <div className='flex items-center gap-2'>
+                <div className='flex gap-2 items-center'>
                   <button
                     onClick={() => toggleThreadCollapse(thread._id)}
-                    className='text-[#800000] font-bold'
+                    className='font-bold text-[#800000]'
                   >
                     <img
                       alt='H' className='extButton threadHideButton'
@@ -296,19 +296,19 @@ export default function Board () {
                   <span className='font-bold'>ThreadID: {thread._id}</span>
                   {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                   </span>)}
-                  {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
-                  {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
+                  {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
+                  {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='w-4 h-4' />}
                   {token && (
                     <>
                       <button
                         onClick={() => handleLockThread(thread._id)}
-                        className='text-[#800000] font-bold hover:underline'
+                        className='font-bold hover:underline text-[#800000]'
                       >
                         {thread.locked ? 'Unlock' : 'Lock'}
                       </button>
                       <button
                         onClick={() => handlePinThread(thread._id)}
-                        className='text-[#800000] font-bold hover:underline'
+                        className='font-bold hover:underline text-[#800000]'
                       >
                         {thread.sticky ? 'Unpin' : 'Pin'}
                       </button>
@@ -317,10 +317,10 @@ export default function Board () {
                 </div>
               ) : (
                 <>
-                  <div className='flex items-center gap-2 mb-2'>
+                  <div className='flex gap-2 items-center mb-2'>
                     <button
                       onClick={() => toggleThreadCollapse(thread._id)}
-                      className='text-[#800000] font-bold'
+                      className='font-bold text-[#800000]'
                     >
                       <img
                         alt='H' className='extButton threadHideButton'
@@ -331,19 +331,19 @@ export default function Board () {
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                     </span>
                     )}
-                    {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
-                    {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
+                    {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
+                    {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='w-4 h-4' />}
                     {token && (
                       <>
                         <button
                           onClick={() => handleLockThread(thread._id)}
-                          className='text-[#800000] font-bold hover:underline'
+                          className='font-bold hover:underline text-[#800000]'
                         >
                           {thread.locked ? 'Unlock' : 'Lock'}
                         </button>
                         <button
                           onClick={() => handlePinThread(thread._id)}
-                          className='text-[#800000] font-bold hover:underline'
+                          className='font-bold hover:underline text-[#800000]'
                         >
                           {thread.sticky ? 'Unpin' : 'Pin'}
                         </button>
@@ -354,7 +354,7 @@ export default function Board () {
                   <div className='flex items-start mb-2'>
                     {thread.image && thread.image.url.endsWith('.mp4')
                       ? (
-                        <div className='mr-4 max-w-[150px]'>
+                        <div className='mr-4 border border-black max-w-[250px]'>
                           <video
                             controls
                             className='w-full h-auto border'
@@ -363,17 +363,17 @@ export default function Board () {
                             Your browser does not support the video tag.
                           </video>
                         </div>
-                        )
+                      )
                       : (
-                          thread.image && (<div className='mr-4'>
-                            <ThreadImage allowExpand={false} imageData={thread.image} />
-                          </div>)
-                        )}
+                        thread.image && (<div className='mr-4'>
+                          <ThreadImage allowExpand={false} imageData={thread.image} />
+                        </div>)
+                      )}
                     <div>
                       <span className='font-bold text-[#117743]'>
                         {thread.username ? thread.username : 'Anonymous'}{' '}
                       </span>
-                      <DynamicColorText posterID={ thread.posterID || 'FFFFFF' }/> 
+                      <DynamicColorText posterID={thread.posterID || 'FFFFFF'} />
                       <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
                       <br />
                       View this thread
@@ -383,7 +383,7 @@ export default function Board () {
                     </div>
                   </div>
 
-                  <h2 className='font-bold mt-2'>{thread.subject}</h2>
+                  <h2 className='mt-2 font-bold'>{thread.subject}</h2>
                   <p className='mt-2'>{formatText(thread.content)}</p>
 
                   {/* Replies */}
@@ -391,20 +391,20 @@ export default function Board () {
                     {thread.replies.slice(-3).map((reply) => (
                       <div
                         key={reply._id}
-                        className='border border-[#D9BFB7] p-2 mb-2'
+                        className='p-2 mb-2 border border-[#D9BFB7]'
                       >
-                        <span className='text-[1.25rem] text-gray-400'>{'>> '}</span>
+                        <span className='text-gray-400 text-[1.25rem]'>{'>> '}</span>
                         <span className='font-bold text-[#117743]'>
                           {reply.username || 'Anonymous'}{' '}
                         </span>
-                        <DynamicColorText posterID={ reply.posterID || 'FFFFFF' }/> 
+                        <DynamicColorText posterID={reply.posterID || 'FFFFFF'} />
                         <span className='ml-1 text-[#34345C]'>{formatDate(reply.created)}</span>
 
                         {reply.image && (
                           <div className='mt-2'>
                             {reply.image.url.endsWith('.mp4')
                               ? (
-                                <div className='mr-4 max-w-[150px]'>
+                                <div className='mr-4 border border-black max-w-[250px]'>
                                   <video
                                     controls
                                     className='w-full h-auto border'
@@ -413,10 +413,10 @@ export default function Board () {
                                     Your browser does not support the video tag.
                                   </video>
                                 </div>
-                                )
+                              )
                               : (
                                 <ThreadImage imageData={reply.image} allowExpand={false} />
-                                )}
+                              )}
                           </div>
                         )}
                         <p className='mt-2'>{formatText(reply.content)}</p>
@@ -436,7 +436,7 @@ export default function Board () {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className='px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50'
+            className='py-1 px-3 mx-1 border disabled:opacity-50 bg-[#F0E0D6] border-[#D9BFB7]'
           >
             Previous
           </button>
@@ -445,8 +445,8 @@ export default function Board () {
               key={i + 1}
               onClick={() => handlePageChange(i + 1)}
               className={`px-3 py-1 mx-1 border ${currentPage === i + 1
-                  ? 'bg-[#800000] text-white'
-                  : 'bg-[#F0E0D6] border-[#D9BFB7]'
+                ? 'bg-[#800000] text-white'
+                : 'bg-[#F0E0D6] border-[#D9BFB7]'
                 }`}
             >
               {i + 1}
@@ -455,7 +455,7 @@ export default function Board () {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className='px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50'
+            className='py-1 px-3 mx-1 border disabled:opacity-50 bg-[#F0E0D6] border-[#D9BFB7]'
           >
             Next
           </button>
