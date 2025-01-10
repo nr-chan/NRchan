@@ -6,6 +6,7 @@ import Cookie from './Cookie'
 import Cookies from "js-cookie";
 import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
 import { Turnstile } from '@marsidev/react-turnstile';
+import NRCButton from './NRCButton';
 
 export default function Component() {
   const { id } = useParams()
@@ -321,12 +322,7 @@ export default function Component() {
             onMouseDown={handleMouseDown}
           >
             <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
-            <button
-              onClick={() => setFormVisible(false)}
-              className='px-1 hover:text-[#800000]'
-            >
-              ×
-            </button>
+            <NRCButton label={"×"} onClick={() => setFormVisible(false)}/>
           </div>
           <div className='p-2 space-y-2'>
             <input
@@ -352,19 +348,16 @@ export default function Component() {
             />
             <div className='space-y-2'>
               <div className='flex items-center'>
-                <button
-                  className='py-0.5 px-2 text-sm border bg-[white] border-[#AAA]'
-                  onClick={() => document.getElementById('fileInput').click()}
-                >
-                  Choose file
-                </button>
+                <NRCButton label={"Choose file"} onClick={() =>
+                  document.getElementById('fileInput').click()
+                }/>
                 <input
                   id='fileInput'
                   type='file'
                   onChange={handleFileChange}
                   className='hidden'
                 />
-                <span className='ml-2 text-sm'>
+                <span className='ml-2 mt-2 text-sm'>
                   {file ? file.name : 'No file chosen'}
                 </span>
               </div>
@@ -374,15 +367,10 @@ export default function Component() {
                   onSuccess={(token) => setCaptchaToken(token)}
                   onError={() => setCaptchaToken(null)}
                 />
-                <button
-                  onClick={() => {
+                <NRCButton label={"Post"} addClass='px-2 py-1' onClick={() => {
                     createthread()
                     setFormVisible(false)
-                  }}
-                  className='py-1 px-2 text-sm border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
-                >
-                  Post
-                </button>
+                }}/>
               </div>
             </div>
           </div>
@@ -422,32 +410,29 @@ export default function Component() {
             <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
             <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
             <br />
-            <button
-              className='pr-2 text-red-500' onClick={() => {
+            <div className='flex'>
+              <NRCButton label={"Reply"} onClick={()=>{
                 setReplyto(null)
                 setFormVisible(true)
-              }}
-            >[Reply]
-            </button>
-            <button
-              className='text-red-500' onClick={() => {
+              }}/>
+              <NRCButton label={"Delete"} onClick={() => {
                 if (token) {
-
                   deleteThread(threadData._id)
                 } else {
-
                   deleteThreadByUser(threadData._id)
                 }
-              }}
-            >[delete]
-            </button>
+              }}/>
+            </div>
           </div>
         </div>
 
         <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
         <p className='mt-2'>{formatText(threadData.content)}</p>
-        {token && <div className='flex justify-end mt-2' onClick={() => { banUUID(threadData.posterID) }}>
-          [ ban uuid ]
+        {token && <div className='mt-2 flex justify-end'>
+          <NRCButton
+            label={"Ban uuid"}
+            onClick={() => {banUUID(threadData.posterID) }}
+          />
         </div>}
       </article>
 
@@ -467,12 +452,7 @@ export default function Component() {
                 <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
                 {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
                 <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
-                  <button onClick={() => {
-                    setReplyto(reply._id)
-                    setFormVisible(true)
-                  }}
-                  >No: {reply._id}
-                  </button>
+                  No: {reply._id}
                 </span>
               </div>
               <div className='flex items-start mt-2'>
@@ -494,21 +474,23 @@ export default function Component() {
                     )
                   )}
                 <div>
+                    <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
+                  <div className='flex'>
 
-                  <span className='text-[#34345C]'>{formatDate(reply.created)}</span>
-
-                  <button
-                    className='pl-2 text-red-500'
-                    onClick={() => {
+                    <NRCButton label={"Reply"} onClick={()=>{
+                      setReplyto(reply._id)
+                      setFormVisible(true)
+                    }}/>
+                    <NRCButton label={"Delete"} onClick={()=>{
                       if (token) {
                         deleteReply(reply._id)
                       } else {
                         deleteReplyByUser(reply._id)
                       }
-                    }}
-                  >
-                    [delete]
-                  </button>
+                    }}/>
+
+                  </div>
+
                   <br />
                   {reply.parentReply && (
                     <div
@@ -522,9 +504,11 @@ export default function Component() {
                   <p className='whitespace-pre-line'>{formatText(reply.content)}</p>
                 </div>
               </div>
-
-              {token && <div className='flex justify-end mt-2' onClick={() => { banUUID(reply.posterID) }}>
-                [ ban uuid ]
+              {token && <div className='mt-2 flex justify-end'>
+                <NRCButton
+                  label={"Ban uuid"}
+                  onClick={() => {banUUID(reply.posterID) }}
+                />
               </div>}
             </article>
           </span>
@@ -551,12 +535,7 @@ export default function Component() {
             onChange={(e) => setDeletePassword(e.target.value)}
             className='py-1 px-2 border border-[#8a4f4b]'
           />
-          <button
-            type='submit'
-            className='py-1 px-4 border bg-[#EA8] border-[#800000] hover:bg-[#F0E0D6]'
-          >
-            Delete
-          </button>
+          <NRCButton label={"Delete"} addClass="py-1 px-4 mb-2" onClick={()=>{}}/>
         </form>
       </div>
     </div>
