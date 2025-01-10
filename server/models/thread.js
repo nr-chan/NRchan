@@ -18,7 +18,15 @@ const ThreadSchema = new mongoose.Schema({
   replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reply' }],
   posterID: String,
   locked: { type: Boolean, default: false },
-  sticky: { type: Boolean, default: false }
+  sticky: { type: Boolean, default: false },
+  upvotes: {
+    count: {type: Number, default: 0},
+    ids: [{type: String}]
+  },
+  downvotes: {
+    count: {type: Number, default: 0},
+    ids: [{type: String}]
+  },
 });
 
 const Thread = mongoose.model('Thread', ThreadSchema);

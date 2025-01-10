@@ -157,3 +157,24 @@ export function DynamicColorText({ posterID }) {
     </span>
   );
 }
+
+export async function UpdateCount(up, threadID) {
+  const response = await fetch(`${API_URL}/votes/${threadID}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      up,
+      'uuid': localStorage.getItem('uuid'),
+    })
+  });
+}
+
+export async function GetVoteCount(threadID) {
+  const response = await fetch(`${API_URL}/votes/${threadID}`, {
+    method: 'GET'
+  })
+  const respJson = await response.json();
+  return respJson.count;
+}

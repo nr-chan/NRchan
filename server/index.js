@@ -12,6 +12,7 @@ const boardsRoutes = require('./routes/boards');
 const recentRoutes = require('./routes/recent');
 const replyRoutes = require('./routes/reply');
 const threadRoutes = require('./routes/thread');
+const votes = require('./routes/votes');
 
 require('dotenv').config();
 
@@ -64,6 +65,7 @@ app.use('/thread', threadRoutes);
 app.use('/admin', adminRoutes);
 app.use('/getuuid', getuuidRoutes);
 app.use('/banUUID', bannedUUID);
+app.use('/votes', votes);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {
