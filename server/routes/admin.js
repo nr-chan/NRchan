@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Reply = require('../models/reply');
 const Thread = require('../models/thread');
+const {deleteImage} = require('../utils/uploadService');
+
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const SALT_ROUNDS = 10;
@@ -223,6 +225,13 @@ router.delete('/thread/:id', adminAuth, async (req, res) => {
       return res.status(404).json({ error: 'Thread not found' });
     }
 
+    
+    const image = thread.image;
+
+    if (image){
+        await deleteImage(image.url);
+    }
+
     await Reply.deleteMany({ threadID: thread._id });
     await Thread.findByIdAndDelete(thread._id);
 
@@ -309,13 +318,19 @@ router.delete('/reply/:id', adminAuth, async (req, res) => {
       return res.status(404).json({ error: 'Reply not found' });
     }
 
+    const image = reply.image;
+
+    if (image){
+        await deleteImage(image.url);
+    }
+
     await Thread.findByIdAndUpdate(reply.threadID, {
       $pull: { replies: reply._id }
     });
 
-    await Reply.findByIdAndDelete(reply._id);
-    await Reply.deleteMany({ parentReply: reply._id });
 
+    await Reply.findByIdAndDelete(reply._id);
+    
     res.json({
       message: 'Reply deleted successfully',
       adminAction: {
