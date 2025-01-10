@@ -1,13 +1,46 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { links, boardList, API_URL, getSmallImageUrl } from '../Defs'
+import { links, boardList, API_URL, getSmallImageUrl,DynamicColorText } from '../Defs'
 
 const Home = () => {
   const nav = useNavigate()
   const [threads, setThreads] = useState([])
+  const [stats,setStats] =useState([]);
+  const [uuidstats,setUUIDstats]=useState([]);
+  const [totalThread,settotalThread]=useState(0);
+  const [totalPosts,settotalPosts]=useState(0);
+  const [uniquePosters,setUniquePosters]=useState(0);
+
+  const fetchStats = async () =>{
+    try {
+      const response= await fetch(`${API_URL}/boards/data`);
+      const data= await response.json();
+      data.sort((a, b) => b.totalPosts - a.totalPosts);
+      setStats(data);
+      settotalThread(data.reduce((sum, item) => sum + item.totalThreads, 0));
+      settotalPosts(data.reduce((sum, item) => sum + item.totalPosts, 0));
+    }
+    catch (error){
+      console.error('Error fetching recent threads:', error)
+    }
+  }
+  const fetchUUIDstats = async () =>{
+    try {
+      const response= await fetch(`${API_URL}/boards/stats`);
+      const data= await response.json();
+      setUUIDstats(data);
+      setUniquePosters(data.length)
+      console.log(data);
+    }
+    catch (error){
+      console.error('Error fetching recent threads:', error)
+    }
+  }
 
   useEffect(() => {
+    fetchStats()
     fetchRecent()
+    fetchUUIDstats()
   }, [])
 
   const fetchRecent = async () => {
@@ -141,6 +174,66 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {/* stats */}
+      <div className="flex flex-wrap max-w-[720px] mx-auto">
+        <div className="w-full sm:w-1/2  ">
+          <div className="mb-4">
+            <div className='bg-[#5599aa] border border-[#06554a] py-1 px-2 mx-1 flex justify-between items-center'>
+              <h2 className='text-[15px] font-bold'>Stats</h2>
+            </div>
+            <div className="bg-[#eeffff] border border-[#06554a] mx-1 p-1 text-red-800">
+              <div className='font-bold'>Global</div>
+              <div>Total Threads {totalThread}</div>
+              <div>Total Posts {totalPosts}</div>
+              <div>Unique Posters {uniquePosters}</div> 
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="bg-[#9a64c9] border border-[#06554a] py-1 mx-1 px-2 grid grid-cols-2 ">
+            <h2 className='text-[15px] font-bold'>OUR TOP USERS</h2>
+            <h2 className='text-[15px] font-bold'>POSTS</h2>
+          </div>
+            <div className="bg-[#f6ecfe]  border border-[#06554a]  mx-1 px-2  text-red-800">
+            {uuidstats.slice(0, 5).map((stat, index) => (
+              <div 
+                key={stat.board}
+                className="grid grid-cols-2 border-b border-gray-200"
+              >
+                {/* <div className="text-teal-600">{stat.posterID}</div> */}
+                <div><DynamicColorText posterID={stat.posterID || 'FFFFFF'} /></div>
+                <div>{stat.totalCount}</div>
+              </div>
+            ))}
+          </div>
+          </div>
+        </div>
+        <div className="w-full sm:w-1/2 ">
+        {/* Board Stats Table */}
+        <div className=" mb-4">
+          {/* Table Header */}
+          <div className="bg-[#99cc66] border border-[#06554a] py-1  px-2 grid grid-cols-3 ">
+            <h2>Board</h2>
+            <h2>Total Threads</h2>
+            <h2>Total Posts</h2>
+          </div>
+
+          {/* Table Body */}
+          <div className="bg-[#eeffee]  border border-[#06554a] p-1 text-red-800">
+            {stats.map((stat, index) => (
+              <div 
+                key={stat.board}
+                className="grid grid-cols-3 border-b border-gray-200"
+              >
+                <div className="text-teal-600">/{stat.board}/</div>
+                <div>{stat.totalThreads}</div>
+                <div>{stat.totalPosts}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        </div>
+    </div>
     </div>
   )
 }
