@@ -26,8 +26,12 @@ export function VoteCount({ threadID }) {
   return (
     <>
       <div>{count}</div>
-      <button onClick={handleUpvote}>UP</button>
-      <button onClick={handleDownvote}>DOWN</button>
+      <button onClick={handleUpvote}>
+        <img src='/up.svg' className='w-4 h-4'/>
+      </button>
+      <button onClick={handleDownvote}>        
+        <img src='/down.svg' className='w-4 h-4 rotate-180'/>
+      </button>
     </>
   );
 }
