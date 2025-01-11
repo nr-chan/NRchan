@@ -1,17 +1,43 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { boardList } from '../Defs'
+import { boardList,API_URL} from '../Defs'
 
 function Navbar() {
   const [token, setToken] = useState('')
   const navigate = useNavigate()
+  const [uuid, setuuid] = useState(localStorage.getItem('uuid'));
 
   const logout = () => {
     localStorage.removeItem('nrtoken')
     setToken('')
   }
+  const getuuid = async () => {
+      if (!uuid) {
+        const response = await fetch(`${API_URL}/getuuid`);
+        const json = await response.json()
+        localStorage.setItem('uuid', json.uuid);
+        setuuid(json.uuid);
+      }
+    }
+
+  setInterval( async() => {
+    try{
+      let deviceId = localStorage.getItem('uuid');
+      const response= await  fetch(`${API_URL}/heartbeat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ deviceId }),
+    });
+    console.log(response)}
+    catch (error){
+      console.log(error);
+    }
+  }, 5000);
 
   useEffect(() => {
+    getuuid()
     setToken(localStorage.getItem('nrtoken'))
   }, [])
 

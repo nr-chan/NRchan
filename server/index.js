@@ -13,7 +13,8 @@ const recentRoutes = require('./routes/recent');
 const replyRoutes = require('./routes/reply');
 const threadRoutes = require('./routes/thread');
 const votes = require('./routes/votes');
-const {initializeRedisClient,redisCacheMiddleware} = require('./utils/redis');
+const { initializeRedisClient, redisCacheMiddleware } = require('./utils/redis');
+const heartbeat = require('./routes/heartbeat');
 
 require('dotenv').config();
 
@@ -67,6 +68,7 @@ app.use('/admin', adminRoutes);
 app.use('/getuuid', getuuidRoutes);
 app.use('/banUUID', bannedUUID);
 app.use('/votes', votes);
+app.use('/heartbeat', heartbeat);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {
@@ -121,4 +123,3 @@ function gracefulShutdown() {
         process.exit(1);
     }, 10000);
 }
-
