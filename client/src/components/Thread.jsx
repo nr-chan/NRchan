@@ -30,6 +30,7 @@ export default function Component() {
   const replyRefs = useRef({})
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null)
+  const [loadingScreen, setLoadingScreen] = useState(false);
 
   const scrollToReply = (replyId) => {
     if (replyRefs.current[replyId]) {
@@ -65,7 +66,7 @@ export default function Component() {
     setIsDragging(true)
     const clientX = e.touches ? e.touches[0].clientX : e.clientX
     const clientY = e.touches ? e.touches[0].clientY : e.clientY
-    
+
     setDragOffset({
       x: clientX - formPosition.x,
       y: clientY - formPosition.y
@@ -76,7 +77,7 @@ export default function Component() {
     if (isDragging) {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX
       const clientY = e.touches ? e.touches[0].clientY : e.clientY
-      
+
       setFormPosition({
         x: clientX - dragOffset.x,
         y: clientY - dragOffset.y
@@ -93,17 +94,17 @@ export default function Component() {
       // Mouse events
       window.addEventListener('mousemove', handleMove)
       window.addEventListener('mouseup', handleEnd)
-      
+
       // Touch events
       window.addEventListener('touchmove', handleMove)
       window.addEventListener('touchend', handleEnd)
     }
-    
+
     return () => {
       // Cleanup mouse events
       window.removeEventListener('mousemove', handleMove)
       window.removeEventListener('mouseup', handleEnd)
-      
+
       // Cleanup touch events
       window.removeEventListener('touchmove', handleMove)
       window.removeEventListener('touchend', handleEnd)
@@ -126,24 +127,34 @@ export default function Component() {
     formData.append('replyto', replyto)
     formData.append('content', comment)
     formData.append('captchaToken', captchaToken)
+    try {
+      setLoadingScreen(true);
 
-    const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
-      method: 'POST',
-      headers: {
-        uuid: uuid
-      },
-      body: formData
-    })
+      const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
+        method: 'POST',
+        headers: {
+          uuid: uuid
+        },
+        body: formData
+      })
 
-    if (response.status === 200) {
-      console.log('File uploaded successfully')
-      setFile(null);
-      setCaptchaToken(null);
-      fetchThreads()
-      // Fetch resumes again after successful upload
-    } else {
-      console.error('Error uploading file:', response.statusText)
+      setLoadingScreen(false);
+      if (response.status === 200) {
+        console.log('File uploaded successfully')
+        setFile(null);
+        setCaptchaToken(null);
+        fetchThreads()
+        // Fetch resumes again after successful upload
+      } else {
+        console.error('Error uploading file:', response.statusText)
+      }
+    } catch (err) {
+      console.error('Network error: ', err)
+
+    } finally {
+      setLoadingScreen(false);
     }
+
   }
 
   const deleteThread = async (threadID) => {
@@ -151,38 +162,55 @@ export default function Component() {
       alert('Login as an admin to delete a thread')
       return
     }
-    const resposne = await fetch(`${API_URL}/admin/thread/${threadID}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: 'bearer ' + token
+    try {
+      setLoadingScreen(true);
+      const resposne = await fetch(`${API_URL}/admin/thread/${threadID}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'bearer ' + token
+        }
+      })
+      if (resposne.status === 200) {
+        console.log('Thread deleted successfully')
+        nav(-1)
+      } else {
+        const json = await resposne.json()
+        console.log('Error deleting the thread', json)
       }
-    })
-    if (resposne.status === 200) {
-      console.log('Thread deleted successfully')
-      nav(-1)
-    } else {
-      const json = await resposne.json()
-      console.log('Error deleting the thread', json)
+    } catch (err) {
+      console.error('Network error: ', err);
+
+    } finally {
+      setLoadingScreen(false);
     }
+
   }
   const deleteReply = async (replyID) => {
     if (!token) {
       alert('Login as an admin to delete a reply')
       return
     }
-    const resposne = await fetch(`${API_URL}/admin/reply/${replyID}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: 'bearer ' + token
+    try {
+      setLoadingScreen(true);
+      const resposne = await fetch(`${API_URL}/admin/reply/${replyID}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'bearer ' + token
+        }
+      })
+      if (resposne.status === 200) {
+        console.log('Reply deleted successfully')
+        fetchThreads()
+      } else {
+        const json = await resposne.json()
+        console.log('Error deleting the reply', json)
       }
-    })
-    if (resposne.status === 200) {
-      console.log('Reply deleted successfully')
-      fetchThreads()
-    } else {
-      const json = await resposne.json()
-      console.log('Error deleting the reply', json)
+    } catch (err) {
+      console.error('Network error: ', err);
+    } finally {
+      setLoadingScreen(false);
     }
+
   }
 
 
@@ -209,6 +237,7 @@ export default function Component() {
       return;
     }
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/thread/${threadID}`, {
         method: 'DELETE',
         headers: {
@@ -225,6 +254,8 @@ export default function Component() {
       }
     } catch (err) {
       console.error('Error: ', err.message);
+    } finally {
+      setLoadingScreen(false);
     }
   }
 
@@ -236,6 +267,7 @@ export default function Component() {
     }
     // console.log("UUID sent: ", uuid);
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/reply/${replyID}`, {
         method: 'DELETE',
         headers: {
@@ -252,6 +284,8 @@ export default function Component() {
       }
     } catch (err) {
       console.error('Error: ', err.message);
+    } finally {
+      setLoadingScreen(false);
     }
   }
 
@@ -313,252 +347,263 @@ export default function Component() {
   };
 
   return (
-    <div className='min-h-screen font-sans text-sm bg-[#FFFFEE]'>
-      {showDisclaimer && <Cookie onAgree={handleAgree} />}
-      {/* Board header */}
-      <div className='py-4 text-center'>
-        <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
-        <hr className='my-4 h-[0px] border-[#8a4f4b]' />
-        <h1 className='mt-2 text-4xl font-bold text-[#800000]'>/{threadData.board}/ - {links[boardList.indexOf(threadData.board)]}</h1>
-      </div>
+    <div>
+      {loadingScreen && (
+        <div className='flex fixed top-0 z-50 justify-center items-center w-full h-full bg-black opacity-50 ledt-0 bg'>
+          <img
+            src='https://raw.githubusercontent.com/gist/Unic-X/4d03e1c856c94e613826d662a067d7e8/raw/7e777de663b31e71235b175e6cebfbe456a25b9e/load.svg'
+            alt='Loading...'
+            className='w-20 h-20 animate-spin'
+          />
+        </div>
+      )}
+      <div className='min-h-screen font-sans text-sm bg-[#FFFFEE]'>
+        {showDisclaimer && <Cookie onAgree={handleAgree} />}
+        {/* Board header */}
+        <div className='py-4 text-center'>
+          <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
+          <hr className='my-4 h-[0px] border-[#8a4f4b]' />
+          <h1 className='mt-2 text-4xl font-bold text-[#800000]'>/{threadData.board}/ - {links[boardList.indexOf(threadData.board)]}</h1>
+        </div>
 
-      <hr className='my-2 h-[0px] border-[#8a4f4b]' />
-      {/* form */}
-      {formVisible && (
-        <div
-          className='fixed rounded-sm border shadow-lg bg-[#F0E0D6] border-[#800000]'
-          style={{
-            left: formPosition.x,
-            top: formPosition.y,
-            width: 'min(400px, 85vw)',
-            zIndex: 1000
-          }}
-        >
+        <hr className='my-2 h-[0px] border-[#8a4f4b]' />
+        {/* form */}
+        {formVisible && (
           <div
-            className='flex justify-between items-center p-1 border-b cursor-move bg-[#EA8] border-[#800000]'
-            onMouseDown={handleStart}
-            onTouchStart={handleStart}
-
+            className='fixed rounded-sm border shadow-lg bg-[#F0E0D6] border-[#800000]'
+            style={{
+              left: formPosition.x,
+              top: formPosition.y,
+              width: 'min(400px, 85vw)',
+              zIndex: 1000
+            }}
           >
-            <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
-            <NRCButton label={"×"} onClick={() => setFormVisible(false)}/>
-          </div>
-          <div className='p-2 space-y-2'>
-            <input
-              type='text'
-              placeholder='Name'
-              defaultValue='Anon'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
-            />
-            <textarea
-              placeholder='Comment'
-              onChange={(e) => setComment(e.target.value)}
-              className='px-1 w-full h-24 text-sm bg-white border resize-y border-[#AAA]'
-            />
-            <input
-              type='text'
-              placeholder='Reply to'
-              defaultValue={replyto}
-              value={replyto}
-              onChange={(e) => setReplyto(e.target.value)}
-              className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
-            />
-            <div className='space-y-2'>
-              <div className='flex items-center flex-wrap gap-2'>
-                <NRCButton label={"Choose file"} onClick={() =>
-                  document.getElementById('fileInput').click()
-                }/>
-                <input
-                  id='fileInput'
-                  type='file'
-                  onChange={handleFileChange}
-                  className='hidden'
-                />
-                <span className='text-sm mt-2 break-all'>
-                  {file ? file.name : 'No file chosen'}
-                </span>
-              </div>
-              <div className='flex gap-2 justify-between items-center flex-col sm:flex-row'>
-                <Turnstile
-                  options={{
-                    theme: 'light',
-                  }}
-                  siteKey={import.meta.env.VITE_SITE_KEY}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onError={() => setCaptchaToken(null)}
-                />
-                <NRCButton label={"Post"} addClass='px-2 py-1' onClick={() => {
+            <div
+              className='flex justify-between items-center p-1 border-b cursor-move bg-[#EA8] border-[#800000]'
+              onMouseDown={handleStart}
+              onTouchStart={handleStart}
+
+            >
+              <span className='text-sm font-bold'>Reply to Thread No.{replyto}</span>
+              <NRCButton label={"×"} onClick={() => setFormVisible(false)} />
+            </div>
+            <div className='p-2 space-y-2'>
+              <input
+                type='text'
+                placeholder='Name'
+                defaultValue='Anon'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
+              />
+              <textarea
+                placeholder='Comment'
+                onChange={(e) => setComment(e.target.value)}
+                className='px-1 w-full h-24 text-sm bg-white border resize-y border-[#AAA]'
+              />
+              <input
+                type='text'
+                placeholder='Reply to'
+                defaultValue={replyto}
+                value={replyto}
+                onChange={(e) => setReplyto(e.target.value)}
+                className='px-1 w-full text-sm bg-white border border-[#AAA] h-[20px]'
+              />
+              <div className='space-y-2'>
+                <div className='flex flex-wrap gap-2 items-center'>
+                  <NRCButton label={"Choose file"} onClick={() =>
+                    document.getElementById('fileInput').click()
+                  } />
+                  <input
+                    id='fileInput'
+                    type='file'
+                    onChange={handleFileChange}
+                    className='hidden'
+                  />
+                  <span className='mt-2 text-sm break-all'>
+                    {file ? file.name : 'No file chosen'}
+                  </span>
+                </div>
+                <div className='flex flex-col gap-2 justify-between items-center sm:flex-row'>
+                  <Turnstile
+                    options={{
+                      theme: 'light',
+                    }}
+                    siteKey={import.meta.env.VITE_SITE_KEY}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onError={() => setCaptchaToken(null)}
+                  />
+                  <NRCButton label={"Post"} addClass='px-2 py-1' onClick={() => {
                     createthread()
                     setFormVisible(false)
-                }}/>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}            {/* Thread */}
-      <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
-        <div>
-          <span className='font-bold text-[#800000]'>No: {threadData._id && threadData._id.slice(-6)} </span>
-          {threadData.image &&
-            (<span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
-            </span>
-            )}
-        </div>
-        <div className='flex items-start m-2'>
-          {threadData.image && threadData.image.url.endsWith('.mp4')
-            ? (
-              <video
-                controls
-                className='mr-4 border'
-                style={{ width: `${150 + sz}px`, height: 'auto' }}
-                onClick={() => { resize() }}
-              >
-                <source src={`${threadData.image.url}`} type='video/mp4' />
-                Your browser does not support the video tag.
-              </video>
-            )
-            : (
-              <ThreadImage imageData={threadData.image} />
-            )}
-          <div>
-            <input
-              type='checkbox'
-              checked={selectedPosts.has(threadData._id)}
-              onChange={() => handleCheckboxChange(threadData._id)}
-            />
-            <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
-            <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
-            <br />
-            <div className='flex'>
-              <NRCButton label={"Reply"} onClick={()=>{
-                setReplyto(null)
-                setFormVisible(true)
-              }}/>
-              <NRCButton label={"Delete"} onClick={() => {
-                if (token) {
-                  deleteThread(threadData._id)
-                } else {
-                  deleteThreadByUser(threadData._id)
-                }
-              }}/>
-            </div>
-          </div>
-        </div>
-
-        <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
-        <p className='mt-2'>{formatText(threadData.content)}</p>
-        {token && <div className='mt-2 flex justify-end'>
-          <NRCButton
-            label={"Ban uuid"}
-            onClick={() => {banUUID(threadData.posterID) }}
-          />
-        </div>}
-      </article>
-
-      {/* Replies */}
-      {threadData.replies && threadData.replies.map((reply) => (
-        <div className='flex ml-2' key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
-
-          <span className='text-gray-400 text-[1.2rem]'>{'>>'}</span>
-          <span>
-            <article key={reply._id} className='pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[#F0E0D6]'>
-              <div>
-                <input
-                  type='checkbox'
-                  checked={selectedPosts.has(reply._id)}
-                  onChange={() => handleCheckboxChange(reply._id)}
-                />
-                <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
-                {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
-                <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
-                No: {reply._id.slice(-6)}
-                </span>
-                <span className='ml-2 text-[#34345C]'>{formatDate(reply.created)}</span>
-
-              </div>
-              <div className='flex items-start mt-2'>
-                {reply.image && reply.image.url.endsWith('.mp4')
-                  ? (
-                    <video
-                      controls
-                      className='border'
-                      style={{ width: `${200 + sz}px`, height: 'auto' }}
-                      onClick={() => { resize() }}
-                    >
-                      <source src={`${reply.image.url}`} type='video/mp4' />
-                      Your browser does not support the video tag.
-                    </video>
-                  )
-                  : (
-                    reply.image && (
-                      <ThreadImage imageData={reply.image} />
-                    )
-                  )}
-                <div>
-                  <div className='flex'>
-
-                    <NRCButton label={"Reply"} onClick={()=>{
-                      setReplyto(reply._id)
-                      setFormVisible(true)
-                    }}/>
-                    <NRCButton label={"Delete"} onClick={()=>{
-                      if (token) {
-                        deleteReply(reply._id)
-                      } else {
-                        deleteReplyByUser(reply._id)
-                      }
-                    }}/>
-
-                  </div>
-
-                  <br />
-                  {reply.parentReply && (
-                    <div
-                      className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
-                      onClick={() => scrollToReply(reply.parentReply._id)}
-                    >
-                      {`>>${reply.parentReply._id.slice(-6)}`}
-                    </div>
-                  )}
-
-                  <p className='whitespace-pre-line'>{formatText(reply.content)}</p>
+                  }} />
                 </div>
               </div>
-              {token && <div className='mt-2 flex justify-end'>
-                <NRCButton
-                  label={"Ban uuid"}
-                  onClick={() => {banUUID(reply.posterID) }}
-                />
-              </div>}
-            </article>
-          </span>
-        </div>
-      ))}
+            </div>
+          </div>
+        )}            {/* Thread */}
+        <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
+          <div>
+            <span className='font-bold text-[#800000]'>No: {threadData._id && threadData._id.slice(-6)} </span>
+            {threadData.image &&
+              (<span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
+              </span>
+              )}
+          </div>
+          <div className='flex items-start m-2'>
+            {threadData.image && threadData.image.url.endsWith('.mp4')
+              ? (
+                <video
+                  controls
+                  className='mr-4 border'
+                  style={{ width: `${150 + sz}px`, height: 'auto' }}
+                  onClick={() => { resize() }}
+                >
+                  <source src={`${threadData.image.url}`} type='video/mp4' />
+                  Your browser does not support the video tag.
+                </video>
+              )
+              : (
+                <ThreadImage imageData={threadData.image} />
+              )}
+            <div>
+              <input
+                type='checkbox'
+                checked={selectedPosts.has(threadData._id)}
+                onChange={() => handleCheckboxChange(threadData._id)}
+              />
+              <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
+              <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
+              <br />
+              <div className='flex'>
+                <NRCButton label={"Reply"} onClick={() => {
+                  setReplyto(null)
+                  setFormVisible(true)
+                }} />
+                <NRCButton label={"Delete"} onClick={() => {
+                  if (token) {
+                    deleteThread(threadData._id)
+                  } else {
+                    deleteThreadByUser(threadData._id)
+                  }
+                }} />
+              </div>
+            </div>
+          </div>
 
-      <div className='right-0 bottom-0 left-0 p-2 border-t border-[#800000]'>
-        <form
-          className='flex gap-4 justify-center items-center' onSubmit={(e) => {
-            e.preventDefault()
-            handleBulkDelete()
-          }}
-        >
-          <input
-            type='hidden'
-            name='mode'
-            value='usrdel'
-          />
-          <span>Delete Post(s):</span>
-          <input
-            type='password'
-            placeholder='Password'
-            value={deletePassword}
-            onChange={(e) => setDeletePassword(e.target.value)}
-            className='py-1 px-2 border border-[#8a4f4b]'
-          />
-          <NRCButton label={"Delete"} addClass="py-1 px-4 mb-2" onClick={()=>{}}/>
-        </form>
+          <h2 className='mt-2 font-bold text-[#800000]'>{threadData.subject}</h2>
+          <p className='mt-2'>{formatText(threadData.content)}</p>
+          {token && <div className='flex justify-end mt-2'>
+            <NRCButton
+              label={"Ban uuid"}
+              onClick={() => { banUUID(threadData.posterID) }}
+            />
+          </div>}
+        </article>
+
+        {/* Replies */}
+        {threadData.replies && threadData.replies.map((reply) => (
+          <div className='flex ml-2' key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
+
+            <span className='text-gray-400 text-[1.2rem]'>{'>>'}</span>
+            <span>
+              <article key={reply._id} className='pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[#F0E0D6]'>
+                <div>
+                  <input
+                    type='checkbox'
+                    checked={selectedPosts.has(reply._id)}
+                    onChange={() => handleCheckboxChange(reply._id)}
+                  />
+                  <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
+                  {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
+                  <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
+                    No: {reply._id.slice(-6)}
+                  </span>
+                  <span className='ml-2 text-[#34345C]'>{formatDate(reply.created)}</span>
+
+                </div>
+                <div className='flex items-start mt-2'>
+                  {reply.image && reply.image.url.endsWith('.mp4')
+                    ? (
+                      <video
+                        controls
+                        className='border'
+                        style={{ width: `${200 + sz}px`, height: 'auto' }}
+                        onClick={() => { resize() }}
+                      >
+                        <source src={`${reply.image.url}`} type='video/mp4' />
+                        Your browser does not support the video tag.
+                      </video>
+                    )
+                    : (
+                      reply.image && (
+                        <ThreadImage imageData={reply.image} />
+                      )
+                    )}
+                  <div>
+                    <div className='flex'>
+
+                      <NRCButton label={"Reply"} onClick={() => {
+                        setReplyto(reply._id)
+                        setFormVisible(true)
+                      }} />
+                      <NRCButton label={"Delete"} onClick={() => {
+                        if (token) {
+                          deleteReply(reply._id)
+                        } else {
+                          deleteReplyByUser(reply._id)
+                        }
+                      }} />
+
+                    </div>
+
+                    <br />
+                    {reply.parentReply && (
+                      <div
+                        className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
+                        onClick={() => scrollToReply(reply.parentReply._id)}
+                      >
+                        {`>>${reply.parentReply._id.slice(-6)}`}
+                      </div>
+                    )}
+
+                    <p className='whitespace-pre-line'>{formatText(reply.content)}</p>
+                  </div>
+                </div>
+                {token && <div className='flex justify-end mt-2'>
+                  <NRCButton
+                    label={"Ban uuid"}
+                    onClick={() => { banUUID(reply.posterID) }}
+                  />
+                </div>}
+              </article>
+            </span>
+          </div>
+        ))}
+
+        <div className='right-0 bottom-0 left-0 p-2 border-t border-[#800000]'>
+          <form
+            className='flex gap-4 justify-center items-center' onSubmit={(e) => {
+              e.preventDefault()
+              handleBulkDelete()
+            }}
+          >
+            <input
+              type='hidden'
+              name='mode'
+              value='usrdel'
+            />
+            <span>Delete Post(s):</span>
+            <input
+              type='password'
+              placeholder='Password'
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className='py-1 px-2 border border-[#8a4f4b]'
+            />
+            <NRCButton label={"Delete"} addClass="py-1 px-4 mb-2" onClick={() => { }} />
+          </form>
+        </div>
       </div>
     </div>
   )
