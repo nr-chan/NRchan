@@ -191,7 +191,7 @@ const Home = () => {
           </div>
           <div className="mb-4">
             <div className="bg-[#9a64c9] border border-[#06554a] py-1 mx-1 px-2 grid grid-cols-2 ">
-            <h2 className='text-[15px] font-bold'>OUR TOP USERS</h2>
+            <h2 className='text-[15px] font-bold'>TOP POSTERS</h2>
             <h2 className='text-[15px] font-bold'>POSTS</h2>
           </div>
             <div className="bg-[#f6ecfe]  border border-[#06554a]  mx-1 px-2  text-red-800">
@@ -200,8 +200,8 @@ const Home = () => {
                 key={stat.board}
                 className="grid grid-cols-2 border-b border-gray-200"
               >
-                {/* <div className="text-teal-600">{stat.posterID}</div> */}
-                <div><DynamicColorText posterID={stat.posterID || 'FFFFFF'} /></div>
+                <div className="text-teal-600">{stat.posterID}</div>
+                {/* <div><DynamicColorText posterID={stat.posterID || 'FFFFFF'} /></div> */}
                 <div>{stat.totalCount}</div>
               </div>
             ))}
@@ -212,10 +212,10 @@ const Home = () => {
         {/* Board Stats Table */}
         <div className=" mb-4">
           {/* Table Header */}
-          <div className="bg-[#99cc66] border border-[#06554a] py-1  px-2 grid grid-cols-3 ">
-            <h2>Board</h2>
-            <h2>Total Threads</h2>
-            <h2>Total Posts</h2>
+          <div className="bg-[#99cc66] border border-[#06554a]  py-1 px-2 grid grid-cols-3 ">
+            <h2 className='text-[15px] font-bold'>Board</h2>
+            <h2 className='text-[15px] font-bold'>Total Threads</h2>
+            <h2 className='text-[15px] font-bold'>Total Posts</h2>
           </div>
 
           {/* Table Body */}
