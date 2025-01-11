@@ -13,6 +13,7 @@ const recentRoutes = require('./routes/recent');
 const replyRoutes = require('./routes/reply');
 const threadRoutes = require('./routes/thread');
 const votes = require('./routes/votes');
+const heartbeat = require('./routes/heartbeat');
 
 require('dotenv').config();
 
@@ -66,6 +67,7 @@ app.use('/admin', adminRoutes);
 app.use('/getuuid', getuuidRoutes);
 app.use('/banUUID', bannedUUID);
 app.use('/votes', votes);
+app.use('/heartbeat',heartbeat);
 
 // Error handling middleware
 app.use((err, _req, res, _) => {

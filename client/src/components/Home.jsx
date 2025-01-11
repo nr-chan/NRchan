@@ -10,6 +10,7 @@ const Home = () => {
   const [totalThread,settotalThread]=useState(0);
   const [totalPosts,settotalPosts]=useState(0);
   const [uniquePosters,setUniquePosters]=useState(0);
+  const [activeDevices, setActiveDevices] = useState(0);
 
   const fetchStats = async () =>{
     try {
@@ -41,6 +42,17 @@ const Home = () => {
     fetchStats()
     fetchRecent()
     fetchUUIDstats()
+    const fetchActiveDevices = () => {
+      fetch(`${API_URL}/heartbeat/active-devices`)
+        .then((response) => response.json())
+        .then((data) => setActiveDevices(data.activeDevices))
+        .catch((error) => console.error('Error fetching active devices:', error));
+    };
+
+    fetchActiveDevices();
+    const interval = setInterval(fetchActiveDevices, 5000); // Fetch every 10 seconds
+
+    return () => clearInterval(interval);
   }, [])
 
   const fetchRecent = async () => {
@@ -187,6 +199,7 @@ const Home = () => {
               <div>Total Threads {totalThread}</div>
               <div>Total Posts {totalPosts}</div>
               <div>Unique Posters {uniquePosters}</div> 
+              <div>activeDevices {activeDevices}</div>
             </div>
           </div>
           <div className="mb-4">
