@@ -218,7 +218,7 @@ export default function Component() {
     const response = await fetch(`${API_URL}/thread/${id}`)
     const data = await response.json()
     if (response.status !== 200) {
-      nav('/404')
+      nav(-1)
     }
     setThreadData(data)
   }
@@ -580,30 +580,6 @@ export default function Component() {
             </span>
           </div>
         ))}
-
-        <div className='right-0 bottom-0 left-0 p-2 border-t border-[#800000]'>
-          <form
-            className='flex gap-4 justify-center items-center' onSubmit={(e) => {
-              e.preventDefault()
-              handleBulkDelete()
-            }}
-          >
-            <input
-              type='hidden'
-              name='mode'
-              value='usrdel'
-            />
-            <span>Delete Post(s):</span>
-            <input
-              type='password'
-              placeholder='Password'
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-              className='py-1 px-2 border border-[#8a4f4b]'
-            />
-            <NRCButton label={"Delete"} addClass="py-1 px-4 mb-2" onClick={() => { }} />
-          </form>
-        </div>
       </div>
     </div>
   )
