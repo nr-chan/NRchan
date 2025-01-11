@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { boardList } from '../Defs'
 
-function Navbar () {
+function Navbar() {
   const [token, setToken] = useState('')
   const navigate = useNavigate()
 
@@ -23,16 +23,16 @@ function Navbar () {
   }
 
   return (
-    <div className='bg-[#fedcba] p-1 text-xs flex items-center gap-2 border-b border-[#d9bfb7]'>
+    <div className='flex gap-2 items-center p-1 text-xs border-b bg-[#fedcba] border-[#d9bfb7]'>
       {/* Dropdown Menu for Boards */}
-      <div className='flex items-center gap-1'>
+      <div className='flex gap-1 items-center'>
         <label htmlFor='board-select' className='text-[#800000]'>
           Board:
         </label>
         <select
           id='board-select'
           onChange={handleBoardChange}
-          className='border border-[#d9bfb7] bg-[#FCA] rounded-md p-0.5 text-[#800000] focus:outline-none'
+          className='p-0.5 rounded-md border focus:outline-none border-[#d9bfb7] bg-[#FCA] text-[#800000]'
         >
           <option value='' disabled selected>
             Select a board
@@ -46,34 +46,34 @@ function Navbar () {
       </div>
 
       {/* Utility Links */}
-      <div className='ml-auto flex items-center gap-2'>
-        <a href='#' className='text-[#800000] hover:underline'>
-          Settings
-        </a>
-        <a href='#' className='text-[#800000] hover:underline'>
-          Mobile
-        </a>
-        <a href='/' className='text-[#800000] hover:underline'>
+      <div className='flex gap-2 items-center ml-auto'>
+        {/* <a href='#' className='hover:underline text-[#800000]'> */}
+        {/*   Settings */}
+        {/* </a> */}
+        {/* <a href='#' className='hover:underline text-[#800000]'> */}
+        {/*   Mobile */}
+        {/* </a> */}
+        <a href='/' className='hover:underline text-[#800000]'>
           Home
         </a>
         {(token === '' || token === null)
           ? (
             <a
               href='/login'
-              className='text-[#800000] hover:underline'
+              className='hover:underline text-[#800000]'
             >
               Login
             </a>
-            )
+          )
           : (
             <a
               href='#'
               onClick={logout}
-              className='text-[#800000] hover:underline'
+              className='hover:underline text-[#800000]'
             >
               Logout
             </a>
-            )}
+          )}
       </div>
     </div>
   )

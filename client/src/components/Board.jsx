@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import { Turnstile } from '@marsidev/react-turnstile'
 import NRCButton from './NRCButton';
 
-export default function Board () {
+export default function Board() {
   const nav = useNavigate()
   const { id } = useParams()
   const [threads, setThreads] = useState([])
@@ -24,6 +24,7 @@ export default function Board () {
   const threadsPerPage = 5
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [loadingScreen, setLoadingScreen] = useState(false);
 
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/board/${id}`)
@@ -75,6 +76,7 @@ export default function Board () {
 
   const handlePinThread = async (threadId) => {
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/admin/pin/${threadId}`, {
         method: 'POST',
         headers: {
@@ -89,13 +91,16 @@ export default function Board () {
       }
     } catch (error) {
       console.error('Error toggling pin status:', error)
+    } finally {
+
+      setLoadingScreen(false);
     }
   }
 
   const createthread = async () => {
     if (!captchaToken) {
-        alert('Please complete the captcha');
-        return;
+      alert('Please complete the captcha');
+      return;
     }
 
     const formData = new FormData()
@@ -118,6 +123,7 @@ export default function Board () {
     formData.append('captchaToken', captchaToken)
 
     try {
+      setLoadingScreen(true);
       const response = await fetch(`${API_URL}/thread`, {
         method: 'POST',
         headers: {
@@ -134,11 +140,13 @@ export default function Board () {
       }
     } catch (error) {
       console.error('Network error:', error)
+    } finally {
+      setLoadingScreen(false);
     }
   }
-  
+
   const getuuid = async () => {
-    if(!uuid){
+    if (!uuid) {
       const response = await fetch(`${API_URL}/getuuid`);
       const json = await response.json()
       localStorage.setItem('uuid', json.uuid);
@@ -191,142 +199,121 @@ export default function Board () {
 
 
   return (
-    <div className='min-h-screen bg-[#FFFFEE] text-[#800000] font-sans text-[10px] pb-8'>
-      {showDisclaimer && <Cookie onAgree={handleAgree} />}
-      {/* Banner */}
-      <div className='text-center my-2'>
+    <div>{loadingScreen && (
+      <div className='flex fixed top-0 z-50 justify-center items-center w-full h-full bg-black opacity-50 ledt-0 bg'>
         <img
-          src={`${API_URL}/images/${banner}.png`}
-          alt='Board banner'
-          className='inline-block border-black border'
+          src='https://raw.githubusercontent.com/gist/Unic-X/4d03e1c856c94e613826d662a067d7e8/raw/7e777de663b31e71235b175e6cebfbe456a25b9e/load.svg'
+          alt='Loading...'
+          className='w-20 h-20 animate-spin'
         />
-        <hr className='h-[0px] border-[#8a4f4b] my-4' />
-
       </div>
+    )}
+      <div className='pb-8 min-h-screen font-sans bg-[#FFFFEE] text-[#800000] text-[10px]'>
+        {showDisclaimer && <Cookie onAgree={handleAgree} />}
+        {/* Banner */}
+        <div className='my-2 text-center'>
+          <img
+            src={`${API_URL}/images/${banner}.png`}
+            alt='Board banner'
+            className='inline-block border border-black'
+          />
+          <hr className='my-4 h-[0px] border-[#8a4f4b]' />
 
-      {/* Board Title */}
-      <h1 className='text-center text-4xl text-[#800000] font-bold mt-2'>
-        /{id}/ - {links[boardList.indexOf(id)]}
-      </h1>
+        </div>
 
-      {/* Post Form */}
-      <div className='max-w-[468px] mx-auto my-4 bg-[#F0E0D6] border border-[#D9BFB7] p-2'>
-  <table className='w-full'>
-    <tbody>
-      <tr>
-        <td className='bg-[#EA8]'>Name</td>
-        <td>
-          <input
-            type='text'
-            defaultValue='Anonymous'
-            onChange={(e) => setName(e.target.value)}
-            className='w-full bg-[#F0E0D6] border border-[#AAA]'
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>Subject</td>
-        <td>
-          <input
-            type='text'
-            onChange={(e) => setSubject(e.target.value)}
-            className='w-full bg-[#F0E0D6] border border-[#AAA]'
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>Comment</td>
-        <td>
-          <textarea
-            className='w-full h-24 bg-[#F0E0D6] border border-[#AAA]'
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'>File</td>
-        <td>
-          <input
-            type='file'
-            className='px-2'
-            onChange={handleFileChange}
-            ref={fileInputRef}
-          />
-          {file && <span className='ml-2'>Selected: {file.name}</span>}
-        </td>
-      </tr>
-      <tr>
-        <td className='bg-[#EA8]'></td>
-        <td>
-          <div className='px-2 items-center justify-between py-2'>
-            <Turnstile
-              siteKey={import.meta.env.VITE_SITE_KEY}
-              onSuccess={(token) => setCaptchaToken(token)}
-              onError={() => setCaptchaToken(null)}
-            />
-            <NRCButton label={"Post"} addClass='px-2 py-1' onClick={()=>createthread()}/>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+        {/* Board Title */}
+        <h1 className='mt-2 text-4xl font-bold text-center text-[#800000]'>
+          /{id}/ - {links[boardList.indexOf(id)]}
+        </h1>
 
-      <hr className='h-[0px] border-[#8a4f4b] my-4' />
-      {/* Threads */}
-      <div className='max-w-[768px] mx-auto'>
-        {currentThreads.map((thread) => (
-          <div key={thread._id} className='mb-4'>
-            <article className='bg-[#F0E0D6] border border-[#D9BFB7] p-2'>
-              {collapsedThreads[thread._id] ? (
-                <div className='flex items-center gap-2'>
-                  <button
-                    onClick={() => toggleThreadCollapse(thread._id)}
-                    className='text-[#800000] font-bold'
-                  >
-                    <img
-                      alt='H' className='extButton threadHideButton'
-                      src={`${API_URL}/images/plus.png`}
+        {/* Post Form */}
+        <div className='p-2 my-4 mx-auto border max-w-[468px] bg-[#F0E0D6] border-[#D9BFB7]'>
+          <table className='w-full'>
+            <tbody>
+              <tr>
+                <td className='bg-[#EA8]'>Name</td>
+                <td>
+                  <input
+                    type='text'
+                    defaultValue='Anonymous'
+                    onChange={(e) => setName(e.target.value)}
+                    className='w-full border bg-[#F0E0D6] border-[#AAA]'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className='bg-[#EA8]'>Subject</td>
+                <td>
+                  <input
+                    type='text'
+                    onChange={(e) => setSubject(e.target.value)}
+                    className='w-full border bg-[#F0E0D6] border-[#AAA]'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className='bg-[#EA8]'>Comment</td>
+                <td>
+                  <textarea
+                    className='w-full h-24 border bg-[#F0E0D6] border-[#AAA]'
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className='bg-[#EA8]'>File</td>
+                <td>
+                  <input
+                    type='file'
+                    className='px-2'
+                    onChange={handleFileChange}
+                    ref={fileInputRef}
+                  />
+                  {file && <span className='ml-2'>Selected: {file.name}</span>}
+                </td>
+              </tr>
+              <tr>
+                <td className='bg-[#EA8]'></td>
+                <td>
+                  <div className='justify-between items-center py-2 px-2'>
+                    <Turnstile
+                      options={{
+                        theme: 'light',
+                      }}
+                      siteKey={import.meta.env.VITE_SITE_KEY}
+                      onSuccess={(token) => setCaptchaToken(token)}
+                      onError={() => setCaptchaToken(null)}
                     />
-                  </button>
-                  <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
-                  {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
-                  </span>)}
-                  {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
-                  {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
-                  {token && (
-                    <>
-                      <NRCButton
-                        label={thread.locked ? 'Unlock' : 'Lock'}
-                        addClass='font-bold mb-2'
-                        onClick={() => handleLockThread(thread._id)}
-                      />
-                      <NRCButton
-                        label={thread.sticky ? 'Unpin' : 'Pin'}
-                        addClass='font-bold mb-2'
-                        onClick={() => handlePinThread(thread._id)}
-                      />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <div className='flex items-center gap-2 mb-2'>
+                    <NRCButton label={"Post"} addClass='px-2 py-1' onClick={() => createthread()} />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr className='my-4 h-[0px] border-[#8a4f4b]' />
+        {/* Threads */}
+        <div className='mx-auto max-w-[768px]'>
+          {currentThreads.map((thread) => (
+            <div key={thread._id} className='mb-4'>
+              <article className='p-2 border bg-[#F0E0D6] border-[#D9BFB7]'>
+                {collapsedThreads[thread._id] ? (
+                  <div className='flex gap-2 items-center'>
                     <button
                       onClick={() => toggleThreadCollapse(thread._id)}
-                      className='text-[#800000] font-bold'
+                      className='font-bold text-[#800000]'
                     >
                       <img
                         alt='H' className='extButton threadHideButton'
-                        src={`${API_URL}/images/minus.png`}
+                        src={`${API_URL}/images/plus.png`}
                       />
                     </button>
                     <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
-                    </span>
-                    )}
-                    {thread.locked && <img src='/closed.png' alt='Locked' className='h-4 w-4' />}
-                    {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='h-4 w-4' />}
+                    </span>)}
+                    {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
+                    {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='w-4 h-4' />}
                     {token && (
                       <>
                         <NRCButton
@@ -342,119 +329,153 @@ export default function Board () {
                       </>
                     )}
                   </div>
+                ) : (
+                  <>
+                    <div className='flex gap-2 items-center mb-2'>
+                      <button
+                        onClick={() => toggleThreadCollapse(thread._id)}
+                        className='font-bold text-[#800000]'
+                      >
+                        <img
+                          alt='H' className='extButton threadHideButton'
+                          src={`${API_URL}/images/minus.png`}
+                        />
+                      </button>
+                      <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
+                      {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
+                      </span>
+                      )}
+                      {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
+                      {thread.sticky && <img src='/sticky.gif' alt='Pinned' className='w-4 h-4' />}
+                      {token && (
+                        <>
+                          <NRCButton
+                            label={thread.locked ? 'Unlock' : 'Lock'}
+                            addClass='font-bold mb-2'
+                            onClick={() => handleLockThread(thread._id)}
+                          />
+                          <NRCButton
+                            label={thread.sticky ? 'Unpin' : 'Pin'}
+                            addClass='font-bold mb-2'
+                            onClick={() => handlePinThread(thread._id)}
+                          />
+                        </>
+                      )}
+                    </div>
 
-                  <div className='flex items-start mb-2'>
-                    {thread.image && thread.image.url.endsWith('.mp4')
-                      ? (
-                        <div className='mr-4 max-w-[150px]'>
-                          <video
-                            controls
-                            className='w-full h-auto border'
-                          >
-                            <source src={`${thread.image.url}`} type='video/mp4' />
-                            Your browser does not support the video tag.
-                          </video>
-                        </div>
+                    <div className='flex items-start mb-2'>
+                      {thread.image && thread.image.url.endsWith('.mp4')
+                        ? (
+                          <div className='mr-4 max-w-[150px]'>
+                            <video
+                              controls
+                              className='w-full h-auto border'
+                            >
+                              <source src={`${thread.image.url}`} type='video/mp4' />
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
                         )
-                      : (
+                        : (
                           thread.image && (<div className='mr-4'>
                             <ThreadImage allowExpand={false} imageData={thread.image} />
                           </div>)
                         )}
-                    <div>
-                      <span className='font-bold text-[#117743]'>
-                        {thread.username ? thread.username : 'Anonymous'}{' '}
-                      </span>
-                      <DynamicColorText posterID={ thread.posterID || 'FFFFFF' }/> 
-                      <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
-                      <br />
-                      To view complete thread
-                      <a href={'/thread/' + thread._id}>
-                        <NRCButton
-                          label={"Click here"}
-                          onClick={()=>{}}/>
-                      </a>
-                    </div>
-                  </div>
-
-                  <h2 className='font-bold mt-2'>{thread.subject}</h2>
-                  <p className='mt-2'>{formatText(thread.content)}</p>
-
-                  {/* Replies */}
-                  <div className='mt-4'>
-                    {thread.replies.slice(-3).map((reply) => (
-                      <div
-                        key={reply._id}
-                        className='border border-[#D9BFB7] p-2 mb-2'
-                      >
-                        <span className='text-[1.25rem] text-gray-400'>{'>> '}</span>
+                      <div>
                         <span className='font-bold text-[#117743]'>
-                          {reply.username || 'Anonymous'}{' '}
+                          {thread.username ? thread.username : 'Anonymous'}{' '}
                         </span>
-                        <DynamicColorText posterID={ reply.posterID || 'FFFFFF' }/> 
-                        <span className='ml-1 text-[#34345C]'>{formatDate(reply.created)}</span>
-
-                        {reply.image && (
-                          <div className='mt-2'>
-                            {reply.image.url.endsWith('.mp4')
-                              ? (
-                                <div className='mr-4 max-w-[150px]'>
-                                  <video
-                                    controls
-                                    className='w-full h-auto border'
-                                  >
-                                    <source src={`${reply.image.url}`} type='video/mp4' />
-                                    Your browser does not support the video tag.
-                                  </video>
-                                </div>
-                                )
-                              : (
-                                <ThreadImage imageData={reply.image} allowExpand={false} />
-                                )}
-                          </div>
-                        )}
-                        <p className='mt-2'>{formatText(reply.content)}</p>
+                        <DynamicColorText posterID={thread.posterID || 'FFFFFF'} />
+                        <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
+                        <br />
+                        To view complete thread
+                        <a href={'/thread/' + thread._id}>
+                          <NRCButton
+                            label={"Click here"}
+                            onClick={() => { }} />
+                        </a>
                       </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </article>
-          </div>
-        ))}
-      </div>
+                    </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className='flex justify-center mt-4 mb-4'>
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className='px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50'
-          >
-            Previous
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
+                    <h2 className='mt-2 font-bold'>{thread.subject}</h2>
+                    <p className='mt-2'>{formatText(thread.content)}</p>
+
+                    {/* Replies */}
+                    <div className='mt-4'>
+                      {thread.replies.slice(-3).map((reply) => (
+                        <div
+                          key={reply._id}
+                          className='p-2 mb-2 border border-[#D9BFB7]'
+                        >
+                          <span className='text-gray-400 text-[1.25rem]'>{'>> '}</span>
+                          <span className='font-bold text-[#117743]'>
+                            {reply.username || 'Anonymous'}{' '}
+                          </span>
+                          <DynamicColorText posterID={reply.posterID || 'FFFFFF'} />
+                          <span className='ml-1 text-[#34345C]'>{formatDate(reply.created)}</span>
+
+                          {reply.image && (
+                            <div className='mt-2'>
+                              {reply.image.url.endsWith('.mp4')
+                                ? (
+                                  <div className='mr-4 max-w-[150px]'>
+                                    <video
+                                      controls
+                                      className='w-full h-auto border'
+                                    >
+                                      <source src={`${reply.image.url}`} type='video/mp4' />
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  </div>
+                                )
+                                : (
+                                  <ThreadImage imageData={reply.image} allowExpand={false} />
+                                )}
+                            </div>
+                          )}
+                          <p className='mt-2'>{formatText(reply.content)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </article>
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className='flex justify-center mt-4 mb-4'>
             <button
-              key={i + 1}
-              onClick={() => handlePageChange(i + 1)}
-              className={`px-3 py-1 mx-1 border ${currentPage === i + 1
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className='py-1 px-3 mx-1 border disabled:opacity-50 bg-[#F0E0D6] border-[#D9BFB7]'
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-3 py-1 mx-1 border ${currentPage === i + 1
                   ? 'bg-[#800000] text-white'
                   : 'bg-[#F0E0D6] border-[#D9BFB7]'
-                }`}
+                  }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className='py-1 px-3 mx-1 border disabled:opacity-50 bg-[#F0E0D6] border-[#D9BFB7]'
             >
-              {i + 1}
+              Next
             </button>
-          ))}
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className='px-3 py-1 mx-1 bg-[#F0E0D6] border border-[#D9BFB7] disabled:opacity-50'
-          >
-            Next
-          </button>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
