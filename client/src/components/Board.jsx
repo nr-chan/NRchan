@@ -344,6 +344,7 @@ export default function Board() {
                         />
                       </button>
                       <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
+                      <VoteCount threadID={thread._id}/>
                       {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                       </span>
                       )}

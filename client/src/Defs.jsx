@@ -26,7 +26,6 @@ export const API_URL = import.meta.env.VITE_API_URL
 export const fetchThreads = async () => {
   const response = await fetch(`${API_URL}/thread/${id}`)
   const data = await response.json()
-  console.log(data)
   setThreadData(data)
 }
 

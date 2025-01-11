@@ -9,46 +9,42 @@ router.post('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Thread not found' });
     }
 
-    const upVoted = thread.upvotes.ids.includes(req.body.uuid);
-    const downVoted = thread.downvotes.ids.includes(req.body.uuid);
+    const { uuid, up } = req.body;
+
+    // Determine if the user has upvoted or downvoted before
+    const upVoted = thread.upvotes.ids.includes(uuid);
+    const downVoted = thread.downvotes.ids.includes(uuid);
 
     if (!upVoted && !downVoted) {
-        if (req.body.up) {
-          await Thread.findByIdAndUpdate(req.params.id, {
-              $push : {'upvotes.ids': req.body.uuid},
-              $inc : {'upvotes.count': 1}
-          })
-        } else {
-          await Thread.findByIdAndUpdate(req.params.id, {
-              $push : {'downvotes.ids': req.body.uuid},
-              $inc : {'downvotes.count': 1}
-          })
-        }
-    } else if (upVoted && !downVoted && !req.body.up) {
-        await Thread.findByIdAndUpdate(req.params.id, {
-            $pull: {"upvotes.ids": req.body.uuid },
-            $inc: {"upvotes.count": -1}
-          })
-        await Thread.findByIdAndUpdate(req.params.id, {
-            $push : {'downvotes.ids': req.body.uuid},
-            $inc : {'downvotes.count': 1}
-        })
-    } else if (downVoted && !upVoted && req.body.up) {
-        await Thread.findByIdAndUpdate(req.params.id, {
-            $pull: {"downvotes.ids": req.body.uuid },
-            $inc: {"downvotes.count": -1}
-          })
-        await Thread.findByIdAndUpdate(req.params.id, {
-            $push : {'upvotes.ids': req.body.uuid},
-            $inc : {'upvotes.count': 1}
-        })
+      // Add a new vote
+      const updateField = up ? 'upvotes' : 'downvotes';
+      await Thread.findByIdAndUpdate(req.params.id, {
+        $push: { [`${updateField}.ids`]: uuid },
+        $set: { [`${updateField}.count`]: thread[updateField].count + 1 }
+      });
+    } else if (upVoted && !downVoted && !up) {
+      // Switch from upvote to downvote
+      await Thread.findByIdAndUpdate(req.params.id, {
+        $pull: { 'upvotes.ids': uuid },
+        $set: { 'upvotes.count': thread.upvotes.count - 1 },
+        $push: { 'downvotes.ids': uuid },
+        $setOnInsert: { 'downvotes.count': thread.downvotes.count + 1 }
+      });
+    } else if (downVoted && !upVoted && up) {
+      // Switch from downvote to upvote
+      await Thread.findByIdAndUpdate(req.params.id, {
+        $pull: { 'downvotes.ids': uuid },
+        $set: { 'downvotes.count': thread.downvotes.count - 1 },
+        $push: { 'upvotes.ids': uuid },
+        $setOnInsert: { 'upvotes.count': thread.upvotes.count + 1 }
+      });
     }
-    res.status(200).json({success: true});
+
+    res.status(200).json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-})
-
+});
 router.get('/:id', async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
