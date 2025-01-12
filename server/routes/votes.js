@@ -45,6 +45,7 @@ router.post('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 router.get('/:id', async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);

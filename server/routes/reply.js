@@ -4,6 +4,8 @@ const Reply = require('../models/reply');
 const BannedUUID = require('../models/bannedUser');
 const uuidToPosterId = require('../utils/uuidToPosterId');
 const {deleteImage} = require('../utils/uploadService');
+const { invalidateCache } = require('../utils/redis');
+const Thread = require('../models/thread');
 
 router.delete('/:id', async (req, res) => {
   try {
@@ -18,6 +20,7 @@ router.delete('/:id', async (req, res) => {
     if (result) {
       return res.status(403).json({ error: 'You have banned cause of your actions' });
     }
+
     const reply = await Reply.findById(req.params.id);
     if (!reply) {
       return res.status(404).json({ error: 'Reply not found' });
@@ -25,6 +28,20 @@ router.delete('/:id', async (req, res) => {
     if (reply.posterID !== posterID) {
       return res.status(403).json({ error: 'You are not authorized to delete this reply' });
     }
+
+    const threadID = reply.threadID;
+    const thread = await Thread.findById(threadID);
+    
+    //Invalidate Thread and Board cache
+    await invalidateCache(`/thread/${threadID._id}`);
+    await invalidateCache(`/board/${thread.board}`);
+
+    //Invalidate Board Stats and Data
+    await invalidateCache(`/boards/stats`);
+    await invalidateCache(`/boards/data`);
+
+    //Invalidate Recent Posts
+    await invalidateCache(`/recent/`);
 
     if (reply.image){
         await deleteImage(reply.image.url);

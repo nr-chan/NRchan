@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Reply = require('../models/reply');
 const Thread = require('../models/thread');
 const {deleteImage} = require('../utils/uploadService');
+const { invalidateCache } = require('../utils/redis');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -233,7 +234,10 @@ router.delete('/thread/:id', adminAuth, async (req, res) => {
     }
 
     await Reply.deleteMany({ threadID: thread._id });
-    await Thread.findByIdAndDelete(thread._id);
+    await thread.deleteOne(thread._id);
+
+    await invalidateCache(`/thread/${thread._id}`);
+    await invalidateCache(`/board/${thread.board}`);
 
     res.json({
       message: 'Thread deleted successfully',
@@ -257,6 +261,9 @@ router.post('/lock/:id', adminAuth, async (req, res) => {
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
+
+    await invalidateCache(`/thread/${thread._id}`);
+    await invalidateCache(`/board/${thread.board}`);
 
     const updatedThread = await Thread.findByIdAndUpdate(
       thread._id,
@@ -294,6 +301,9 @@ router.post('/pin/:id', adminAuth, async (req, res) => {
       { new: true }
     );
 
+    await invalidateCache(`/thread/${thread._id}`);
+    await invalidateCache(`/board/${thread.board}`);
+
     res.json({
       message: `Thread ${updatedThread.sticky ? 'Pinned' : 'Unpinned'} successfully`,
       adminAction: {
@@ -324,10 +334,16 @@ router.delete('/reply/:id', adminAuth, async (req, res) => {
         await deleteImage(image.url);
     }
 
-    await Thread.findByIdAndUpdate(reply.threadID, {
+    const thread = await Thread.findByIdAndUpdate(reply.threadID, {
       $pull: { replies: reply._id }
     });
+        
+    await invalidateCache(`/thread/${thread._id}`);
+    await invalidateCache(`/board/${thread.board}`);
 
+    //Invalidate Board Stats and Data
+    await invalidateCache(`/boards/stats`);
+    await invalidateCache(`/boards/data`);
 
     await Reply.findByIdAndDelete(reply._id);
     
@@ -345,8 +361,5 @@ router.delete('/reply/:id', adminAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 module.exports = router;
