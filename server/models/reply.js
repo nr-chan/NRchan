@@ -16,6 +16,14 @@ const ReplySchema = new mongoose.Schema({
   parentReply: { type: mongoose.Schema.Types.ObjectId, ref: 'Reply', default: null },
   threadID: { type: mongoose.Schema.Types.ObjectId, ref: 'Thread', required: true },
   isOP: { type: Boolean, default: false },
+  upvotes: {
+    count: {type: Number, default: 0},
+    ids: [{type: String}]
+  },
+  downvotes: {
+    count: {type: Number, default: 0},
+    ids: [{type: String}]
+  },
   posterID: String
 });
 
