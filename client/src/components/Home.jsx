@@ -194,10 +194,12 @@ const Home = () => {
             </div>
             <div className="bg-[#eeffff] border border-[#06554a] mx-1 p-1 text-red-800">
               <div className='font-bold'>Global</div>
-              <div>Total Threads {totalThread}</div>
-              <div>Total Posts {totalPosts}</div>
-              <div>Unique Posters {uniquePosters}</div> 
-              <div>activeDevices {activeDevices}</div>
+              <div className='grid grid-cols-3 border-b border-gray-200'>
+                <div>Total Threads  </div><div>{totalThread}</div> <div></div>
+                <div>Total Posts   </div><div>{totalPosts}</div><div></div>
+                <div>Unique User </div><div>{uniquePosters}</div> <div></div>
+                <div>activeDevices </div><div>  {activeDevices}</div><div></div>
+              </div>
             </div>
           </div>
           <div className="mb-4">
