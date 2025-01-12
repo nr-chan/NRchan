@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Thread = require('../models/thread');
+const { redisCacheMiddleware } = require('../utils/redis');
 router.get('/', (_, res) => {
   res.json(['p', 'cp', 'n', 's', 'v', 'k', 'a', 'c', 'T', 'Sp', 'Ph', 'm', 'G', 'r', 'd', 'Con', 'GIF', 'Rnt']); // Example boards
 });
 
-router.get('/data',async (_, res) => {
+router.get('/data',redisCacheMiddleware(),async (_, res) => {
   try {
     const pipeline = [
       {
@@ -48,7 +49,7 @@ router.get('/data',async (_, res) => {
   }
 })
 
-router.get('/stats',async (_, res) => {
+router.get('/stats',redisCacheMiddleware(), async (_, res) => {
   try {
 
     const results = await Thread.aggregate([

@@ -203,7 +203,7 @@ export default function Component() {
         fetchThreads()
       } else {
         const json = await resposne.json()
-        console.log('Error deleting the reply', json)
+        console.error('Error deleting the reply', json)
       }
     } catch (err) {
       console.error('Network error: ', err);

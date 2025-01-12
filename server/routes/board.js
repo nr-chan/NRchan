@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Thread = require('../models/thread');
+const { redisCacheMiddleware } = require('../utils/redis');
 
-router.get('/:board', async (req, res) => {
+router.get('/:board',redisCacheMiddleware(), async (req, res) => {
   try {
     const threads = await Thread.find({ board: req.params.board })
       .sort({ sticky: -1, lastBump: -1 })

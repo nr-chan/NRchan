@@ -28,7 +28,6 @@ const Login = () => {
     } else {
       setStatus('failed')
     }
-    console.log('Login attempt:', { username, password })
   }
 
   return (

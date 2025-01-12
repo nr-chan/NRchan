@@ -14,6 +14,7 @@ const replyRoutes = require('./routes/reply');
 const threadRoutes = require('./routes/thread');
 const votes = require('./routes/votes');
 const heartbeat = require('./routes/heartbeat');
+const {initializeRedisClient,redisCacheMiddleware} = require('./utils/redis');
 
 require('dotenv').config();
 
@@ -55,7 +56,7 @@ mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err);
 });
 
-// Import routes
+module.exports = redisClient = initializeRedisClient();
 
 // Use routes
 app.use('/board', boardRoutes);

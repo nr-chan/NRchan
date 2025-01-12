@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Thread = require('../models/thread');
+const { redisCacheMiddleware } = require('../utils/redis');
 
-router.get('/', async (_, res) => {
+router.get('/',redisCacheMiddleware(), async (_, res) => {
   try {
     const pipeline = [
       {
@@ -83,7 +84,8 @@ router.get('/', async (_, res) => {
     ];
 
     const results = await Thread.aggregate(pipeline);
-
+    
+    
     if (!results || results.length === 0) {
       return res.status(404).json({
         success: false,

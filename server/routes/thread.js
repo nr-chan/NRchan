@@ -10,6 +10,7 @@ const uuidToPosterId = require('../utils/uuidToPosterId');
 const {uploadToR2} = require('../utils/uploadService');
 const {deleteImage} = require('../utils/uploadService');
 const validateCaptcha = require('../utils/validateCaptcha');
+const { invalidateCache, redisCacheMiddleware } = require('../utils/redis');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -29,6 +30,8 @@ const upload = multer({
 
 router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
   try {
+
+
     const isValid = await validateCaptcha(req.body.captchaToken)
 
     if (!isValid) {
@@ -42,6 +45,16 @@ router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
     if (!req.body.board) {
       return res.status(400).json({ error: 'Board is required' });
     }
+    
+    // Invalidate the board in which the post was sent
+    await invalidateCache(`/board/${req.body.board}`);
+    
+    //Invalidate Board Stats and Data
+    await invalidateCache(`/boards/stats`);
+    await invalidateCache(`/boards/data`);
+
+    //Invalidate Recent Posts
+    await invalidateCache(`/recent/`)
 
     let imageUrl = null;
     if (req.file) {
@@ -74,7 +87,7 @@ router.post('/', rateLimiter, upload.single('image'), async (req, res) => {
 });
 
 // Get specific thread with replies
-router.get('/:id', async (req, res) => {
+router.get('/:id',redisCacheMiddleware(), async (req, res) => {
   try {
     const thread = await Thread.findById(req.params.id);
     if (!thread) {
@@ -108,6 +121,17 @@ router.post('/:id/reply', rateLimiter, upload.single('image'), async (req, res) 
     if (!thread) {
       return res.status(404).json({ error: 'Thread not found' });
     }
+    
+    //Invalidate the board
+    await invalidateCache(`/board/${thread.board}`);
+    await invalidateCache(`/thread/${thread._id}`);
+    
+    //Invalidate Board Stats and Data
+    await invalidateCache(`/boards/stats`);
+    await invalidateCache(`/boards/data`);
+
+    //Invalidate Recent Posts
+    await invalidateCache(`/recent/`)
 
     if (thread.locked) {
       return res.status(403).json({ error: 'Thread is locked' });
@@ -170,6 +194,17 @@ router.delete('/:id', async (req, res) => {
     if (thread.image){
         await deleteImage(thread.image.url);
     }
+
+    //Invalidate the board
+    await invalidateCache(`/board/${thread.board}`);
+    await invalidateCache(`/thread/${thread._id}`);
+
+    //Invalidate Board Stats and Data
+    await invalidateCache(`/boards/stats`);
+    await invalidateCache(`/boards/data`);
+
+    //Invalidate Recent Posts
+    await invalidateCache(`/recent/`)
 
     await thread.deleteOne();
 

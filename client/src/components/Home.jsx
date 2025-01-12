@@ -31,7 +31,6 @@ const Home = () => {
       const data= await response.json();
       setUUIDstats(data);
       setUniquePosters(data.length)
-      console.log(data);
     }
     catch (error){
       console.error('Error fetching recent threads:', error)
@@ -59,7 +58,6 @@ const Home = () => {
     try {
       const response = await fetch(`${API_URL}/recent`)
       const data = await response.json()
-      console.log(data)
       setThreads(data.data)
     } catch (error) {
       console.error('Error fetching recent threads:', error)
