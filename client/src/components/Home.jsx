@@ -41,17 +41,6 @@ const Home = () => {
     fetchStats()
     fetchRecent()
     fetchUUIDstats()
-    const fetchActiveDevices = () => {
-      fetch(`${API_URL}/heartbeat/active-devices`)
-        .then((response) => response.json())
-        .then((data) => setActiveDevices(data.activeDevices))
-        .catch((error) => console.error('Error fetching active devices:', error));
-    };
-
-    fetchActiveDevices();
-    const interval = setInterval(fetchActiveDevices, 5000); // Fetch every 10 seconds
-
-    return () => clearInterval(interval);
   }, [])
 
   const fetchRecent = async () => {
@@ -200,6 +189,7 @@ const Home = () => {
                 <div>Unique User </div><div>{uniquePosters}</div> <div></div>
                 <div>activeDevices </div><div>  {activeDevices}</div><div></div>
               </div>
+
             </div>
           </div>
           <div className="mb-4">
