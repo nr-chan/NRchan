@@ -15,7 +15,7 @@ const { invalidateCache, redisCacheMiddleware } = require('../utils/redis');
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 25 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_, file, cb) => {
     const allowedFileTypes = /jpeg|jpg|png|gif|heic|mp4|mov|avi|mkv|webm/;
     const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
