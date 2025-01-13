@@ -4,8 +4,7 @@ const hash = require("object-hash");
 let redisClient;
 
 const initializeRedisClient = () => {
-  // const redisURL = process.env.REDIS_URI;
-  const redisURL = 'redis://127.0.0.1:6379';
+  const redisURL = process.env.REDIS_URI;
   if (!redisURL) throw new Error("REDIS_URI is not defined in the environment variables.");
 
   redisClient = createClient({ url: redisURL });
