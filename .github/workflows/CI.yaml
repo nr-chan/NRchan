@@ -1,0 +1,60 @@
+on:
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+    
+
+jobs:
+  blow_job:
+    runs-on: ubuntu-latest
+    name: Format Files
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Prettier
+        run: npx prettier --write **/*.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v5.1.0
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        with:
+          commit_message: "chore: format files"
+  
+  tit_job:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+        project: [server, client] # Define server and client as matrix projects
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    # Setup Node.js for the specified version in the matrix
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    # Install dependencies for the respective project
+    - name: Install Dependencies
+      run: |
+        cd ${{ matrix.project }}
+        npm ci
+
+    # Run the respective commands for the server or client project
+    - name: Build and Run
+      run: |
+        cd ${{ matrix.project }}
+        if [ "${{ matrix.project }}" == "server" ]; then
+          node index.js
+        elif [ "${{ matrix.project }}" == "client" ]; then
+          npm run build
+        fi
+
+    
