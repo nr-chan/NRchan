@@ -49,10 +49,14 @@ jobs:
 
     # Run the respective commands for the server or client project
     - name: Build and Run
+      env:
+        TESTING_ENV: ${{ secrets.TESTING_ENV }}
       run: |
         cd ${{ matrix.project }}
         if [ "${{ matrix.project }}" == "server" ]; then
+          echo "$TESTING_ENV" > .env
           node index.js
+
         elif [ "${{ matrix.project }}" == "client" ]; then
           npm run build
         fi
