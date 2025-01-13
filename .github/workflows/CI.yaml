@@ -55,7 +55,7 @@ jobs:
         cd ${{ matrix.project }}
         if [ "${{ matrix.project }}" == "server" ]; then
           echo "$TESTING_ENV" > .env
-          node index.js
+          timeout 30s node index.js
 
         elif [ "${{ matrix.project }}" == "client" ]; then
           npm run build
