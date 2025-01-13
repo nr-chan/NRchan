@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const activeDevices = new Map(); 
+const activeDevices = new Map();
 
 router.post('/', async (req, res) => {
   const { deviceId } = req.body;
@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 
 router.get('/active-devices', async (req, res) => {
   const now = Date.now();
-  const activeThreshold = 15000; 
+  const activeThreshold = 10000;
 
   for (const [deviceId, lastSeen] of activeDevices) {
     if (now - lastSeen > activeThreshold) {

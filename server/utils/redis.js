@@ -1,10 +1,11 @@
 const { createClient } = require("redis");
-const hash = require("object-hash"); 
+const hash = require("object-hash");
 
 let redisClient;
 
 const initializeRedisClient = () => {
-  const redisURL = process.env.REDIS_URI;
+  // const redisURL = process.env.REDIS_URI;
+  const redisURL = 'redis://127.0.0.1:6379';
   if (!redisURL) throw new Error("REDIS_URI is not defined in the environment variables.");
 
   redisClient = createClient({ url: redisURL });
@@ -103,5 +104,4 @@ const invalidateCache = async (key) => {
   }
 };
 
-module.exports = { initializeRedisClient,invalidateCache, redisCacheMiddleware };
-
+module.exports = { initializeRedisClient, invalidateCache, redisCacheMiddleware };

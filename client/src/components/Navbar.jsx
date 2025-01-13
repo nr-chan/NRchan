@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { boardList,API_URL} from '../Defs'
+import { boardList, API_URL } from '../Defs'
 
 function Navbar() {
   const [token, setToken] = useState('')
@@ -12,27 +12,28 @@ function Navbar() {
     setToken('')
   }
   const getuuid = async () => {
-      if (!uuid) {
-        const response = await fetch(`${API_URL}/getuuid`);
-        const json = await response.json()
-        localStorage.setItem('uuid', json.uuid);
-        setuuid(json.uuid);
-      }
+    if (!uuid) {
+      const response = await fetch(`${API_URL}/getuuid`);
+      const json = await response.json()
+      localStorage.setItem('uuid', json.uuid);
+      setuuid(json.uuid);
     }
+  }
 
-  setInterval( async() => {
-    try{
+  setInterval(async () => {
+    try {
       let deviceId = localStorage.getItem('uuid');
-      const response= await  fetch(`${API_URL}/heartbeat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ deviceId }),
-    });
-    console.log(response)}
-    catch (error){
-      console.log(error);
+      const response = await fetch(`${API_URL}/heartbeat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceId }),
+      });
+      console.log(response)
+    }
+    catch (error) {
+      console.error(error);
     }
   }, 5000);
 
@@ -73,12 +74,6 @@ function Navbar() {
 
       {/* Utility Links */}
       <div className='flex gap-2 items-center ml-auto'>
-        {/* <a href='#' className='hover:underline text-[#800000]'> */}
-        {/*   Settings */}
-        {/* </a> */}
-        {/* <a href='#' className='hover:underline text-[#800000]'> */}
-        {/*   Mobile */}
-        {/* </a> */}
         <a href='/' className='hover:underline text-[#800000]'>
           Home
         </a>
