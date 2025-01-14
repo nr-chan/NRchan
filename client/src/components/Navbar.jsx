@@ -20,23 +20,6 @@ function Navbar() {
     }
   }
 
-  setInterval(async () => {
-    try {
-      let deviceId = localStorage.getItem('uuid');
-      const response = await fetch(`${API_URL}/heartbeat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ deviceId }),
-      });
-      console.log(response)
-    }
-    catch (error) {
-      console.error(error);
-    }
-  }, 5000);
-
   useEffect(() => {
     getuuid()
     setToken(localStorage.getItem('nrtoken'))
