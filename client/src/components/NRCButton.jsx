@@ -20,7 +20,7 @@ const NRCButton = ({
           backgroundColor: isHovered ? hoverBgColor : bgColor,
           borderColor: borderColor,
         }}
-        className={`px-1 mt-2 mr-1 h-12 text-sm border ${addClass}`}
+        className={`px-1 mt-2 mr-1 h-24 text-sm border ${addClass}`}
       >
         {label}
       </button>
