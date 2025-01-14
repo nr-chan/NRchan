@@ -33,11 +33,11 @@ function Navbar() {
   }
 
   return (
-    <div className='flex gap-2 items-center p-1 text-xs border-b bg-[#fedcba] border-[#d9bfb7]'>
+    <div className='flex gap-2 items-center h-[56px] p-1 text-xs border-b bg-[#fedcba] border-[#d9bfb7]'>
       {/* Dropdown Menu for Boards */}
       <div className='flex gap-1 items-center'>
         <label htmlFor='board-select' className='text-[#800000]'>
-          Boardigga:
+          Board:
         </label>
         <select
           id='board-select'
