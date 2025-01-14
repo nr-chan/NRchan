@@ -37,7 +37,7 @@ function Navbar() {
       {/* Dropdown Menu for Boards */}
       <div className='flex gap-1 items-center'>
         <label htmlFor='board-select' className='text-[#800000]'>
-          Board:
+          Boardigga:
         </label>
         <select
           id='board-select'
