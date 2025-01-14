@@ -11,7 +11,7 @@ const Home = () => {
   const [totalPosts, settotalPosts] = useState(0);
   const [uniquePosters, setUniquePosters] = useState(0);
   const [activeDevices, setActiveDevices] = useState(0);
-
+  let socket;
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_URL}/boards/data`);
@@ -41,25 +41,41 @@ const Home = () => {
     fetchStats()
     fetchRecent()
     fetchUUIDstats()
-    // Call fetchActiveDevices every 5 seconds
-    const intervalId = setInterval(fetchActiveDevices, 5000);
+    const deviceId = localStorage.getItem('uuid');
+    socket = new WebSocket(`${API_URL.replace(/^http/, 'ws')}/heartbeat`);
+    socket.onopen = () => {
+      console.log('WebSocket connection opened');
 
-    // Cleanup on unmount
-    return () => clearInterval(intervalId);
-  }, [])
-
-
-  const fetchActiveDevices = async () => {
-    try {
-      const response = await fetch(`${API_URL}/heartbeat/active-devices`);
-      const data = await response.json();
-      // console.log('data: ', data);
-      setActiveDevices(data.activeDevices);
-    } catch (err) {
-      console.error('Error fetching active devices: ', err);
+      //sent heartbeat
+      const heartbeatInterval = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ deviceId }));
+        }
+      }, 2500);
+      return () => clearInterval(heartbeatInterval);
+    };
+    socket.onmessage = (event) => {
+      try {
+        const { message } = JSON.parse(event.data);
+        if (typeof message === 'number') {
+          setActiveDevices(message);
+        }
+      } catch (err) {
+        console.error('Error parsing the message from server', err);
+      }
 
     }
-  }
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
+    }
+    socket.onerror = (error) => {
+      console.error('WebSocket error: ', error);
+    }
+    return () => {
+      if (socket) socket.close();
+    }
+
+  }, [API_URL])
 
 
   const fetchRecent = async () => {
@@ -206,7 +222,7 @@ const Home = () => {
                 <div>Total Threads  </div><div>{totalThread}</div> <div></div>
                 <div>Total Posts   </div><div>{totalPosts}</div><div></div>
                 <div>Unique User </div><div>{uniquePosters}</div> <div></div>
-                <div>activeDevices </div><div>  {activeDevices}</div><div></div>
+                <div>Active Devices </div><div>  {activeDevices}</div><div></div>
               </div>
 
             </div>

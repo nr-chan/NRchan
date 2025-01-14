@@ -14,10 +14,11 @@ const replyRoutes = require('./routes/reply');
 const threadRoutes = require('./routes/thread');
 const votes = require('./routes/votes');
 const { initializeRedisClient, redisCacheMiddleware } = require('./utils/redis');
-const heartbeat = require('./routes/heartbeat');
+// const heartbeat = require('./routes/heartbeat');
+const http = require('http'); // Required for WebSocket integration
+const { wss } = require('./routes/heartbeat'); // Import WebSocket server
 
 require('dotenv').config();
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -68,7 +69,10 @@ app.use('/admin', adminRoutes);
 app.use('/getuuid', getuuidRoutes);
 app.use('/banUUID', bannedUUID);
 app.use('/votes', votes);
-app.use('/heartbeat', heartbeat);
+// app.use('/heartbeat', (req, res, next) => {
+//     req.wss = wss;
+//     next();
+// });
 
 // Error handling middleware
 app.use((err, _req, res, _) => {
@@ -98,13 +102,26 @@ app.use((err, _req, res, _) => {
 app.use((req, res) => {
     res.status(404).json({ error: '404 Route not found' });
 });
-
+//gracefulShutdown
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
+//Create server
+const server = http.createServer(app);
+
+// Upgrade HTTP Server to Support WebSocket
+server.on('upgrade', (req, socket, head) => {
+    if (req.url === '/heartbeat') {
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            wss.emit('connection', ws, req);
+        });
+    } else {
+        socket.destroy();
+    }
+});
 
 //Start server
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

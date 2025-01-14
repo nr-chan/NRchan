@@ -1,30 +1,41 @@
 const express = require('express');
-const router = express.Router();
-
+const webSocket = require('ws');
 const activeDevices = new Map();
+const activeThreshold = 10000;
 
-router.post('/', async (req, res) => {
-  const { deviceId } = req.body;
 
-  if (!deviceId) {
-    return res.status(400).json({ message: 'Device ID is required' });
-  }
+const wss = new webSocket.Server({ noServer: true });
 
-  activeDevices.set(deviceId, Date.now());
-  res.json({ message: 'Heartbeat received' });
+
+
+wss.on('connection', (ws, req) => {
+  console.log('Client connected');
+  ws.on('message', (message) => {
+    try {
+      const { deviceId } = JSON.parse(message);
+      if (deviceId) {
+        activeDevices.set(deviceId, Date.now());
+        ws.send(JSON.stringify({ message: activeDevices.size }));
+      } else {
+        ws.send(JSON.stringify({ error: 'Invalid message format' }));
+      }
+    } catch (err) {
+      console.error('NACK error: ', err);
+      ws.send(JSON.stringify({ error: 'Invalid JSON format' }));
+    }
+  });
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
 });
 
-router.get('/active-devices', async (req, res) => {
+setInterval(() => {
   const now = Date.now();
-  const activeThreshold = 10000;
-
   for (const [deviceId, lastSeen] of activeDevices) {
     if (now - lastSeen > activeThreshold) {
       activeDevices.delete(deviceId);
     }
   }
+}, activeThreshold);
 
-  res.json({ activeDevices: activeDevices.size });
-});
-
-module.exports = router;
+module.exports = { wss };
