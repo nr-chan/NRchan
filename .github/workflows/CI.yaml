@@ -9,7 +9,11 @@ on:
 jobs:
   blow_job:
     runs-on: ubuntu-latest
-    name: Format Files
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,8 +21,8 @@ jobs:
           node-version: "22"
       - name: Prettier
         run: npx prettier --write **/*.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: stefanzweifel/git-auto-commit-action@v5.1.0
         if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
