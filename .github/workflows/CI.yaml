@@ -9,7 +9,6 @@ on:
 jobs:
   blow_job:
     runs-on: ubuntu-latest
-    name: Format Files
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
