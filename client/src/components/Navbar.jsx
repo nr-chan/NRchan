@@ -75,7 +75,7 @@ function Navbar() {
               onClick={logout}
               className='hover:underline text-[#800000]'
             >
-              Logout
+              Logou
             </a>
           )}
       </div>
