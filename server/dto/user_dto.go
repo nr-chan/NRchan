@@ -2,8 +2,6 @@ package dto
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -33,8 +31,8 @@ const (
 )
 
 type BannedUUID struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UUID      string             `bson:"uuid" json:"uuid"`
-	CreatedAt time.Time          `bson:"createdAt,omitempty" json:"createdAt,omitempty"`
-	UpdatedAt time.Time          `bson:"updatedAt,omitempty" json:"updatedAt,omitempty"`
+	ID        string    `json:"id"`
+	UUID      string    `json:"uuid"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }

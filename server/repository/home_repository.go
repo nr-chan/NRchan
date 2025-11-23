@@ -2,11 +2,9 @@ package repository
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo"
+	"database/sql"
 
 	"github.com/nr-chan/NRchan/dto"
-	db "github.com/nr-chan/NRchan/mongo"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -14,113 +12,72 @@ type (
 		GetRecents(ctx context.Context) ([]dto.Thread, error)
 	}
 	homeRepository struct {
-		db db.Database
+		db *sql.DB
 	}
 )
 
-func NewHomeRepository(db db.Database) *homeRepository {
-	return &homeRepository{
-		db: db,
-	}
-}
-
-type CombinedWrapper struct {
-	Combined dto.Thread `bson:"combined"`
+func NewHomeRepository(db *sql.DB) *homeRepository {
+	return &homeRepository{db: db}
 }
 
 func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
-	var combinedResults []CombinedWrapper
-
-	pipeline := mongo.Pipeline{
-		{
-			{"$facet", bson.D{
-				{"threads", bson.A{
-					bson.D{
-						{"$project", bson.D{
-							{"_id", 1},
-							{"type", bson.D{{"$literal", "thread"}}},
-							{"board", 1},
-							{"subject", 1},
-							{"content", 1},
-							{"image", 1},
-							{"created", 1},
-							{"lastBump", 1},
-							{"posterID", 1},
-						}},
-					},
-					bson.D{
-						{"$sort", bson.D{{"lastBump", -1}}},
-					},
-					bson.D{
-						{"$limit", 10},
-					},
-				}},
-				{"replies", bson.A{
-					bson.D{
-						{"$lookup", bson.D{
-							{"from", "threads"},
-							{"localField", "threadID"},
-							{"foreignField", "_id"},
-							{"as", "thread"},
-						}},
-					},
-					bson.D{
-						{"$unwind", "$thread"},
-					},
-					bson.D{
-						{"$project", bson.D{
-							{"_id", 1},
-							{"type", bson.D{{"$literal", "reply"}}},
-							{"board", "$thread.board"},
-							{"content", 1},
-							{"image", 1},
-							{"created", 1},
-							{"threadID", 1},
-							{"posterID", 1},
-						}},
-					},
-					bson.D{
-						{"$sort", bson.D{{"created", -1}}},
-					},
-					bson.D{
-						{"$limit", 10},
-					},
-				}},
-			}},
-		},
-		{
-			{"$project", bson.D{
-				{"combined", bson.D{
-					{"$concatArrays", bson.A{"$threads", "$replies"}},
-				}},
-			}},
-		},
-		{
-			{"$unwind", "$combined"},
-		},
-		{
-			{"$sort", bson.D{
-				{"combined.lastBump", -1},
-				{"combined.created", -1},
-			}},
-		},
-		{
-			{"$limit", 10},
-		},
-	}
-
-	cursor, err := b.db.Collection("threads").Aggregate(ctx, pipeline)
+	rows, err := b.db.QueryContext(ctx, `
+        SELECT 
+            t.id, t.board_id, t.username, t.subject, t.content, t.image_id,
+            t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
+            i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
+        FROM threads t
+        LEFT JOIN images i ON i.id = t.image_id
+        ORDER BY t.last_bump DESC
+        LIMIT 10
+    `)
 	if err != nil {
 		return nil, err
 	}
-	if err := cursor.All(ctx, &combinedResults); err != nil {
+	defer rows.Close()
+
+	threads := []dto.Thread{}
+	for rows.Next() {
+		var (
+			th dto.Thread
+			imageID sql.NullInt64
+			img dto.Image
+			imgID sql.NullInt64
+			imgURL sql.NullString
+			imgSize sql.NullInt64
+			imgW sql.NullInt64
+			imgH sql.NullInt64
+			imgTW sql.NullInt64
+			imgTH sql.NullInt64
+			lockedInt int64
+			stickyInt int64
+		)
+		if err := rows.Scan(
+			&th.ID, &th.BoardID, &th.Username, &th.Subject, &th.Content, &imageID,
+			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
+			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
+		); err != nil {
+			return nil, err
+		}
+		th.Locked = lockedInt == 1
+		th.Sticky = stickyInt == 1
+		if imageID.Valid {
+			th.ImageID = &imageID.Int64
+		}
+		if imgID.Valid {
+			img.ID = imgID.Int64
+			if imgURL.Valid { img.URL = imgURL.String }
+			if imgSize.Valid { img.Size = imgSize.Int64 }
+			if imgW.Valid { img.Width = imgW.Int64 }
+			if imgH.Valid { img.Height = imgH.Int64 }
+			if imgTW.Valid { img.ThumbWidth = imgTW.Int64 }
+			if imgTH.Valid { img.ThumbHeight = imgTH.Int64 }
+			th.Image = &img
+		}
+		threads = append(threads, th)
+	}
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-
-	threads := make([]dto.Thread, len(combinedResults))
-	for i, result := range combinedResults {
-		threads[i] = result.Combined
-	}
-
 	return threads, nil
 }

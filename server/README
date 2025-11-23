@@ -1,0 +1,28 @@
+nrchan-server is a cf-workers project written entirely in Go, compiled to
+WebAssembly using the `syumai/workers` library. It uses D1 SQL as the database
+and R2 for object storage.
+
+To run locally, install wrangler and log in:
+
+    npm install -g wrangler
+    npx wrangler login
+
+Start the development server:
+
+    npm start
+
+To deploy the server:
+
+    npm run deploy
+
+The Go code follows clean architecture and is compiled automatically into WASM
+during the Worker build process. MongoDB is no longer used; all storage is now
+handled via D1 and R2.
+
+Production deployment is available at:
+
+    https://nrchan.friedpotato.in/
+
+See the syumai/workers library for Go → WASM → Worker bindings:
+
+    https://github.com/syumai/workers

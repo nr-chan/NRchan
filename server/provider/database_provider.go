@@ -1,58 +1,40 @@
 package provider
 
 import (
+	"database/sql"
+	"fmt"
+
 	"github.com/nr-chan/NRchan/config"
-	"github.com/nr-chan/NRchan/mongo"
 	"github.com/samber/do"
 )
 
 type DatabaseProvider struct {
-	client   mongo.Client
-	database mongo.Database
+	database *sql.DB
 }
 
-func NewDatabaseProvider(client mongo.Client, databaseName string) *DatabaseProvider {
+func NewDatabaseProvider(db *sql.DB) *DatabaseProvider {
 	return &DatabaseProvider{
-		client:   client,
-		database: client.Database(databaseName),
+		database: db,
 	}
 }
 
-func (dp *DatabaseProvider) GetCollection(name string) mongo.Collection {
-	return dp.database.Collection(name)
-}
-
-func (dp *DatabaseProvider) GetClient() mongo.Client {
-	return dp.client
-}
-
-func (dp *DatabaseProvider) GetDatabase() mongo.Database {
+func (dp *DatabaseProvider) GetDatabase() *sql.DB {
 	return dp.database
 }
 
 func RegisterDatabase(injector *do.Injector) {
 
-	// Register database client
-	do.ProvideNamed(injector, "MongoClient", func(i *do.Injector) (mongo.Client, error) {
+	// Register mongoapi HTTP Client
+	do.ProvideNamed(injector, "Database", func(i *do.Injector) (*sql.DB, error) {
 		cfg := do.MustInvokeNamed[*config.AppConfig](i, "AppConfig")
 		return cfg.DatabaseConfig.SetupClient()
 	})
 
-	// Register database provider
+	// Register DatabaseProvider
 	do.ProvideNamed(injector, "DatabaseProvider", func(i *do.Injector) (*DatabaseProvider, error) {
-		client := do.MustInvokeNamed[mongo.Client](i, "MongoClient")
-		cfg := do.MustInvokeNamed[*config.AppConfig](i, "AppConfig")
-		return NewDatabaseProvider(client, cfg.DatabaseConfig.DatabaseName), nil
-	})
+		db := do.MustInvokeNamed[*sql.DB](i, "Database")
 
-	// Register specific collections
-	do.ProvideNamed(injector, "UsersCollection", func(i *do.Injector) (mongo.Collection, error) {
-		dbProvider := do.MustInvokeNamed[*DatabaseProvider](i, "DatabaseProvider")
-		return dbProvider.GetCollection("users"), nil
-	})
-
-	do.ProvideNamed(injector, "PostsCollection", func(i *do.Injector) (mongo.Collection, error) {
-		dbProvider := do.MustInvokeNamed[*DatabaseProvider](i, "DatabaseProvider")
-		return dbProvider.GetCollection("posts"), nil
+		fmt.Println("%+v", db)
+		return NewDatabaseProvider(db), nil
 	})
 }

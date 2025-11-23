@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/charmbracelet/log"
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/middleware"
 	"github.com/nr-chan/NRchan/provider"
 	"github.com/nr-chan/NRchan/routes"
 	"github.com/samber/do"
+	"github.com/syumai/workers"
 )
 
 func main() {
@@ -22,7 +25,9 @@ func main() {
 	if err := routes.RegisterRoutes(server, injector); err != nil {
 		log.Fatal("Failed to register routes: ", err)
 	}
-	if err := server.Run(":8080"); err != nil {
-		log.Fatal("error running server", err)
-	}
+
+	server.GET("/hello", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello, World!")
+	})
+	workers.Serve(server)
 }
