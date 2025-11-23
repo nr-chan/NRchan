@@ -1,0 +1,16 @@
+{
+	"name": "nrchan-server",
+	"main": "./build/worker.mjs",
+	"compatibility_date": "2025-11-01",
+	"build": {
+		"command": "npm run build"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "nr-chan",
+			"database_id": "1bf8595c-fa70-44a1-8999-b071c1e016dc",
+			"remote": true
+		}
+	]
+}

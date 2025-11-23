@@ -26,9 +26,9 @@ func RegisterServices(injector *do.Injector) {
 		return service.NewHomeService(homeRepository, jwtService), nil
 	})
 
-	do.ProvideNamed(injector, "ThreadService", func(i *do.Injector) (service.ThreadService, error) {
-		threadRepository := do.MustInvokeNamed[repository.ThreadRepository](i, "ThreadRepository")
-		jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
-		return service.NewThreadService(threadRepository, jwtService), nil
-	})
+	// do.ProvideNamed(injector, "ThreadService", func(i *do.Injector) (service.ThreadService, error) {
+	// 	threadRepository := do.MustInvokeNamed[repository.ThreadRepository](i, "ThreadRepository")
+	// 	jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
+	// 	return service.NewThreadService(threadRepository, jwtService), nil
+	// })
 }

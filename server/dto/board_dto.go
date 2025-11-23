@@ -1,21 +1,25 @@
 package dto
 
-import (
-	"time"
+// D1 (SQLite) schema-aligned DTOs for board-related data
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-type BoardCategory struct {
-	Title  string   `bson:"title" json:"title"`
-	Boards []string `bson:"boards" json:"boards"`
+type Board struct {
+    ID        int64        `json:"id"`
+    BoardKey  string       `json:"board_key"`
+    Title     string       `json:"title"`
+    CreatedAt string       `json:"created_at,omitempty"`
+    UpdatedAt string       `json:"updated_at,omitempty"`
+    Categories []BoardCategory `json:"categories,omitempty"`
+    Links     []BoardLink  `json:"links,omitempty"`
 }
 
-type BoardData struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Boards    []BoardCategory    `bson:"boards" json:"boards"`
-	Links     []string           `bson:"links" json:"links"`
-	BoardList []string           `bson:"board_list" json:"board_list"`
-	CreatedAt time.Time          `bson:"createdAt,omitempty" json:"createdAt,omitempty"`
-	UpdatedAt time.Time          `bson:"updatedAt,omitempty" json:"updatedAt,omitempty"`
+type BoardCategory struct {
+    ID       int64  `json:"id"`
+    Category string `json:"category"`
+    BoardID  int64  `json:"board_id"`
+}
+
+type BoardLink struct {
+    ID      int64  `json:"id"`
+    BoardID int64  `json:"board_id"`
+    Link    string `json:"link"`
 }

@@ -1,37 +1,14 @@
 {
-  "type": "commonjs",
-  "name": "server",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "nrchan-server",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "go run github.com/syumai/workers/cmd/workers-assets-gen -mode=go && GOOS=js GOARCH=wasm go build -o ./build/app.wasm ./cmd",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.717.0",
-    "bcrypt": "^5.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "express-rate-limit": "^7.4.1",
-    "helmet": "^8.0.0",
-    "http": "^0.0.1-security",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.0",
-    "multer": "^1.4.5-lts.1",
-    "object-hash": "^3.0.0",
-    "path": "^0.12.7",
-    "redis": "^4.7.0",
-    "sharp": "^0.33.5",
-    "uuid": "^11.0.4",
-    "ws": "^8.18.0"
-  },
-  "keywords": [],
-  "description": "",
   "devDependencies": {
-    "@eslint/js": "^9.12.0",
-    "eslint": "^9.12.0",
-    "globals": "^15.11.0"
+    "wrangler": "^3.109.2"
   }
 }
