@@ -4,6 +4,7 @@ type AppConfig struct {
 	DatabaseConfig *DatabaseConfig
 	JWTSecret      string
 	Port           string
+	R2BucketName   string
 }
 
 func LoadConfig() (*AppConfig, error) {
@@ -17,5 +18,6 @@ func LoadConfig() (*AppConfig, error) {
 		DatabaseConfig: dbConfig,
 		JWTSecret:      config.SECRETACCESSKEY,
 		Port:           config.PORT,
+		R2BucketName:   config.BUCKETNAME,
 	}, nil
 }

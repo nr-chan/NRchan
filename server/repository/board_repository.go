@@ -76,16 +76,16 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 	ids := []int64{}
 	for rows.Next() {
 		var (
-			th dto.Thread
-			imageID sql.NullInt64
-			img dto.Image
-			imgID sql.NullInt64
-			imgURL sql.NullString
-			imgSize sql.NullInt64
-			imgW sql.NullInt64
-			imgH sql.NullInt64
-			imgTW sql.NullInt64
-			imgTH sql.NullInt64
+			th        dto.Thread
+			imageID   sql.NullInt64
+			img       dto.Image
+			imgID     sql.NullInt64
+			imgURL    sql.NullString
+			imgSize   sql.NullInt64
+			imgW      sql.NullInt64
+			imgH      sql.NullInt64
+			imgTW     sql.NullInt64
+			imgTH     sql.NullInt64
 			lockedInt int64
 			stickyInt int64
 		)
@@ -103,12 +103,24 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 		}
 		if imgID.Valid {
 			img.ID = imgID.Int64
-			if imgURL.Valid { img.URL = imgURL.String }
-			if imgSize.Valid { img.Size = imgSize.Int64 }
-			if imgW.Valid { img.Width = imgW.Int64 }
-			if imgH.Valid { img.Height = imgH.Int64 }
-			if imgTW.Valid { img.ThumbWidth = imgTW.Int64 }
-			if imgTH.Valid { img.ThumbHeight = imgTH.Int64 }
+			if imgURL.Valid {
+				img.URL = imgURL.String
+			}
+			if imgSize.Valid {
+				img.Size = imgSize.Int64
+			}
+			if imgW.Valid {
+				img.Width = imgW.Int64
+			}
+			if imgH.Valid {
+				img.Height = imgH.Int64
+			}
+			if imgTW.Valid {
+				img.ThumbWidth = imgTW.Int64
+			}
+			if imgTH.Valid {
+				img.ThumbHeight = imgTH.Int64
+			}
 			th.Image = &img
 		}
 		threadIndex[th.ID] = len(threads)
@@ -147,8 +159,12 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 		if err := repRows.Scan(&r.ID, &r.ThreadID, &parent, &r.Username, &r.Content, &image, &r.CreatedAt, &isOPInt, &r.PosterID); err != nil {
 			return nil, err
 		}
-		if parent.Valid { r.ParentReply = &parent.Int64 }
-		if image.Valid { r.ImageID = &image.Int64 }
+		if parent.Valid {
+			r.ParentReply = &parent.Int64
+		}
+		if image.Valid {
+			r.ImageID = &image.Int64
+		}
 		r.IsOP = isOPInt == 1
 		if idx, ok := threadIndex[r.ThreadID]; ok {
 			threads[idx].Replies = append(threads[idx].Replies, &r)

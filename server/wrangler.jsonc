@@ -12,5 +12,23 @@
 			"database_id": "1bf8595c-fa70-44a1-8999-b071c1e016dc",
 			"remote": true
 		}
-	]
+	],
+
+    "r2_buckets": [
+        {
+            "binding": "MY_BUCKET",
+            "bucket_name": "nr-chan",
+            "remote": true
+        }
+    ],
+    "observability": {
+        "logs": {
+        "enabled": false,
+        "head_sampling_rate": 1,
+        "invocation_logs": true,
+        "persist": true
+        }
+    }
+
+
 }

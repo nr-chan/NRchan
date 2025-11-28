@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"github.com/nr-chan/NRchan/utils"
 	"net/http"
+
+	"github.com/nr-chan/NRchan/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/service"
