@@ -25,9 +25,9 @@ func RegisterHandlers(injector *do.Injector) {
 		return controller.NewHomeController(homeService), nil
 	})
 
-	// //Thread Handler
-	// do.ProvideNamed(injector, "HomeController", func(i *do.Injector) (*controller.ThreadController, error) {
-	// 	threadService := do.MustInvokeNamed[service.ThreadService](i, "ThreadService")
-	// 	return controller.NewThreadController(threadService), nil
-	// })
+	//Thread Handler
+	do.ProvideNamed(injector, "ThreadController", func(i *do.Injector) (*controller.ThreadController, error) {
+		threadService := do.MustInvokeNamed[service.ThreadService](i, "ThreadService")
+		return controller.NewThreadController(threadService), nil
+	})
 }

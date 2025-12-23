@@ -17,8 +17,13 @@ func RegisterRepositories(injector *do.Injector) {
 		return repository.NewHomeRepository(dbProvider.database), nil
 	})
 
-	// do.ProvideNamed(injector, "ThreadRepository", func(i *do.Injector) (repository.ThreadRepository, error) {
-	// 	dbProvider := do.MustInvokeNamed[*DatabaseProvider](i, "DatabaseProvider")
-	// 	return repository.NewThreadRepository(dbProvider.database), nil
-	// })
+	do.ProvideNamed(injector, "ThreadRepository", func(i *do.Injector) (repository.ThreadRepository, error) {
+		dbProvider := do.MustInvokeNamed[*DatabaseProvider](i, "DatabaseProvider")
+		return repository.NewThreadRepository(dbProvider.database), nil
+	})
+
+	do.ProvideNamed(injector, "ReplyRepository", func(i *do.Injector) (repository.ReplyRepository, error) {
+		dbProvider := do.MustInvokeNamed[*DatabaseProvider](i, "DatabaseProvider")
+		return repository.NewReplyRepository(dbProvider.database), nil
+	})
 }

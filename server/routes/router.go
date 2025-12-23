@@ -9,5 +9,6 @@ func RegisterRoutes(server *gin.Engine, injector *do.Injector) error {
 	Board(server, injector)
 	Admin(server, injector)
 	Home(server, injector)
+	Thread(server, injector)
 	return nil
 }

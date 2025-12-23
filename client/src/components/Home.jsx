@@ -42,38 +42,7 @@ const Home = () => {
     fetchRecent()
     fetchUUIDstats()
     const deviceId = localStorage.getItem('uuid');
-    socket = new WebSocket(`${API_URL.replace(/^http/, 'ws')}/heartbeat`);
-    socket.onopen = () => {
-      console.log('WebSocket connection opened');
-
-      //sent heartbeat
-      const heartbeatInterval = setInterval(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify({ deviceId }));
-        }
-      }, 2500);
-      return () => clearInterval(heartbeatInterval);
-    };
-    socket.onmessage = (event) => {
-      try {
-        const { message } = JSON.parse(event.data);
-        if (typeof message === 'number') {
-          setActiveDevices(message);
-        }
-      } catch (err) {
-        console.error('Error parsing the message from server', err);
-      }
-
-    }
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
-    }
-    socket.onerror = (error) => {
-      console.error('WebSocket error: ', error);
-    }
-    return () => {
-      if (socket) socket.close();
-    }
+  
 
   }, [API_URL])
 

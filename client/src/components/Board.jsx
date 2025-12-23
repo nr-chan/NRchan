@@ -104,6 +104,8 @@ export default function Board() {
       return;
     }
 
+    console.log(captchaToken)
+
     const formData = new FormData()
 
     if (!subject || !subject.trim()) {

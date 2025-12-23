@@ -16,19 +16,10 @@
 
     "r2_buckets": [
         {
-            "binding": "MY_BUCKET",
+            "binding": "NR_BUCKET",
             "bucket_name": "nr-chan",
             "remote": true
         }
-    ],
-    "observability": {
-        "logs": {
-        "enabled": false,
-        "head_sampling_rate": 1,
-        "invocation_logs": true,
-        "persist": true
-        }
-    }
-
+    ]
 
 }

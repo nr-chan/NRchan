@@ -27,7 +27,7 @@ func main() {
 	}
 
 	server.GET("/hello", func(c *gin.Context) {
-		c.String(http.StatusOK, "Hello, World!")
+		c.JSON(http.StatusOK, gin.H{"message": "Hello, World!"})
 	})
 	workers.Serve(server)
 }

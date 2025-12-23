@@ -39,16 +39,16 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 	threads := []dto.Thread{}
 	for rows.Next() {
 		var (
-			th dto.Thread
-			imageID sql.NullInt64
-			img dto.Image
-			imgID sql.NullInt64
-			imgURL sql.NullString
-			imgSize sql.NullInt64
-			imgW sql.NullInt64
-			imgH sql.NullInt64
-			imgTW sql.NullInt64
-			imgTH sql.NullInt64
+			th        dto.Thread
+			imageID   sql.NullInt64
+			img       dto.Image
+			imgID     sql.NullInt64
+			imgURL    sql.NullString
+			imgSize   sql.NullInt64
+			imgW      sql.NullInt64
+			imgH      sql.NullInt64
+			imgTW     sql.NullInt64
+			imgTH     sql.NullInt64
 			lockedInt int64
 			stickyInt int64
 		)
@@ -66,12 +66,24 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 		}
 		if imgID.Valid {
 			img.ID = imgID.Int64
-			if imgURL.Valid { img.URL = imgURL.String }
-			if imgSize.Valid { img.Size = imgSize.Int64 }
-			if imgW.Valid { img.Width = imgW.Int64 }
-			if imgH.Valid { img.Height = imgH.Int64 }
-			if imgTW.Valid { img.ThumbWidth = imgTW.Int64 }
-			if imgTH.Valid { img.ThumbHeight = imgTH.Int64 }
+			if imgURL.Valid {
+				img.URL = imgURL.String
+			}
+			if imgSize.Valid {
+				img.Size = imgSize.Int64
+			}
+			if imgW.Valid {
+				img.Width = imgW.Int64
+			}
+			if imgH.Valid {
+				img.Height = imgH.Int64
+			}
+			if imgTW.Valid {
+				img.ThumbWidth = imgTW.Int64
+			}
+			if imgTH.Valid {
+				img.ThumbHeight = imgTH.Int64
+			}
 			th.Image = &img
 		}
 		threads = append(threads, th)

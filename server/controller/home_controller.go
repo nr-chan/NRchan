@@ -21,7 +21,7 @@ func (c *HomeController) HandleRecent(ctx *gin.Context) {
 	threads, err := c.homeService.GetRecent(ctx)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get recent threads", err.Error(), nil)
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 	res := utils.BuildResponseSuccess("Successfully got recent threads", threads)

@@ -9,6 +9,8 @@ import (
 
 type (
 	ReplyRepository interface {
+		AddReply(ctx context.Context, id int64, parentReply *int64, username string, posterID string, content string) (int64, error)
+		UpdateReplyImage(ctx context.Context, replyId int64, imageId int64) error
 		DeleteReplyWithId(ctx context.Context, id string) error
 		GetRepliesByThreadID(ctx context.Context, threadID interface{}) ([]dto.Reply, error)
 	}
@@ -41,16 +43,20 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID int
 	replies := []dto.Reply{}
 	for rows.Next() {
 		var (
-			rp dto.Reply
-			parent sql.NullInt64
-			image sql.NullInt64
+			rp      dto.Reply
+			parent  sql.NullInt64
+			image   sql.NullInt64
 			isOPInt int64
 		)
 		if err := rows.Scan(&rp.ID, &rp.ThreadID, &parent, &rp.Username, &rp.Content, &image, &rp.CreatedAt, &isOPInt, &rp.PosterID); err != nil {
 			return nil, err
 		}
-		if parent.Valid { rp.ParentReply = &parent.Int64 }
-		if image.Valid { rp.ImageID = &image.Int64 }
+		if parent.Valid {
+			rp.ParentReply = &parent.Int64
+		}
+		if image.Valid {
+			rp.ImageID = &image.Int64
+		}
 		rp.IsOP = isOPInt == 1
 		replies = append(replies, rp)
 	}
@@ -58,4 +64,17 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID int
 		return nil, err
 	}
 	return replies, nil
+}
+
+func (r *replyRepository) AddReply(ctx context.Context, id int64, parentReply *int64, username string, posterID string, content string) (int64, error) {
+	res, err := r.db.ExecContext(ctx, "INSERT INTO replies (thread_id, parent_reply, username, poster_id, content) VALUES (?, ?, ?, ?, ?)", id, parentReply, username, posterID, content)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *replyRepository) UpdateReplyImage(ctx context.Context, replyId int64, imageId int64) error {
+	_, err := r.db.ExecContext(ctx, "UPDATE replies SET image_id = ? WHERE id = ?", imageId, replyId)
+	return err
 }
