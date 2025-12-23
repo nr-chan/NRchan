@@ -2,7 +2,6 @@ package provider
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/nr-chan/NRchan/config"
 	"github.com/samber/do"
@@ -33,8 +32,6 @@ func RegisterDatabase(injector *do.Injector) {
 	// Register DatabaseProvider
 	do.ProvideNamed(injector, "DatabaseProvider", func(i *do.Injector) (*DatabaseProvider, error) {
 		db := do.MustInvokeNamed[*sql.DB](i, "Database")
-
-		fmt.Println("%+v", db)
 		return NewDatabaseProvider(db), nil
 	})
 }

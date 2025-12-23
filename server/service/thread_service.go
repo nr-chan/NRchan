@@ -2,94 +2,244 @@ package service
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+	"sync"
+	"time"
 
 	"github.com/nr-chan/NRchan/dto"
+	"github.com/nr-chan/NRchan/dto/request"
+	"github.com/nr-chan/NRchan/repository"
+	"github.com/nr-chan/NRchan/utils"
 )
 
 type (
 	ThreadService interface {
-		CreateThread(ctx context.Context, thread dto.Thread) error
+		CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error)
+		GetThreadById(ctx context.Context, id string) (dto.Thread, error)
+
+		// Reply to thread
+		AddReply(ctx context.Context, reply request.ReplyRequest) error
+		//DeleteReply(ctx context.Context, replyID int64) error
 	}
 	threadService struct {
-		db *sql.DB
+		threadRepository repository.ThreadRepository
+		replyRepository  repository.ReplyRepository
+		jwtService       JWTService
 	}
 )
 
-func NewThreadService(db *sql.DB) *threadService {
-	return &threadService{db: db}
+func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService) *threadService {
+	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt}
 }
 
-func (b *threadService) CreateThread(ctx context.Context, content string, boardID int64, username string) error {
-	rows, err := b.db.QueryContext(ctx, `
-        SELECT 
-            t.id, t.board_id, t.username, t.subject, t.content, t.image_id,
-            t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
-            i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
-        FROM threads t
-        LEFT JOIN images i ON i.id = t.image_id
-        ORDER BY t.last_bump DESC
-        LIMIT 10
-    `)
+func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
+	// 1) Resolve board id
+	boardID, err := b.threadRepository.GetBoardIDByKey(ctx, thread.Board)
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
-	defer rows.Close()
 
-	threads := []dto.Thread{}
-	for rows.Next() {
-		var (
-			th        dto.Thread
-			imageID   sql.NullInt64
-			img       dto.Image
-			imgID     sql.NullInt64
-			imgURL    sql.NullString
-			imgSize   sql.NullInt64
-			imgW      sql.NullInt64
-			imgH      sql.NullInt64
-			imgTW     sql.NullInt64
-			imgTH     sql.NullInt64
-			lockedInt int64
-			stickyInt int64
-		)
-		if err := rows.Scan(
-			&th.ID, &th.BoardID, &th.Username, &th.Subject, &th.Content, &imageID,
-			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
-			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
-		); err != nil {
-			return nil, err
-		}
-		th.Locked = lockedInt == 1
-		th.Sticky = stickyInt == 1
-		if imageID.Valid {
-			th.ImageID = &imageID.Int64
-		}
-		if imgID.Valid {
-			img.ID = imgID.Int64
-			if imgURL.Valid {
-				img.URL = imgURL.String
+	username := utils.UUIDToPosterID(thread.UUID)
+
+	// 2) Kick off image processing in parallel (if present)
+	var (
+		wg       sync.WaitGroup
+		imgIDCh  chan int64
+		imgErrCh chan error
+		hasImage = thread.Image != nil
+	)
+
+	if hasImage {
+		imgIDCh = make(chan int64, 1)
+		imgErrCh = make(chan error, 1)
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Initialize bucket via binding name
+			bucket := utils.NewImageBucket("NR_BUCKET")
+			if bucket == nil {
+				imgErrCh <- fmt.Errorf("image bucket is not configured")
+				return
 			}
-			if imgSize.Valid {
-				img.Size = imgSize.Int64
+
+			// Open uploaded file
+			f, err := thread.Image.Open()
+			if err != nil {
+				imgErrCh <- err
+				return
 			}
-			if imgW.Valid {
-				img.Width = imgW.Int64
+			defer f.Close()
+
+			// Upload to R2
+			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
+			contentType := thread.Image.Header.Get("Content-Type")
+			if err := bucket.Post(key, f, contentType); err != nil {
+				imgErrCh <- err
+				return
 			}
-			if imgH.Valid {
-				img.Height = imgH.Int64
+
+			// Rewind and decode dimensions
+			if _, err := f.Seek(0, 0); err != nil {
+				imgErrCh <- err
+				return
 			}
-			if imgTW.Valid {
-				img.ThumbWidth = imgTW.Int64
+			cfg, _, err := image.DecodeConfig(f)
+			if err != nil {
+				imgErrCh <- err
+				return
 			}
-			if imgTH.Valid {
-				img.ThumbHeight = imgTH.Int64
+
+			// Insert image metadata; thumb dims same as full for now
+			imageID, err := b.threadRepository.InsertImage(
+				ctx, key, thread.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
+			)
+			if err != nil {
+				imgErrCh <- err
+				return
 			}
-			th.Image = &img
-		}
-		threads = append(threads, th)
+			imgIDCh <- imageID
+		}()
 	}
-	if err := rows.Err(); err != nil {
-		return nil, err
+
+	// 3) Insert the thread row immediately (without image_id)
+	threadID, err := b.threadRepository.InsertThread(ctx, boardID, thread.Subject, thread.Content, thread.UUID, username)
+	if err != nil {
+		return -1, err
 	}
-	return threads, nil
+
+	// 4) If an image exists, wait for the image task and then update the thread with image_id
+	if hasImage {
+		wg.Wait()
+
+		select {
+		case err := <-imgErrCh:
+			if err != nil {
+				return -1, err
+			}
+		default:
+			// no image error
+		}
+
+		select {
+		case imgID := <-imgIDCh:
+			if imgID != 0 {
+				if err := b.threadRepository.UpdateThreadImage(ctx, threadID, imgID); err != nil {
+					return -1, err
+				}
+			}
+		default:
+			// no image id returned (shouldn't happen if no error)
+		}
+	}
+
+	return threadID, nil
+}
+
+func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Thread, error) {
+	return b.threadRepository.GetThreadById(ctx, id)
+}
+
+func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest) error {
+	username := utils.UUIDToPosterID(reply.UUID)
+
+	// 2) Kick off image processing in parallel (if present)
+	var (
+		wg       sync.WaitGroup
+		imgIDCh  chan int64
+		imgErrCh chan error
+		hasImage = reply.Image != nil
+	)
+
+	if hasImage {
+		imgIDCh = make(chan int64, 1)
+		imgErrCh = make(chan error, 1)
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Initialize bucket via binding name
+			bucket := utils.NewImageBucket("NR_BUCKET")
+			if bucket == nil {
+				imgErrCh <- fmt.Errorf("image bucket is not configured")
+				return
+			}
+
+			// Open uploaded file
+			f, err := reply.Image.Open()
+			if err != nil {
+				imgErrCh <- err
+				return
+			}
+			defer f.Close()
+
+			// Upload to R2
+			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
+			contentType := reply.Image.Header.Get("Content-Type")
+			if err := bucket.Post(key, f, contentType); err != nil {
+				imgErrCh <- err
+				return
+			}
+
+			// Rewind and decode dimensions
+			if _, err := f.Seek(0, 0); err != nil {
+				imgErrCh <- err
+				return
+			}
+			cfg, _, err := image.DecodeConfig(f)
+			if err != nil {
+				imgErrCh <- err
+				return
+			}
+
+			// Insert image metadata; thumb dims same as full for now
+			imageID, err := b.threadRepository.InsertImage(
+				ctx, key, reply.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
+			)
+			if err != nil {
+				imgErrCh <- err
+				return
+			}
+			imgIDCh <- imageID
+		}()
+	}
+
+	// 3) Insert the thread row immediately (without image_id)
+	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, reply.ParentReply, username, reply.UUID, reply.Content)
+	if err != nil {
+		return err
+	}
+
+	// 4) If an image exists, wait for the image task and then update the thread with image_id
+	if hasImage {
+		wg.Wait()
+
+		select {
+		case err := <-imgErrCh:
+			if err != nil {
+				return err
+			}
+		default:
+			// no image error
+		}
+
+		select {
+		case imgID := <-imgIDCh:
+			if imgID != 0 {
+				if err := b.replyRepository.UpdateReplyImage(ctx, replyId, imgID); err != nil {
+					return err
+				}
+			}
+		default:
+			// no image id returned (shouldn't happen if no error)
+		}
+	}
+
+	return nil
 }
