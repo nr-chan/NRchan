@@ -2,9 +2,6 @@ package provider
 
 import (
 	"database/sql"
-
-	"github.com/nr-chan/NRchan/config"
-	"github.com/samber/do"
 )
 
 type DatabaseProvider struct {
@@ -21,17 +18,16 @@ func (dp *DatabaseProvider) GetDatabase() *sql.DB {
 	return dp.database
 }
 
-func RegisterDatabase(injector *do.Injector) {
+func RegisterDatabase(cfgCnt *ConfigContainer) (*DatabaseProvider, error) {
 
 	// Register mongoapi HTTP Client
-	do.ProvideNamed(injector, "Database", func(i *do.Injector) (*sql.DB, error) {
-		cfg := do.MustInvokeNamed[*config.AppConfig](i, "AppConfig")
-		return cfg.DatabaseConfig.SetupClient()
-	})
+
+	db, err := cfgCnt.Config.DatabaseConfig.SetupClient()
+	if err != nil {
+		return nil, err
+	}
 
 	// Register DatabaseProvider
-	do.ProvideNamed(injector, "DatabaseProvider", func(i *do.Injector) (*DatabaseProvider, error) {
-		db := do.MustInvokeNamed[*sql.DB](i, "Database")
-		return NewDatabaseProvider(db), nil
-	})
+
+	return NewDatabaseProvider(db), nil
 }
