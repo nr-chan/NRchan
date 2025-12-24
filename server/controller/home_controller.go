@@ -5,7 +5,6 @@ import (
 
 	"github.com/nr-chan/NRchan/utils"
 
-	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/service"
 )
 
@@ -17,13 +16,11 @@ func NewHomeController(hs service.HomeService) *HomeController {
 	return &HomeController{homeService: hs}
 }
 
-func (c *HomeController) HandleRecent(ctx *gin.Context) {
-	threads, err := c.homeService.GetRecent(ctx)
+func (c *HomeController) HandleRecent(w http.ResponseWriter, r *http.Request) {
+	threads, err := c.homeService.GetRecent(r.Context())
 	if err != nil {
-		res := utils.BuildResponseFailed("Failed to get recent threads", err.Error(), nil)
-		ctx.JSON(http.StatusInternalServerError, res)
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get recent threads", err.Error(), nil)
 		return
 	}
-	res := utils.BuildResponseSuccess("Successfully got recent threads", threads)
-	ctx.JSON(http.StatusOK, res)
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got recent threads", threads)
 }

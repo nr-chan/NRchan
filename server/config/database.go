@@ -2,7 +2,6 @@ package config
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/syumai/workers/cloudflare/d1"
 )
@@ -19,7 +18,6 @@ func NewDatabaseConfig() *DatabaseConfig {
 func (dc *DatabaseConfig) SetupClient() (*sql.DB, error) {
 	client, err := sql.Open("d1", "DB")
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return client, nil

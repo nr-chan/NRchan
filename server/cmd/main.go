@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/middleware"
 	"github.com/nr-chan/NRchan/provider"
 	"github.com/nr-chan/NRchan/routes"
@@ -12,21 +11,21 @@ import (
 )
 
 func main() {
+	mux := http.DefaultServeMux
 
-	server := gin.Default()
-	server.Use(middleware.CorsMiddleware())
+	// Apply CORS middleware to all routes
+	handler := middleware.CorsMiddleware(mux)
 
 	container, err := provider.NewContainer()
 	if err != nil {
 		log.Fatal("Failed to create container: ", err)
 	}
 
-	if err := routes.RegisterRoutes(server, container); err != nil {
+	// Register routes
+	if err := routes.RegisterRoutes(mux, container); err != nil {
 		log.Fatal("Failed to register routes: ", err)
 	}
 
-	server.GET("/hello", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Hello, World!"})
-	})
-	workers.Serve(server)
+	// Start the server
+	workers.Serve(handler)
 }

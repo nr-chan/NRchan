@@ -1,14 +1,15 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+
 	"github.com/nr-chan/NRchan/dto"
 	"github.com/nr-chan/NRchan/repository"
 )
 
 type (
 	HomeService interface {
-		GetRecent(ctx *gin.Context) ([]dto.Thread, error)
+		GetRecent(ctx context.Context) ([]dto.Thread, error)
 	}
 	homeService struct {
 		homeRepository repository.HomeRepository
@@ -20,6 +21,6 @@ func NewHomeService(boardRepository repository.HomeRepository, jwt JWTService) H
 	return &homeService{homeRepository: boardRepository, jwtService: jwt}
 }
 
-func (h *homeService) GetRecent(ctx *gin.Context) ([]dto.Thread, error) {
+func (h *homeService) GetRecent(ctx context.Context) ([]dto.Thread, error) {
 	return h.homeRepository.GetRecents(ctx)
 }

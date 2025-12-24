@@ -1,14 +1,14 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
+
 	"github.com/nr-chan/NRchan/provider"
 )
 
-func Board(route *gin.Engine, container *provider.Container) {
+func Board(route *http.ServeMux, container *provider.Container) {
 	boardController := container.HandlerContainer.BoardController
-	routes := route.Group("/api/board")
-	{
-		routes.GET(":board/", boardController.GetThreadsByBoard)
-	}
+
+	// Prefix match
+	route.HandleFunc("/api/board/", boardController.GetThreadsByBoard)
 }
