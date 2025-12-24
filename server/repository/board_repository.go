@@ -167,7 +167,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 		}
 		r.IsOP = isOPInt == 1
 		if idx, ok := threadIndex[r.ThreadID]; ok {
-			threads[idx].Replies = append(threads[idx].Replies, &r)
+			threads[idx].Replies = append(threads[idx].Replies, r)
 		}
 	}
 	if err := repRows.Err(); err != nil {

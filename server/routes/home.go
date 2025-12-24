@@ -8,5 +8,5 @@ import (
 
 func Home(route *http.ServeMux, container *provider.Container) {
 	homeController := container.HandlerContainer.HomeController
-	route.HandleFunc("/api/home/recent", homeController.HandleRecent)
+	route.HandleFunc("GET /api/home/recent", homeController.HandleRecent)
 }

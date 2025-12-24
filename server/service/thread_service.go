@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -20,20 +21,30 @@ type (
 	ThreadService interface {
 		CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error)
 		GetThreadById(ctx context.Context, id string) (dto.Thread, error)
+		DeleteThread(ctx context.Context, threadId, posterId string) error
 
 		// Reply to thread
-		AddReply(ctx context.Context, reply request.ReplyRequest) error
-		//DeleteReply(ctx context.Context, replyID int64) error
+		AddReply(ctx context.Context, reply request.ReplyRequest) (int64, error)
+		DeleteReply(ctx context.Context, replyID string, posterId string) error
+		UpdateVote(ctx context.Context, threadId, posterId string, isUpvote bool) error
 	}
 	threadService struct {
 		threadRepository repository.ThreadRepository
 		replyRepository  repository.ReplyRepository
-		jwtService       JWTService
+
+		imageBucket *utils.ImageBucket
+		jwtService  JWTService
 	}
 )
 
 func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService) *threadService {
-	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt}
+	bucket := utils.NewImageBucket("NR_BUCKET")
+
+	if bucket == nil {
+		return nil
+	}
+
+	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: bucket}
 }
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
@@ -61,13 +72,6 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 		go func() {
 			defer wg.Done()
 
-			// Initialize bucket via binding name
-			bucket := utils.NewImageBucket("NR_BUCKET")
-			if bucket == nil {
-				imgErrCh <- fmt.Errorf("image bucket is not configured")
-				return
-			}
-
 			// Open uploaded file
 			f, err := thread.Image.Open()
 			if err != nil {
@@ -79,7 +83,7 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 			// Upload to R2
 			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
 			contentType := thread.Image.Header.Get("Content-Type")
-			if err := bucket.Post(key, f, contentType); err != nil {
+			if err := b.imageBucket.Post(key, f, contentType); err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -141,11 +145,36 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 	return threadID, nil
 }
 
-func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Thread, error) {
-	return b.threadRepository.GetThreadById(ctx, id)
+func (b *threadService) DeleteThread(ctx context.Context, threadId, posterId string) error {
+	replyPosterId, err := b.threadRepository.GetPosterId(ctx, threadId)
+
+	if err != nil {
+		return err
+	}
+
+	if posterId != replyPosterId {
+		return errors.New("you are not the poster of this reply")
+	}
+
+	return b.threadRepository.DeleteByID(ctx, threadId)
 }
 
-func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest) error {
+func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Thread, error) {
+	thread, err := b.threadRepository.GetThreadById(ctx, id)
+	if err != nil {
+		return dto.Thread{}, err
+	}
+
+	replies, err := b.replyRepository.GetRepliesByThreadID(ctx, id)
+	if err != nil {
+		return dto.Thread{}, err
+	}
+
+	thread.Replies = replies
+	return thread, nil
+}
+
+func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest) (int64, error) {
 	username := utils.UUIDToPosterID(reply.UUID)
 
 	// 2) Kick off image processing in parallel (if present)
@@ -164,13 +193,6 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 		go func() {
 			defer wg.Done()
 
-			// Initialize bucket via binding name
-			bucket := utils.NewImageBucket("NR_BUCKET")
-			if bucket == nil {
-				imgErrCh <- fmt.Errorf("image bucket is not configured")
-				return
-			}
-
 			// Open uploaded file
 			f, err := reply.Image.Open()
 			if err != nil {
@@ -182,7 +204,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 			// Upload to R2
 			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
 			contentType := reply.Image.Header.Get("Content-Type")
-			if err := bucket.Post(key, f, contentType); err != nil {
+			if err := b.imageBucket.Post(key, f, contentType); err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -213,7 +235,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 	// 3) Insert the thread row immediately (without image_id)
 	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, reply.ParentReply, username, reply.UUID, reply.Content)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	// 4) If an image exists, wait for the image task and then update the thread with image_id
@@ -223,7 +245,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 		select {
 		case err := <-imgErrCh:
 			if err != nil {
-				return err
+				return -1, err
 			}
 		default:
 			// no image error
@@ -233,7 +255,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 		case imgID := <-imgIDCh:
 			if imgID != 0 {
 				if err := b.replyRepository.UpdateReplyImage(ctx, replyId, imgID); err != nil {
-					return err
+					return -1, err
 				}
 			}
 		default:
@@ -241,5 +263,24 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 		}
 	}
 
-	return nil
+	return replyId, nil
+}
+
+func (b *threadService) DeleteReply(ctx context.Context, replyID string, posterId string) error {
+
+	replyPosterId, err := b.replyRepository.GetPosterId(ctx, replyID)
+
+	if err != nil {
+		return err
+	}
+
+	if posterId != replyPosterId {
+		return errors.New("you are not the poster of this reply")
+	}
+
+	return b.replyRepository.DeleteReplyWithId(ctx, replyID)
+}
+
+func (b *threadService) UpdateVote(ctx context.Context, threadId, posterId string, isUpvote bool) error {
+	return b.threadRepository.UpdateVote(ctx, threadId, posterId, isUpvote)
 }

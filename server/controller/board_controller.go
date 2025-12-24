@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/nr-chan/NRchan/utils"
 
@@ -17,12 +16,7 @@ func NewBoardController(bs service.BoardService) *BoardController {
 	return &BoardController{boardService: bs}
 }
 func (c *BoardController) GetThreadsByBoard(w http.ResponseWriter, r *http.Request) {
-	board := strings.TrimPrefix(r.URL.Path, "/api/board/")
-	if board == "" {
-		utils.BuildResponseFailed(w, http.StatusBadRequest, "Board not specified", "missing board param", nil)
-		return
-	}
-
+	board := r.PathValue("board")
 	threads, err := c.boardService.GetThreads(r.Context(), board)
 	if err != nil {
 		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get threads", err.Error(), nil)
@@ -30,4 +24,14 @@ func (c *BoardController) GetThreadsByBoard(w http.ResponseWriter, r *http.Reque
 	}
 
 	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got threads", threads)
+}
+
+func (c *BoardController) GetAllBoards(w http.ResponseWriter, r *http.Request) {
+	boards, err := c.boardService.GetAllBoards(r.Context())
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get boards", err.Error(), nil)
+		return
+	}
+
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got boards", boards)
 }

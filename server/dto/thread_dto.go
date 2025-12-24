@@ -28,7 +28,7 @@ type Thread struct {
 	PosterID  string   `json:"poster_id,omitempty"`
 	Locked    bool     `json:"locked"`
 	Sticky    bool     `json:"sticky"`
-	Replies   []*Reply `json:"replies,omitempty"`
+	Replies   []Reply  `json:"replies,omitempty"`
 	Upvotes   VoteInfo `json:"upvotes,omitempty"`
 	Downvotes VoteInfo `json:"downvotes,omitempty"`
 }

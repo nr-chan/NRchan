@@ -9,7 +9,7 @@ import (
 func Admin(route *http.ServeMux, container *provider.Container) {
 	adminController := container.HandlerContainer.AdminController
 
-	route.HandleFunc("/api/admin/login", adminController.LoginController)
+	route.HandleFunc("POST /api/admin/login", adminController.LoginController)
 	//routes.POST("/create", adminController.CreateAdmin)
 	//routes.GET("/list", middleware.Authenticate(jwtService), adminController.ListAdmins)
 	//routes.DELETE(":id", middleware.Authenticate(jwtService), adminController.Delete)

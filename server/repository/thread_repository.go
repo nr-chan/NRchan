@@ -4,8 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/nr-chan/NRchan/dto"
+)
+
+const (
+	VoteUp   = 1
+	VoteDown = -1
 )
 
 type (
@@ -16,8 +22,11 @@ type (
 		InsertThread(ctx context.Context, boardID int64, subject, content, posterID, username string) (int64, error)
 		InsertImage(ctx context.Context, url string, sizeBytes int64, width, height, thumbWidth, thumbHeight int) (int64, error)
 		UpdateThreadImage(ctx context.Context, threadID, imageID int64) error
-		// DeleteByID(ctx context.Context, id int64) error
+		DeleteByID(ctx context.Context, id string) error
+		GetPosterId(ctx context.Context, threadId string) (string, error)
 		// GetAllThreads(ctx context.Context) ([]dto.Thread, error)
+
+		UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error
 	}
 	threadRepository struct {
 		db *sql.DB
@@ -60,8 +69,83 @@ func (r *threadRepository) UpdateThreadImage(ctx context.Context, threadID, imag
 
 func (r *threadRepository) GetThreadById(ctx context.Context, id string) (dto.Thread, error) {
 	var thread dto.Thread
-	if err := r.db.QueryRowContext(ctx, "SELECT * FROM threads WHERE id = ?", id).Scan(&thread); err != nil {
-		return dto.Thread{}, err
+	err := r.db.QueryRowContext(ctx, `
+        SELECT id, board_id, subject, content, poster_id, username, 
+               image_id, created_at, locked, sticky
+        FROM threads 
+        WHERE id = ?`,
+		id,
+	).Scan(
+		&thread.ID,
+		&thread.BoardID,
+		&thread.Subject,
+		&thread.Content,
+		&thread.PosterID,
+		&thread.Username,
+		&thread.ImageID,
+		&thread.CreatedAt,
+		&thread.Locked,
+		&thread.Sticky,
+	)
+
+	if err != nil {
+		return dto.Thread{}, fmt.Errorf("failed to get thread: %w", err)
 	}
+
 	return thread, nil
+}
+
+func (r *threadRepository) GetPosterId(ctx context.Context, threadId string) (string, error) {
+	var posterId string
+	if err := r.db.QueryRowContext(ctx, "SELECT poster_id FROM threads WHERE id = ?", threadId).Scan(&posterId); err != nil {
+		return "", errors.New("invalid thread ID")
+	}
+	return posterId, nil
+}
+
+func (r *threadRepository) DeleteByID(ctx context.Context, id string) error {
+	_, err := r.db.ExecContext(ctx, "DELETE FROM threads WHERE id = ?", id)
+	return err
+}
+
+func (r *threadRepository) UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error {
+	newVote := VoteDown
+	if isUpvote {
+		newVote = VoteUp
+	}
+
+	var existingVote int
+	err := r.db.QueryRowContext(
+		ctx,
+		`SELECT vote_type FROM votes WHERE thread_id = ? AND voter_id = ?`,
+		threadID, voterID,
+	).Scan(&existingVote)
+
+	// No existing vote → INSERT
+	if err == sql.ErrNoRows {
+		_, err = r.db.ExecContext(
+			ctx,
+			`INSERT INTO votes (thread_id, voter_id, vote_type) VALUES (?, ?, ?)`,
+			threadID, voterID, newVote,
+		)
+		return err
+	}
+
+	if err != nil {
+		return err
+	}
+
+	// Same vote again → DO NOTHING
+	if existingVote == newVote {
+		return nil
+	}
+
+	// Switch vote → UPDATE
+	_, err = r.db.ExecContext(
+		ctx,
+		`UPDATE votes SET vote_type = ?, created_at = CURRENT_TIMESTAMP 
+		 WHERE thread_id = ? AND voter_id = ?`,
+		newVote, threadID, voterID,
+	)
+	return err
 }

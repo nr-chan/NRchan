@@ -18,10 +18,6 @@ func NewAdminController(as service.AdminService) *AdminController {
 }
 
 func (c *AdminController) LoginController(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var loginRequest request.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
