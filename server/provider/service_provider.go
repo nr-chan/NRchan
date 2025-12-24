@@ -1,36 +1,21 @@
 package provider
 
 import (
-	"github.com/nr-chan/NRchan/repository"
 	"github.com/nr-chan/NRchan/service"
-	"github.com/samber/do"
 )
 
-func RegisterServices(injector *do.Injector) {
+type ServiceContainer struct {
+	boardService  service.BoardService
+	adminService  service.AdminService
+	homeService   service.HomeService
+	threadService service.ThreadService
+}
 
-	do.ProvideNamed(injector, "BoardService", func(i *do.Injector) (service.BoardService, error) {
-		boardRepository := do.MustInvokeNamed[repository.BoardRepository](i, "BoardRepository")
-		jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
-		return service.NewBoardService(boardRepository, jwtService), nil
-	})
-
-	do.ProvideNamed(injector, "AdminService", func(i *do.Injector) (service.AdminService, error) {
-		boardRepository := do.MustInvokeNamed[repository.BoardRepository](i, "BoardRepository")
-		jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
-		return service.NewAdminService(boardRepository, jwtService), nil
-	})
-
-	do.ProvideNamed(injector, "HomeService", func(i *do.Injector) (service.HomeService, error) {
-		homeRepository := do.MustInvokeNamed[repository.HomeRepository](i, "HomeRepository")
-		jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
-		return service.NewHomeService(homeRepository, jwtService), nil
-	})
-
-	do.ProvideNamed(injector, "ThreadService", func(i *do.Injector) (service.ThreadService, error) {
-		threadRepository := do.MustInvokeNamed[repository.ThreadRepository](i, "ThreadRepository")
-		replyRepository := do.MustInvokeNamed[repository.ReplyRepository](i, "ReplyRepository")
-		jwtService := do.MustInvokeNamed[service.JWTService](i, "JWTService")
-
-		return service.NewThreadService(threadRepository, replyRepository, jwtService), nil
-	})
+func RegisterServices(data *RepositoryContainer, jwtService service.JWTService) ServiceContainer {
+	return ServiceContainer{
+		boardService:  service.NewBoardService(data.boardRepository, jwtService),
+		adminService:  service.NewAdminService(data.boardRepository, jwtService),
+		homeService:   service.NewHomeService(data.homeRepository, jwtService),
+		threadService: service.NewThreadService(data.threadRepository, data.replyRepository, jwtService),
+	}
 }
