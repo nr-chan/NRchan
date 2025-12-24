@@ -12,3 +12,8 @@ type ThreadRequest struct {
 	Image        *multipart.FileHeader `form:"image"`
 	UUID         string                `form:"-"`
 }
+
+type VoteRequest struct {
+	IsUpvote bool   `form:"up" binding:"required"`
+	UUID     string `form:"uuid" binding:"required"`
+}

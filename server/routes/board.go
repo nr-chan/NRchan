@@ -9,6 +9,6 @@ import (
 func Board(route *http.ServeMux, container *provider.Container) {
 	boardController := container.HandlerContainer.BoardController
 
-	// Prefix match
-	route.HandleFunc("/api/board/", boardController.GetThreadsByBoard)
+	route.HandleFunc("GET /api/board/{board}", boardController.GetThreadsByBoard)
+	route.HandleFunc("GET /api/boards", boardController.GetAllBoards)
 }

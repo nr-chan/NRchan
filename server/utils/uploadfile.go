@@ -17,7 +17,7 @@ type ImageBucket struct {
 	bucket *r2.Bucket
 }
 
-func NewImageBucket(bucketName string) ImageBucketInterface {
+func NewImageBucket(bucketName string) *ImageBucket {
 	bucket, err := r2.NewBucket(bucketName)
 
 	if err != nil {

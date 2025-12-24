@@ -1,9 +1,9 @@
 {
   "name": "nrchan-server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "go run github.com/syumai/workers/cmd/workers-assets-gen && tinygo build -o ./build/app.wasm -target wasm -no-debug ./cmd",
+    "build": "go run github.com/syumai/workers/cmd/workers-assets-gen -mode=go && GOOS=js GOARCH=wasm go build -o ./build/app.wasm ./cmd",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev"
