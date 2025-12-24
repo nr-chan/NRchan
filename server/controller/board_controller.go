@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/nr-chan/NRchan/utils"
 	"net/http"
+	"strings"
 
-	"github.com/gin-gonic/gin"
+	"github.com/nr-chan/NRchan/utils"
+
 	"github.com/nr-chan/NRchan/service"
 )
 
@@ -15,15 +16,18 @@ type BoardController struct {
 func NewBoardController(bs service.BoardService) *BoardController {
 	return &BoardController{boardService: bs}
 }
-
-func (c *BoardController) GetThreadsByBoard(ctx *gin.Context) {
-	board := ctx.Param("board")
-	threads, err := c.boardService.GetThreads(ctx, board)
-	if err != nil {
-		res := utils.BuildResponseFailed("Failed to get threads", err.Error(), nil)
-		ctx.JSON(http.StatusOK, res)
+func (c *BoardController) GetThreadsByBoard(w http.ResponseWriter, r *http.Request) {
+	board := strings.TrimPrefix(r.URL.Path, "/api/board/")
+	if board == "" {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Board not specified", "missing board param", nil)
 		return
 	}
-	res := utils.BuildResponseSuccess("Successfully got threads", threads)
-	ctx.JSON(http.StatusOK, res)
+
+	threads, err := c.boardService.GetThreads(r.Context(), board)
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get threads", err.Error(), nil)
+		return
+	}
+
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got threads", threads)
 }

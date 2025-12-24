@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"encoding/json"
+	"net/http"
+)
+
 type Response struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message"`
@@ -8,23 +13,40 @@ type Response struct {
 	Meta    any    `json:"meta,omitempty"`
 }
 
-type EmptyObj struct{}
+func BuildResponseSuccess(
+	w http.ResponseWriter,
+	status int,
+	message string,
+	data any,
+) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 
-func BuildResponseSuccess(message string, data any) Response {
 	res := Response{
 		Status:  true,
 		Message: message,
 		Data:    data,
 	}
-	return res
+
+	_ = json.NewEncoder(w).Encode(res)
 }
 
-func BuildResponseFailed(message string, err string, data any) Response {
+func BuildResponseFailed(
+	w http.ResponseWriter,
+	status int,
+	message string,
+	err any,
+	data any,
+) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
 	res := Response{
 		Status:  false,
 		Message: message,
 		Error:   err,
 		Data:    data,
 	}
-	return res
+
+	_ = json.NewEncoder(w).Encode(res)
 }

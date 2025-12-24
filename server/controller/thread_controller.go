@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/dto/request"
 	"github.com/nr-chan/NRchan/service"
+	"github.com/nr-chan/NRchan/utils"
 )
 
 type ThreadController struct {
@@ -17,49 +19,61 @@ func NewThreadController(ts service.ThreadService) *ThreadController {
 	return &ThreadController{threadService: ts}
 }
 
-func (c *ThreadController) PostThread(ctx *gin.Context) {
-	var threadRequest request.ThreadRequest
-	if err := ctx.ShouldBind(&threadRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-
-	threadRequest.UUID = ctx.GetHeader("uuid")
-
-	threadID, err := c.threadService.CreateThread(ctx, threadRequest)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+func (c *ThreadController) PostThread(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Thread created successfully", "thread_id": threadID})
+	var threadRequest request.ThreadRequest
+	if err := json.NewDecoder(r.Body).Decode(&threadRequest); err != nil {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid request body", err.Error(), nil)
+		return
+	}
+	threadRequest.UUID = r.Header.Get("uuid")
+
+	threadID, err := c.threadService.CreateThread(r.Context(), threadRequest)
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to create thread", err.Error(), nil)
+		return
+	}
+
+	utils.BuildResponseSuccess(w, http.StatusOK, "Thread created successfully", map[string]interface{}{
+		"thread_id": threadID,
+	})
 }
 
-func (c *ThreadController) PostReply(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	if idStr == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "thread id is required in URL"})
+func (c *ThreadController) PostReply(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	threadID, err := strconv.ParseInt(idStr, 10, 64)
+
+	// Extract thread ID from URL path
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 3 {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid URL", "thread id is required in URL", nil)
+		return
+	}
+	threadID, err := strconv.ParseInt(pathParts[len(pathParts)-1], 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread id"})
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid thread ID", "thread id must be a number", nil)
 		return
 	}
 
 	var replyRequest request.ReplyRequest
-	if err := ctx.ShouldBind(&replyRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&replyRequest); err != nil {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid request body", err.Error(), nil)
 		return
 	}
 
 	replyRequest.ThreadID = threadID
+	replyRequest.UUID = r.Header.Get("uuid")
 
-	replyRequest.UUID = ctx.GetHeader("uuid")
-
-	if err := c.threadService.AddReply(ctx, replyRequest); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := c.threadService.AddReply(r.Context(), replyRequest); err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to add reply", err.Error(), nil)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Reply added successfully"})
+	utils.BuildResponseSuccess(w, http.StatusOK, "Reply added successfully", nil)
 }

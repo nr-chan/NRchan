@@ -1,14 +1,12 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
+
 	"github.com/nr-chan/NRchan/provider"
 )
 
-func Home(route *gin.Engine, container *provider.Container) {
+func Home(route *http.ServeMux, container *provider.Container) {
 	homeController := container.HandlerContainer.HomeController
-	routes := route.Group("/api/home")
-	{
-		routes.GET("/recent", homeController.HandleRecent)
-	}
+	route.HandleFunc("/api/home/recent", homeController.HandleRecent)
 }

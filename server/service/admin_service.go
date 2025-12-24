@@ -1,12 +1,13 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+
 	"github.com/nr-chan/NRchan/repository"
 )
 
 type AdminService interface {
-	Login(ctx *gin.Context) (string, error)
+	Login(ctx context.Context) (string, error)
 }
 
 type adminService struct {
@@ -18,6 +19,6 @@ func NewAdminService(boardRepository repository.BoardRepository, jwt JWTService)
 	return &adminService{boardRepository: boardRepository, jwtService: jwt}
 }
 
-func (j *adminService) Login(ctx *gin.Context) (string, error) {
+func (j *adminService) Login(ctx context.Context) (string, error) {
 	return "", nil
 }

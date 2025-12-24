@@ -1,11 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/nr-chan/NRchan/dto/request"
 	"github.com/nr-chan/NRchan/service"
+	"github.com/nr-chan/NRchan/utils"
 )
 
 type AdminController struct {
@@ -16,18 +17,23 @@ func NewAdminController(as service.AdminService) *AdminController {
 	return &AdminController{adminService: as}
 }
 
-func (c *AdminController) LoginController(ctx *gin.Context) {
+func (c *AdminController) LoginController(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var loginRequest request.LoginRequest
-	if err := ctx.ShouldBindJSON(&loginRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid request body", err.Error(), nil)
 		return
 	}
 
-	admin, err := c.adminService.Login(ctx)
+	admin, err := c.adminService.Login(r.Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Login failed", err.Error(), nil)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, admin)
+	utils.BuildResponseSuccess(w, http.StatusOK, "Login successful", admin)
 }
