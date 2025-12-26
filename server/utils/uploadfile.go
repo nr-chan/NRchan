@@ -7,6 +7,8 @@ import (
 	"github.com/syumai/workers/cloudflare/r2"
 )
 
+const IMAGE_SUBDOMAIN = "https://images.friedpotato.in/"
+
 type ImageBucketInterface interface {
 	Post(key string, body io.ReadCloser, contentType string) error
 	Get(key string) (*r2.Object, error)
@@ -29,27 +31,19 @@ func NewImageBucket(bucketName string) *ImageBucket {
 	}
 }
 
-func (s *ImageBucket) Post(key string, body io.ReadCloser, contentType string) error {
-
-	objects, err := s.bucket.List()
-	if err != nil {
-		return err
-	}
-	for _, obj := range objects.Objects {
-		if obj.Key == key {
-			return fmt.Errorf("key %s already exists", key)
-		}
-	}
-	_, err = s.bucket.Put(key, body, &r2.PutOptions{
+func (s *ImageBucket) Post(key string, body io.ReadCloser, contentType string) (string, error) {
+	_, err := s.bucket.Put(key, body, &r2.PutOptions{
 		HTTPMetadata: r2.HTTPMetadata{
 			ContentType: contentType,
 		},
 	})
+
+	imageURL := IMAGE_SUBDOMAIN + key
 	if err != nil {
-		return err
+		return imageURL, err
 	}
 
-	return nil
+	return imageURL, nil
 }
 
 func (s *ImageBucket) Get(key string) (*r2.Object, error) {

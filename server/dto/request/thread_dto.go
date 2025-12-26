@@ -14,6 +14,6 @@ type ThreadRequest struct {
 }
 
 type VoteRequest struct {
-	IsUpvote bool   `form:"up" binding:"required"`
-	UUID     string `form:"uuid" binding:"required"`
+	IsUpvote bool   `json:"up" binding:"required"`
+	UUID     string `json:"uuid" binding:"required"`
 }

@@ -12,7 +12,7 @@ type ConfigContainer struct {
 	Config *config.AppConfig
 
 	// Utils
-	ImageBucket utils.ImageBucketInterface
+	ImageBucket *utils.ImageBucket
 	JWTService  service.JWTService
 }
 
@@ -38,7 +38,7 @@ func NewContainer() (*Container, error) {
 	container.Config = cfg
 
 	// Initialize utils
-	container.ImageBucket = utils.NewImageBucket(cfg.R2BucketName)
+	container.ImageBucket = utils.NewImageBucket("NR_BUCKET")
 	container.JWTService = service.NewJWTService(cfg.JWTSecret)
 
 	// Initialize database
@@ -50,7 +50,7 @@ func NewContainer() (*Container, error) {
 	container.RepositoryContainer = RegisterRepositories(container.DatabaseProvider)
 
 	// Initialize services
-	container.ServiceContainer = RegisterServices(&container.RepositoryContainer, container.JWTService)
+	container.ServiceContainer = RegisterServices(&container.RepositoryContainer, container)
 
 	// Initialize handlers
 	container.HandlerContainer = RegisterHandlers(&container.ServiceContainer)

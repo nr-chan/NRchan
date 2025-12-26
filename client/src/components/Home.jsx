@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { links, boardList, API_URL, getSmallImageUrl, DynamicColorText } from '../Defs'
+import { links, boardList, API_URL, getSmallImageUrl, DynamicColorText, STATIC_URL } from '../Defs'
 
 const Home = () => {
   const nav = useNavigate()
@@ -77,7 +77,7 @@ const Home = () => {
       {/* Header */}
       <header className='flex justify-center p-2'>
         <img
-          src={`${API_URL}/images/banner.png`}
+          src={`${STATIC_URL}/banner.png`}
           alt='NRchan Logo'
           className='h-28'
         />

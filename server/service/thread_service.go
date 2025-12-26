@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"image"
@@ -37,18 +38,13 @@ type (
 	}
 )
 
-func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService) *threadService {
-	bucket := utils.NewImageBucket("NR_BUCKET")
-
-	if bucket == nil {
-		return nil
-	}
-
-	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: bucket}
+func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService, imageBucket *utils.ImageBucket) *threadService {
+	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: imageBucket}
 }
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
 	// 1) Resolve board id
+
 	boardID, err := b.threadRepository.GetBoardIDByKey(ctx, thread.Board)
 	if err != nil {
 		return -1, err
@@ -83,7 +79,8 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 			// Upload to R2
 			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
 			contentType := thread.Image.Header.Get("Content-Type")
-			if err := b.imageBucket.Post(key, f, contentType); err != nil {
+			imgURL, err := b.imageBucket.Post(key, f, contentType)
+			if err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -101,7 +98,7 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 
 			// Insert image metadata; thumb dims same as full for now
 			imageID, err := b.threadRepository.InsertImage(
-				ctx, key, thread.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
+				ctx, imgURL, thread.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
 			)
 			if err != nil {
 				imgErrCh <- err
@@ -204,7 +201,8 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 			// Upload to R2
 			key := fmt.Sprintf("img_%d", time.Now().UnixNano())
 			contentType := reply.Image.Header.Get("Content-Type")
-			if err := b.imageBucket.Post(key, f, contentType); err != nil {
+			imgURL, err := b.imageBucket.Post(key, f, contentType)
+			if err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -222,7 +220,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 
 			// Insert image metadata; thumb dims same as full for now
 			imageID, err := b.threadRepository.InsertImage(
-				ctx, key, reply.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
+				ctx, imgURL, reply.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
 			)
 			if err != nil {
 				imgErrCh <- err
@@ -281,6 +279,30 @@ func (b *threadService) DeleteReply(ctx context.Context, replyID string, posterI
 	return b.replyRepository.DeleteReplyWithId(ctx, replyID)
 }
 
-func (b *threadService) UpdateVote(ctx context.Context, threadId, posterId string, isUpvote bool) error {
-	return b.threadRepository.UpdateVote(ctx, threadId, posterId, isUpvote)
+func (b *threadService) UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error {
+	newVote := -1
+	if isUpvote {
+		newVote = 1
+	}
+
+	existingVote, err := b.threadRepository.GetVote(ctx, threadID, voterID)
+
+	if err == sql.ErrNoRows {
+		return b.threadRepository.InsertVote(ctx, threadID, voterID, newVote)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if existingVote == newVote {
+		return nil
+	}
+
+	return b.threadRepository.UpdateVoteType(
+		ctx,
+		threadID,
+		voterID,
+		newVote,
+	)
 }

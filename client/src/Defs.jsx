@@ -22,6 +22,8 @@ export const links = [
 export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha']
 
 export const API_URL = import.meta.env.VITE_API_URL
+export const STATIC_URL = import.meta.env.VITE_STATIC_URL
+
 
 export const fetchThreads = async () => {
   const response = await fetch(`${API_URL}/thread/${id}`)
@@ -111,7 +113,7 @@ export const formatText = (content) => {
 
 export const getSmallImageUrl = (url) => {
   const lastDotIndex = url.lastIndexOf('.')
-  return `${url.substring(0, lastDotIndex)}s${url.substring(lastDotIndex)}`
+  return `${url.substring(0, lastDotIndex)}${url.substring(lastDotIndex)}`
 }
 
 export const getFileSize = (bytes) => {

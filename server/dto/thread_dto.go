@@ -1,7 +1,7 @@
 package dto
 
 type Image struct {
-	ID          int64  `json:"id"`
+	ID          int64  `json:"-"`
 	URL         string `json:"url"`
 	Size        int64  `json:"size,omitempty"`
 	Width       int64  `json:"width,omitempty"`
@@ -12,20 +12,20 @@ type Image struct {
 
 type VoteInfo struct {
 	Count int      `json:"count"`
-	IDs   []string `json:"ids"`
+	IDs   []string `json:"-"`
 }
 
 type Thread struct {
 	ID        int64    `json:"id"`
 	BoardID   int64    `json:"board_id"`
-	Username  string   `json:"username,omitempty"`
+	Username  string   `json:"posterID,omitempty"`
 	Subject   string   `json:"subject,omitempty"`
 	Content   string   `json:"content"`
 	ImageID   *int64   `json:"image_id,omitempty"`
 	Image     *Image   `json:"image,omitempty"`
 	CreatedAt string   `json:"created_at,omitempty"`
 	LastBump  string   `json:"last_bump,omitempty"`
-	PosterID  string   `json:"poster_id,omitempty"`
+	PosterID  string   `json:"-"`
 	Locked    bool     `json:"locked"`
 	Sticky    bool     `json:"sticky"`
 	Replies   []Reply  `json:"replies,omitempty"`
