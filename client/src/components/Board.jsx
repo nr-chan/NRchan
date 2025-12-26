@@ -216,7 +216,7 @@ export default function Board() {
         {/* Banner */}
         <div className='my-2 text-center'>
           <img
-            src={`${API_URL}/images/${banner}.png`}
+            src={`${API_URL}/static/${banner}.png`}
             alt='Board banner'
             className='inline-block border border-black'
           />

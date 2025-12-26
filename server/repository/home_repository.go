@@ -25,9 +25,15 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
         SELECT 
             t.id, t.board_id, t.username, t.subject, t.content, t.image_id,
             t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
-            i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
+
+            i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height,
+
+            COALESCE(SUM(CASE WHEN v.vote_type = 1 THEN 1 ELSE 0 END), 0)  AS upvotes,
+            COALESCE(SUM(CASE WHEN v.vote_type = -1 THEN 1 ELSE 0 END), 0) AS downvotes
         FROM threads t
         LEFT JOIN images i ON i.id = t.image_id
+        LEFT JOIN votes v ON v.thread_id = t.id
+        GROUP BY t.id
         ORDER BY t.last_bump DESC
         LIMIT 10
     `)
@@ -36,7 +42,8 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 	}
 	defer rows.Close()
 
-	threads := []dto.Thread{}
+	var threads []dto.Thread
+
 	for rows.Next() {
 		var (
 			th        dto.Thread
@@ -51,19 +58,32 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 			imgTH     sql.NullInt64
 			lockedInt int64
 			stickyInt int64
+			upCnt     int
+			downCnt   int
 		)
+
 		if err := rows.Scan(
 			&th.ID, &th.BoardID, &th.Username, &th.Subject, &th.Content, &imageID,
 			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
+
 			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
+
+			&upCnt, &downCnt,
 		); err != nil {
 			return nil, err
 		}
+
 		th.Locked = lockedInt == 1
 		th.Sticky = stickyInt == 1
+
+		// 👇 Populate VoteInfo (DTO unchanged)
+		th.Upvotes.Count = upCnt
+		th.Downvotes.Count = downCnt
+
 		if imageID.Valid {
 			th.ImageID = &imageID.Int64
 		}
+
 		if imgID.Valid {
 			img.ID = imgID.Int64
 			if imgURL.Valid {
@@ -86,10 +106,13 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 			}
 			th.Image = &img
 		}
+
 		threads = append(threads, th)
 	}
+
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+
 	return threads, nil
 }

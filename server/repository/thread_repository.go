@@ -9,11 +9,6 @@ import (
 	"github.com/nr-chan/NRchan/dto"
 )
 
-const (
-	VoteUp   = 1
-	VoteDown = -1
-)
-
 type (
 	ThreadRepository interface {
 		GetThreadById(ctx context.Context, id string) (dto.Thread, error)
@@ -26,7 +21,10 @@ type (
 		GetPosterId(ctx context.Context, threadId string) (string, error)
 		// GetAllThreads(ctx context.Context) ([]dto.Thread, error)
 
-		UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error
+		// Vote
+		GetVote(ctx context.Context, threadID, voterID string) (int, error)
+		InsertVote(ctx context.Context, threadID, voterID string, voteType int) error
+		UpdateVoteType(ctx context.Context, threadID, voterID string, voteType int) error
 	}
 	threadRepository struct {
 		db *sql.DB
@@ -108,44 +106,43 @@ func (r *threadRepository) DeleteByID(ctx context.Context, id string) error {
 	return err
 }
 
-func (r *threadRepository) UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error {
-	newVote := VoteDown
-	if isUpvote {
-		newVote = VoteUp
-	}
-
-	var existingVote int
+func (r *threadRepository) GetVote(
+	ctx context.Context,
+	threadID, voterID string,
+) (int, error) {
+	var vote int
 	err := r.db.QueryRowContext(
 		ctx,
 		`SELECT vote_type FROM votes WHERE thread_id = ? AND voter_id = ?`,
 		threadID, voterID,
-	).Scan(&existingVote)
+	).Scan(&vote)
+	return vote, err
+}
 
-	// No existing vote → INSERT
-	if err == sql.ErrNoRows {
-		_, err = r.db.ExecContext(
-			ctx,
-			`INSERT INTO votes (thread_id, voter_id, vote_type) VALUES (?, ?, ?)`,
-			threadID, voterID, newVote,
-		)
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	// Same vote again → DO NOTHING
-	if existingVote == newVote {
-		return nil
-	}
-
-	// Switch vote → UPDATE
-	_, err = r.db.ExecContext(
+func (r *threadRepository) InsertVote(
+	ctx context.Context,
+	threadID, voterID string,
+	voteType int,
+) error {
+	_, err := r.db.ExecContext(
 		ctx,
-		`UPDATE votes SET vote_type = ?, created_at = CURRENT_TIMESTAMP 
+		`INSERT INTO votes (thread_id, voter_id, vote_type) VALUES (?, ?, ?)`,
+		threadID, voterID, voteType,
+	)
+	return err
+}
+
+func (r *threadRepository) UpdateVoteType(
+	ctx context.Context,
+	threadID, voterID string,
+	voteType int,
+) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`UPDATE votes 
+		 SET vote_type = ?, created_at = CURRENT_TIMESTAMP
 		 WHERE thread_id = ? AND voter_id = ?`,
-		newVote, threadID, voterID,
+		voteType, threadID, voterID,
 	)
 	return err
 }
