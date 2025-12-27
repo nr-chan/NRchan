@@ -23,19 +23,17 @@ func NewHomeRepository(db *sql.DB) *homeRepository {
 func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 	rows, err := b.db.QueryContext(ctx, `
         SELECT 
-            t.id, t.board_id, t.username, t.subject, t.content, t.image_id,
-            t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
-
-            i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height,
-
-            COALESCE(SUM(CASE WHEN v.vote_type = 1 THEN 1 ELSE 0 END), 0)  AS upvotes,
-            COALESCE(SUM(CASE WHEN v.vote_type = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-        FROM threads t
-        LEFT JOIN images i ON i.id = t.image_id
-        LEFT JOIN votes v ON v.thread_id = t.id
-        GROUP BY t.id
-        ORDER BY t.last_bump DESC
-        LIMIT 10
+			t.id, t.board_key, t.username, t.subject, t.content, t.image_id,
+			t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
+			i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height,
+			COALESCE(SUM(CASE WHEN v.vote_type = 1 THEN 1 ELSE 0 END), 0)  AS upvotes,
+			COALESCE(SUM(CASE WHEN v.vote_type = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+		FROM threads_new t
+		LEFT JOIN images i ON i.id = t.image_id
+		LEFT JOIN votes_new v ON v.thread_id = t.id
+		GROUP BY t.id
+		ORDER BY t.last_bump DESC
+		LIMIT 10
     `)
 	if err != nil {
 		return nil, err
@@ -63,7 +61,7 @@ func (b *homeRepository) GetRecents(ctx context.Context) ([]dto.Thread, error) {
 		)
 
 		if err := rows.Scan(
-			&th.ID, &th.BoardID, &th.Username, &th.Subject, &th.Content, &imageID,
+			&th.ID, &th.BoardKey, &th.Username, &th.Subject, &th.Content, &imageID,
 			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
 
 			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,

@@ -1,16 +1,13 @@
 package utils
 
 import (
+	"crypto/sha1"
 	"encoding/hex"
-	"hash/maphash"
 )
 
-// UUIDToPosterID converts a UUID (string) into a 6-char hex poster ID.
-// - Validates UUIDv4 shape (lightweight check).
-// - Uses mapHash and returns first 6 hex chars.
-// - Returns "000000" on invalid input.
+// UUIDToPosterID hashes a UUID using SHA-1 and returns first 6 hex chars.
+// Assumes UUID is already validated.
 func UUIDToPosterID(uuid string) string {
-	var h maphash.Hash
-	h.WriteString(uuid)
-	return hex.EncodeToString(h.Sum(nil))[:6]
+	sum := sha1.Sum([]byte(uuid))
+	return hex.EncodeToString(sum[:])[:6]
 }

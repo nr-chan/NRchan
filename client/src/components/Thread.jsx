@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import Cookie from './Cookie'
 import Cookies from "js-cookie";
-import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText } from '../Defs'
+import { links, boardList, API_URL, bannerImg, formatDate, formatText, getFileSize, DynamicColorText, STATIC_URL } from '../Defs'
 import { Turnstile } from '@marsidev/react-turnstile';
 import NRCButton from './NRCButton';
 
@@ -130,7 +130,7 @@ export default function Component() {
     try {
       setLoadingScreen(true);
 
-      const response = await fetch(`${API_URL}/thread/${threadData._id}/reply`, {
+      const response = await fetch(`${API_URL}/thread/${threadData.id}/reply`, {
         method: 'POST',
         headers: {
           uuid: uuid
@@ -215,12 +215,20 @@ export default function Component() {
 
 
   const fetchThreads = async () => {
-    const response = await fetch(`${API_URL}/thread/${id}`)
-    const data = await response.json()
-    if (response.status !== 200) {
-      nav(-1)
+    try {
+    const response = await fetch(`${API_URL}/thread/${id}`);
+    const json = await response.json();
+
+    if (!response.ok || !json?.status || !json?.data) {
+      nav(-1);
+      return;
     }
-    setThreadData(data)
+
+    setThreadData(json.data);
+  } catch (e) {
+    console.error('fetchThreads error:', e);
+    nav(-1);
+  }
   }
 
   const getuuid = async () => {
@@ -361,7 +369,7 @@ export default function Component() {
         {showDisclaimer && <Cookie onAgree={handleAgree} />}
         {/* Board header */}
         <div className='py-4 text-center'>
-          <img src={`${API_URL}/images/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
+          <img src={`${STATIC_URL}/${banner}.png`} width={300} height={100} alt='Board Header' className='mx-auto border border-black' />
           <hr className='my-4 h-[0px] border-[#8a4f4b]' />
           <h1 className='mt-2 text-4xl font-bold text-[#800000]'>/{threadData.board}/ - {links[boardList.indexOf(threadData.board)]}</h1>
         </div>
@@ -444,7 +452,7 @@ export default function Component() {
         )}            {/* Thread */}
         <article key={threadData.id} className='p-2 m-2 bg-[#F0E0D6]'>
           <div>
-            <span className='font-bold text-[#800000]'>No: {threadData._id && threadData._id.slice(-6)} </span>
+            <span className='font-bold text-[#800000]'>No: {threadData.id} </span>
             {threadData.image &&
               (<span>({getFileSize(threadData.image.size)}, {threadData.image.width}x{threadData.image.height})
               </span>
@@ -469,11 +477,11 @@ export default function Component() {
             <div>
               <input
                 type='checkbox'
-                checked={selectedPosts.has(threadData._id)}
-                onChange={() => handleCheckboxChange(threadData._id)}
+                checked={selectedPosts.has(threadData.id)}
+                onChange={() => handleCheckboxChange(threadData.id)}
               />
               <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
-              <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created)}</span>
+              <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created_at)}</span>
               <br />
               <div className='flex'>
                 <NRCButton label={"Reply"} onClick={() => {
@@ -482,9 +490,9 @@ export default function Component() {
                 }} />
                 <NRCButton label={"Delete"} onClick={() => {
                   if (token) {
-                    deleteThread(threadData._id)
+                    deleteThread(threadData.id)
                   } else {
-                    deleteThreadByUser(threadData._id)
+                    deleteThreadByUser(threadData.id)
                   }
                 }} />
               </div>
@@ -503,23 +511,23 @@ export default function Component() {
 
         {/* Replies */}
         {threadData.replies && threadData.replies.map((reply) => (
-          <div className='flex ml-2' key={reply._id} ref={(el) => (replyRefs.current[reply._id] = el)}>
+          <div className='flex ml-2' key={reply.id} ref={(el) => (replyRefs.current[reply.id] = el)}>
 
             <span className='text-gray-400 text-[1.2rem]'>{'>>'}</span>
             <span>
-              <article key={reply._id} className='pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[#F0E0D6]'>
+              <article key={reply.id} className='pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[#F0E0D6]'>
                 <div>
                   <input
                     type='checkbox'
-                    checked={selectedPosts.has(reply._id)}
-                    onChange={() => handleCheckboxChange(reply._id)}
+                    checked={selectedPosts.has(reply.id)}
+                    onChange={() => handleCheckboxChange(reply.id)}
                   />
                   <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
                   {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
                   <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
-                    No: {reply._id.slice(-6)}
+                    No: {reply.id}
                   </span>
-                  <span className='ml-2 text-[#34345C]'>{formatDate(reply.created)}</span>
+                  <span className='ml-2 text-[#34345C]'>{formatDate(reply.created_at)}</span>
 
                 </div>
                 <div className='flex items-start mt-2'>
@@ -544,14 +552,14 @@ export default function Component() {
                     <div className='flex'>
 
                       <NRCButton label={"Reply"} onClick={() => {
-                        setReplyto(reply._id)
+                        setReplyto(reply.id)
                         setFormVisible(true)
                       }} />
                       <NRCButton label={"Delete"} onClick={() => {
                         if (token) {
-                          deleteReply(reply._id)
+                          deleteReply(reply.id)
                         } else {
-                          deleteReplyByUser(reply._id)
+                          deleteReplyByUser(reply.id)
                         }
                       }} />
 
@@ -561,9 +569,9 @@ export default function Component() {
                     {reply.parentReply && (
                       <div
                         className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
-                        onClick={() => scrollToReply(reply.parentReply._id)}
+                        onClick={() => scrollToReply(reply.parentReply.id)}
                       >
-                        {`>>${reply.parentReply._id.slice(-6)}`}
+                        {`>>${reply.parentReply.id}`}
                       </div>
                     )}
 

@@ -17,7 +17,7 @@ type VoteInfo struct {
 
 type Thread struct {
 	ID        int64    `json:"id"`
-	BoardID   int64    `json:"board_id"`
+	BoardKey  string   `json:"board"`
 	Username  string   `json:"posterID,omitempty"`
 	Subject   string   `json:"subject,omitempty"`
 	Content   string   `json:"content"`

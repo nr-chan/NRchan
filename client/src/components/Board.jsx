@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText, GetVoteCount } from '../Defs'
+import { links, boardList, API_URL, bannerImg, formatText, formatDate, getFileSize, DynamicColorText, GetVoteCount, STATIC_URL } from '../Defs'
 import ThreadImage from './Image'
 import { VoteCount } from './Votes'
 import Cookie from './Cookie'
@@ -29,11 +29,11 @@ export default function Board() {
 
   const fetchThreads = async () => {
     const response = await fetch(`${API_URL}/board/${id}`)
+    const json = await response.json()
     if (response.status !== 200 || !boardList.includes(id)) {
       nav('/404')
     }
-    const data = await response.json()
-    setThreads(data)
+    setThreads(json.data)
   }
 
   const handlePaste = (e) => {
@@ -216,7 +216,7 @@ export default function Board() {
         {/* Banner */}
         <div className='my-2 text-center'>
           <img
-            src={`${API_URL}/static/${banner}.png`}
+            src={`${STATIC_URL}/${banner}.png`}
             alt='Board banner'
             className='inline-block border border-black'
           />
@@ -299,21 +299,21 @@ export default function Board() {
         {/* Threads */}
         <div className='mx-auto max-w-[768px]'>
           {currentThreads.map((thread) => (
-            <div key={thread._id} className='mb-4'>
+            <div key={thread.id} className='mb-4'>
               <article className='p-2 border bg-[#F0E0D6] border-[#D9BFB7]'>
-                {collapsedThreads[thread._id] ? (
+                {collapsedThreads[thread.id] ? (
                   <div className='flex gap-2 items-center'>
                     <button
-                      onClick={() => toggleThreadCollapse(thread._id)}
+                      onClick={() => toggleThreadCollapse(thread.id)}
                       className='font-bold text-[#800000]'
                     >
                       <img
                         alt='H' className='extButton threadHideButton'
-                        src={`${API_URL}/images/plus.png`}
+                        src={`${STATIC_URL}/plus.png`}
                       />
                     </button>
-                    <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
-                    <VoteCount threadID={thread._id}/>
+                    <span className='font-bold'>ThreadID: {thread.id}</span>
+                    <VoteCount threadID={thread.id}/>
                     {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                     </span>)}
                     {thread.locked && <img src='/closed.png' alt='Locked' className='w-4 h-4' />}
@@ -323,12 +323,12 @@ export default function Board() {
                         <NRCButton
                           label={thread.locked ? 'Unlock' : 'Lock'}
                           addClass='font-bold mb-2'
-                          onClick={() => handleLockThread(thread._id)}
+                          onClick={() => handleLockThread(thread.id)}
                         />
                         <NRCButton
                           label={thread.sticky ? 'Unpin' : 'Pin'}
                           addClass='font-bold mb-2'
-                          onClick={() => handlePinThread(thread._id)}
+                          onClick={() => handlePinThread(thread.id)}
                         />
                       </>
                     )}
@@ -337,16 +337,16 @@ export default function Board() {
                   <>
                     <div className='flex gap-2 items-center mb-2'>
                       <button
-                        onClick={() => toggleThreadCollapse(thread._id)}
+                        onClick={() => toggleThreadCollapse(thread.id)}
                         className='font-bold text-[#800000]'
                       >
                         <img
                           alt='H' className='extButton threadHideButton'
-                          src={`${API_URL}/images/minus.png`}
+                          src={`${STATIC_URL}/minus.png`}
                         />
                       </button>
-                      <span className='font-bold'>ThreadID: {thread._id && thread._id.slice(-6)}</span>
-                      <VoteCount threadID={thread._id}/>
+                      <span className='font-bold'>ThreadID: {thread.id}</span>
+                      <VoteCount threadID={thread.id}/>
                       {thread.image && (<span>({getFileSize(thread.image.size)}, {thread.image.width}x{thread.image.height})
                       </span>
                       )}
@@ -357,12 +357,12 @@ export default function Board() {
                           <NRCButton
                             label={thread.locked ? 'Unlock' : 'Lock'}
                             addClass='font-bold mb-2'
-                            onClick={() => handleLockThread(thread._id)}
+                            onClick={() => handleLockThread(thread.id)}
                           />
                           <NRCButton
                             label={thread.sticky ? 'Unpin' : 'Pin'}
                             addClass='font-bold mb-2'
-                            onClick={() => handlePinThread(thread._id)}
+                            onClick={() => handlePinThread(thread.id)}
                           />
                         </>
                       )}
@@ -391,10 +391,10 @@ export default function Board() {
                           {thread.username ? thread.username : 'Anonymous'}{' '}
                         </span>
                         <DynamicColorText posterID={thread.posterID || 'FFFFFF'} />
-                        <span className='ml-1 text-[#34345C]'>{formatDate(thread.created)}</span>
+                        <span className='ml-1 text-[#34345C]'>{formatDate(thread.created_at)}</span>
                         <br />
                         To view complete thread
-                        <a href={'/thread/' + thread._id}>
+                        <a href={'/thread/' + thread.id}>
                           <NRCButton
                             label={"Click here"}
                             onClick={() => { }} />
@@ -407,17 +407,17 @@ export default function Board() {
 
                     {/* Replies */}
                     <div className='mt-4'>
-                      {thread.replies.slice(-3).map((reply) => (
+                      {thread.replies && thread.replies.slice(-3).map((reply) => (
                         <div
-                          key={reply._id}
+                          key={reply.id}
                           className='p-2 mb-2 border border-[#D9BFB7]'
                         >
                           <span className='text-gray-400 text-[1.25rem]'>{'>> '}</span>
                           <span className='font-bold text-[#117743]'>
-                            {reply.username || 'Anonymous'}{' '}
+                            {reply.username || 'Anon'}{' '}
                           </span>
                           <DynamicColorText posterID={reply.posterID || 'FFFFFF'} />
-                          <span className='ml-1 text-[#34345C]'>{formatDate(reply.created)}</span>
+                          <span className='ml-1 text-[#34345C]'>{formatDate(reply.created_at)}</span>
 
                           {reply.image && (
                             <div className='mt-2'>

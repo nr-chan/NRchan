@@ -43,12 +43,6 @@ func NewThreadService(threadRepository repository.ThreadRepository, replyReposit
 }
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
-	// 1) Resolve board id
-
-	boardID, err := b.threadRepository.GetBoardIDByKey(ctx, thread.Board)
-	if err != nil {
-		return -1, err
-	}
 
 	username := utils.UUIDToPosterID(thread.UUID)
 
@@ -109,7 +103,7 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 	}
 
 	// 3) Insert the thread row immediately (without image_id)
-	threadID, err := b.threadRepository.InsertThread(ctx, boardID, thread.Subject, thread.Content, thread.UUID, username)
+	threadID, err := b.threadRepository.InsertThread(ctx, thread.Board, thread.Subject, thread.Content, thread.UUID, username)
 	if err != nil {
 		return -1, err
 	}

@@ -14,7 +14,7 @@ func main() {
 	mux := http.DefaultServeMux
 
 	// Apply CORS middleware to all routes
-	handler := middleware.CorsMiddleware(mux)
+	handler := middleware.CORSMiddleware(mux)
 
 	container, err := provider.NewContainer()
 	if err != nil {
