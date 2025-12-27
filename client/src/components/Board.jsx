@@ -152,8 +152,8 @@ export default function Board() {
     if (!uuid) {
       const response = await fetch(`${API_URL}/getuuid`);
       const json = await response.json()
-      localStorage.setItem('uuid', json.uuid);
-      setuuid(json.uuid);
+      localStorage.setItem('uuid', json.data);
+      setuuid(json.data);
     }
   }
 

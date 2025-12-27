@@ -1,4 +1,4 @@
-export const boardList = ['p', 'mm', 'v', 'c', 'a', 'Sp', 'Ph', 'm', 'f', 'par', 'ka', 'np', 'GIF', 'Rnt', 'pol', 'cs']
+export const boardList = ['p', 'mm', 'v', 'c', 'a', 'sp', 'ph', 'm', 'f', 'par', 'ka', 'np', 'gif', 'rnt', 'pol', 'cs']
 
 export const links = [
   'Programming',

@@ -12,6 +12,9 @@ type (
 	BoardRepository interface {
 		GetBoards(ctx context.Context) ([]dto.Board, error)
 		GetThreadsByBoard(ctx context.Context, boardKey string) ([]dto.Thread, error)
+
+		GetBoardsData(ctx context.Context) ([]dto.BoardData, error)
+		GetPosterStats(ctx context.Context) ([]dto.PosterStats, error)
 	}
 	boardRepository struct {
 		db *sql.DB
@@ -170,4 +173,71 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string
 	}
 
 	return threads, nil
+}
+
+func (b *boardRepository) GetBoardsData(ctx context.Context) ([]dto.BoardData, error) {
+	rows, err := b.db.QueryContext(ctx, `
+        SELECT
+            t.board_key AS board,
+            COUNT(t.id) AS total_threads,
+            COUNT(t.id) + COALESCE(COUNT(r.id), 0) AS total_posts
+        FROM threads_new t
+        LEFT JOIN replies_new r ON r.thread_id = t.id
+        GROUP BY t.board_key
+        ORDER BY t.board_key ASC
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []dto.BoardData
+	for rows.Next() {
+		var bd dto.BoardData
+		if err := rows.Scan(&bd.Board, &bd.TotalThreads, &bd.TotalPosts); err != nil {
+			return nil, err
+		}
+		out = append(out, bd)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (b *boardRepository) GetPosterStats(ctx context.Context) ([]dto.PosterStats, error) {
+	rows, err := b.db.QueryContext(ctx, `
+        SELECT poster_id,
+               SUM(thread_cnt) AS thread_count,
+               SUM(reply_cnt)  AS reply_count,
+               SUM(thread_cnt + reply_cnt) AS total_count
+        FROM (
+            SELECT poster_id, COUNT(*) AS thread_cnt, 0 AS reply_cnt
+            FROM threads_new
+            GROUP BY poster_id
+            UNION ALL
+            SELECT poster_id, 0 AS thread_cnt, COUNT(*) AS reply_cnt
+            FROM replies_new
+            GROUP BY poster_id
+        )
+        GROUP BY poster_id
+        ORDER BY total_count DESC
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []dto.PosterStats
+	for rows.Next() {
+		var ps dto.PosterStats
+		if err := rows.Scan(&ps.PosterID, &ps.ThreadCount, &ps.ReplyCount, &ps.TotalCount); err != nil {
+			return nil, err
+		}
+		out = append(out, ps)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

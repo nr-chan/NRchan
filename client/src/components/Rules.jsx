@@ -110,7 +110,7 @@ export default function Rules() {
                   <h4 className="font-bold text-[#006600]">Video Games</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Discussions about gaming news, updates, or game mechanics are allowed.</li>
-                    <li>Do not share pirated content or illegal game copies.</li>
+                    <li>Please share pirated content or illegal game copies.</li>
                   </ul>
                 </div>
 

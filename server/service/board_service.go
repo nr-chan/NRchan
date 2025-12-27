@@ -11,6 +11,9 @@ type (
 	BoardService interface {
 		GetThreads(ctx context.Context, board string) ([]dto.Thread, error)
 		GetAllBoards(ctx context.Context) ([]dto.Board, error)
+
+		GetBoardsData(ctx context.Context) ([]dto.BoardData, error)
+		GetPosterStats(ctx context.Context) ([]dto.PosterStats, error)
 	}
 	boardService struct {
 		boardRepository repository.BoardRepository
@@ -28,4 +31,12 @@ func (s *boardService) GetThreads(ctx context.Context, board string) ([]dto.Thre
 
 func (s *boardService) GetAllBoards(ctx context.Context) ([]dto.Board, error) {
 	return s.boardRepository.GetBoards(ctx)
+}
+
+func (s *boardService) GetBoardsData(ctx context.Context) ([]dto.BoardData, error) {
+	return s.boardRepository.GetBoardsData(ctx)
+}
+
+func (s *boardService) GetPosterStats(ctx context.Context) ([]dto.PosterStats, error) {
+	return s.boardRepository.GetPosterStats(ctx)
 }

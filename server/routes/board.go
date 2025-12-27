@@ -11,4 +11,6 @@ func Board(route *http.ServeMux, container *provider.Container) {
 
 	route.HandleFunc("GET /api/board/{board}", boardController.GetThreadsByBoard)
 	route.HandleFunc("GET /api/boards", boardController.GetAllBoards)
+	route.HandleFunc("GET /api/boards/data", boardController.GetBoardsData)
+	route.HandleFunc("GET /api/boards/stats", boardController.GetPosterStats)
 }
