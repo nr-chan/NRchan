@@ -35,3 +35,21 @@ func (c *BoardController) GetAllBoards(w http.ResponseWriter, r *http.Request) {
 
 	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got boards", boards)
 }
+
+func (c *BoardController) GetBoardsData(w http.ResponseWriter, r *http.Request) {
+	data, err := c.boardService.GetBoardsData(r.Context())
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get boards data", err.Error(), nil)
+		return
+	}
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got boards data", data)
+}
+
+func (c *BoardController) GetPosterStats(w http.ResponseWriter, r *http.Request) {
+	data, err := c.boardService.GetPosterStats(r.Context())
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get poster stats", err.Error(), nil)
+		return
+	}
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got poster stats", data)
+}

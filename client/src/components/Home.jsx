@@ -7,34 +7,47 @@ const Home = () => {
   const [threads, setThreads] = useState([])
   const [stats, setStats] = useState([]);
   const [uuidstats, setUUIDstats] = useState([]);
+  const [boardstats, setBoardstats] = useState([]); 
   const [totalThread, settotalThread] = useState(0);
   const [totalPosts, settotalPosts] = useState(0);
   const [uniquePosters, setUniquePosters] = useState(0);
   const [activeDevices, setActiveDevices] = useState(0);
   let socket;
   const fetchStats = async () => {
-    try {
-      const response = await fetch(`${API_URL}/boards/data`);
-      const data = await response.json();
-      data.sort((a, b) => b.totalPosts - a.totalPosts);
-      setStats(data);
-      settotalThread(data.reduce((sum, item) => sum + item.totalThreads, 0));
-      settotalPosts(data.reduce((sum, item) => sum + item.totalPosts, 0));
+  try {
+    const response = await fetch(`${API_URL}/boards/data`);
+    const json = await response.json();
+    
+    if (response.ok && json?.status && Array.isArray(json.data)) {
+      setStats(json.data);
+      // Calculate totals
+      settotalThread(json.data.reduce((sum, item) => sum + (item.totalThreads || 0), 0));
+      settotalPosts(json.data.reduce((sum, item) => sum + (item.totalPosts || 0), 0));
+    } else {
+      setStats([]);
+      settotalThread(0);
+      settotalPosts(0);
     }
-    catch (error) {
-      console.error('Error fetching recent threads:', error)
-    }
+  } catch (error) {
+    console.error('Error fetching board stats:', error);
+    setStats([]);
+    settotalThread(0);
+    settotalPosts(0);
   }
+};
   const fetchUUIDstats = async () => {
     try {
-      const response = await fetch(`${API_URL}/boards/stats`);
-      const data = await response.json();
-      setUUIDstats(data);
-      setUniquePosters(data.length)
+    const res = await fetch(`${API_URL}/boards/stats`);
+    const json = await res.json();
+    if (res.ok && json?.status && Array.isArray(json.data)) {
+      setUUIDstats(json.data);
+    } else {
+      setUUIDstats([]);
     }
-    catch (error) {
-      console.error('Error fetching recent threads:', error)
-    }
+  } catch (e) {
+    console.error('fetchUuidStats error:', e);
+    setUUIDstats([]);
+  }
   }
 
   useEffect(() => {
@@ -202,13 +215,9 @@ const Home = () => {
               <h2 className='font-bold text-[15px]'>POSTS</h2>
             </div>
             <div className="px-2 mx-1 text-red-800 border bg-[#f6ecfe] border-[#06554a]">
-              {uuidstats.slice(0, 5).map((stat, index) => (
-                <div
-                  key={stat.board}
-                  className="grid grid-cols-2 border-b border-gray-200"
-                >
-                  <div className="text-teal-600">{stat.posterID}</div>
-                  {/* <div><DynamicColorText posterID={stat.posterID || 'FFFFFF'} /></div> */}
+              {Array.isArray(uuidstats) && uuidstats.map((stat) => (
+                <div key={stat.posterID} className="grid grid-cols-2 border-b border-gray-200">
+                  <div className="text-teal-600">{stat.posterID.slice(0, 6)}...</div>
                   <div>{stat.totalCount}</div>
                 </div>
               ))}

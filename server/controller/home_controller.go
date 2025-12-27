@@ -24,3 +24,9 @@ func (c *HomeController) HandleRecent(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got recent threads", threads)
 }
+
+func (c *HomeController) GetUUID(w http.ResponseWriter, r *http.Request) {
+	UUID := c.homeService.GetUUID(r.Context())
+
+	utils.BuildResponseSuccess(w, http.StatusOK, "Successfully got UUID", UUID)
+}

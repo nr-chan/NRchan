@@ -24,7 +24,15 @@ type BoardLink struct {
 	Link    string `json:"link"`
 }
 
-type BoardStats struct {
-	TotalThreads int64 `json:"total_threads"`
-	TotalPosts   int64 `json:"total_posts"`
+type BoardData struct {
+	Board        string `json:"board"`
+	TotalThreads int    `json:"totalThreads"`
+	TotalPosts   int    `json:"totalPosts"`
+}
+
+type PosterStats struct {
+	PosterID    string `json:"posterID"`
+	ThreadCount int    `json:"threadCount"`
+	ReplyCount  int    `json:"replyCount"`
+	TotalCount  int    `json:"totalCount"`
 }
