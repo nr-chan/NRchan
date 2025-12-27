@@ -11,7 +11,7 @@ import (
 type (
 	BoardRepository interface {
 		GetBoards(ctx context.Context) ([]dto.Board, error)
-		GetThreadsByBoard(ctx context.Context, board string) ([]dto.Thread, error)
+		GetThreadsByBoard(ctx context.Context, boardKey string) ([]dto.Thread, error)
 	}
 	boardRepository struct {
 		db *sql.DB
@@ -24,9 +24,9 @@ func NewBoardRepository(db *sql.DB) *boardRepository {
 
 func (b *boardRepository) GetBoards(ctx context.Context) ([]dto.Board, error) {
 	rows, err := b.db.QueryContext(ctx, `
-		SELECT id, board_key, title, created_at, updated_at
-		FROM boards
-		ORDER BY id ASC
+		SELECT board_key, name,description, created_at, updated_at
+		FROM boards_new
+		ORDER BY created_at ASC
 	`)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (b *boardRepository) GetBoards(ctx context.Context) ([]dto.Board, error) {
 	boards := []dto.Board{}
 	for rows.Next() {
 		var bd dto.Board
-		if err := rows.Scan(&bd.ID, &bd.BoardKey, &bd.Title, &bd.CreatedAt, &bd.UpdatedAt); err != nil {
+		if err := rows.Scan(&bd.BoardKey, &bd.Name, &bd.Description, &bd.CreatedAt, &bd.UpdatedAt); err != nil {
 			return nil, err
 		}
 		boards = append(boards, bd)
@@ -47,25 +47,20 @@ func (b *boardRepository) GetBoards(ctx context.Context) ([]dto.Board, error) {
 	return boards, nil
 }
 
-func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) ([]dto.Thread, error) {
-	// find board id by board_key
-	var boardID int64
-	if err := b.db.QueryRowContext(ctx, `SELECT id FROM boards WHERE board_key = ?`, board).Scan(&boardID); err != nil {
-		return nil, err
-	}
+func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string) ([]dto.Thread, error) {
 
 	// fetch threads with optional image join
 	rows, err := b.db.QueryContext(ctx, `
 		SELECT 
-			t.id, t.board_id, t.username, t.subject, t.content, t.image_id,
-			t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
-			i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
-		FROM threads t
-		LEFT JOIN images i ON i.id = t.image_id
-		WHERE t.board_id = ?
-		ORDER BY t.sticky DESC, t.last_bump DESC
-		LIMIT 15
-	`, boardID)
+        t.id, t.board_key, t.username, t.subject, t.content, t.image_id,
+        t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
+        i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
+    FROM threads_new t
+    LEFT JOIN images i ON i.id = t.image_id
+    WHERE t.board_key = ?
+    ORDER BY t.sticky DESC, t.last_bump DESC
+    LIMIT 15
+	`, boardKey)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +85,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 			stickyInt int64
 		)
 		if err := rows.Scan(
-			&th.ID, &th.BoardID, &th.Username, &th.Subject, &th.Content, &imageID,
+			&th.ID, &th.BoardKey, &th.Username, &th.Subject, &th.Content, &imageID,
 			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
 			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
 		); err != nil {
@@ -143,7 +138,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, board string) (
 		placeholders[i] = "?"
 		args[i] = id
 	}
-	query := "SELECT id, thread_id, parent_reply, username, content, image_id, created_at, is_op, poster_id FROM replies WHERE thread_id IN (" + strings.Join(placeholders, ",") + ") ORDER BY created_at ASC"
+	query := "SELECT id, thread_id, parent_reply, username, content, image_id, created_at, is_op, poster_id FROM replies_new WHERE thread_id IN (" + strings.Join(placeholders, ",") + ") ORDER BY created_at ASC"
 
 	repRows, err := b.db.QueryContext(ctx, query, args...)
 	if err != nil {
