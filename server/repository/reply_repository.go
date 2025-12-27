@@ -9,10 +9,10 @@ import (
 
 type (
 	ReplyRepository interface {
-		AddReply(ctx context.Context, id string, parentReply *string, username string, posterID string, content string) (int64, error)
+		AddReply(ctx context.Context, id string, parentReply string, username string, uuid string, posterID string, content string) (int64, error)
 		DeleteReplyWithId(ctx context.Context, id string) error
 		GetRepliesByThreadID(ctx context.Context, threadID string) ([]dto.Reply, error)
-		GetPosterId(ctx context.Context, replyId string) (string, error)
+		GetUUID(ctx context.Context, replyId string) (string, error)
 
 		UpdateReplyImage(ctx context.Context, replyId int64, imageId int64) error
 	}
@@ -34,7 +34,7 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID str
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT 
 			r.id, r.thread_id, r.parent_reply, r.username, r.content, r.image_id, 
-			r.created_at, r.is_op, r.poster_id,
+			r.created_at, r.is_op, r.poster_id, r.uuid,
 			i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
 		FROM replies_new r
 		LEFT JOIN images i ON i.id = r.image_id
@@ -66,14 +66,14 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID str
 
 		if err := rows.Scan(
 			&rp.ID, &rp.ThreadID, &parent, &rp.Username, &rp.Content, &imageID,
-			&rp.CreatedAt, &isOPInt, &rp.PosterID,
+			&rp.CreatedAt, &isOPInt, &rp.PosterID, &rp.UUID,
 			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
 		); err != nil {
 			return nil, err
 		}
 
 		if parent.Valid {
-			rp.ParentReply = &parent.Int64
+			rp.ParentReply = parent.Int64
 		}
 		if imageID.Valid {
 			rp.ImageID = &imageID.Int64
@@ -111,8 +111,8 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID str
 	return replies, nil
 }
 
-func (r *replyRepository) AddReply(ctx context.Context, id string, parentReply *string, username string, posterID string, content string) (int64, error) {
-	res, err := r.db.ExecContext(ctx, "INSERT INTO replies_new (thread_id, parent_reply, username, poster_id, content) VALUES (?, ?, ?, ?, ?)", id, parentReply, username, posterID, content)
+func (r *replyRepository) AddReply(ctx context.Context, id string, parentReply string, username string, uuid string, posterID string, content string) (int64, error) {
+	res, err := r.db.ExecContext(ctx, "INSERT INTO replies_new (thread_id, parent_reply, username, uuid, poster_id, content) VALUES (?, ?, ?, ?, ?, ?)", id, parentReply, username, uuid, posterID, content)
 	if err != nil {
 		return 0, err
 	}
@@ -124,9 +124,9 @@ func (r *replyRepository) UpdateReplyImage(ctx context.Context, replyId int64, i
 	return err
 }
 
-func (r *replyRepository) GetPosterId(ctx context.Context, replyId string) (string, error) {
+func (r *replyRepository) GetUUID(ctx context.Context, replyId string) (string, error) {
 	var id string
-	if err := r.db.QueryRowContext(ctx, "SELECT poster_id FROM replies_new WHERE id = ?", replyId).Scan(&id); err != nil {
+	if err := r.db.QueryRowContext(ctx, "SELECT uuid FROM replies_new WHERE id = ?", replyId).Scan(&id); err != nil {
 		return "", err
 	}
 	return id, nil

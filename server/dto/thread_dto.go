@@ -18,17 +18,18 @@ type VoteInfo struct {
 type Thread struct {
 	ID        int64    `json:"id"`
 	BoardKey  string   `json:"board"`
-	Username  string   `json:"posterID,omitempty"`
+	Username  string   `json:"username,omitempty"`
 	Subject   string   `json:"subject,omitempty"`
 	Content   string   `json:"content"`
 	ImageID   *int64   `json:"image_id,omitempty"`
 	Image     *Image   `json:"image,omitempty"`
 	CreatedAt string   `json:"created_at,omitempty"`
 	LastBump  string   `json:"last_bump,omitempty"`
-	PosterID  string   `json:"-"`
+	PosterID  string   `json:"poster_id"`
 	Locked    bool     `json:"locked"`
 	Sticky    bool     `json:"sticky"`
 	Replies   []Reply  `json:"replies,omitempty"`
 	Upvotes   VoteInfo `json:"upvotes,omitempty"`
 	Downvotes VoteInfo `json:"downvotes,omitempty"`
+	UUID      string   `json:"-"`
 }

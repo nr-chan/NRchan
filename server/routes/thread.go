@@ -17,5 +17,5 @@ func Thread(route *http.ServeMux, container *provider.Container) {
 	route.HandleFunc("DELETE /api/reply/{replyId}", threadController.DeleteReply)
 
 	route.HandleFunc("POST /api/votes/{id}", threadController.UpdateVote)
-
+	route.HandleFunc("GET /api/votes/{id}", threadController.GetVote)
 }

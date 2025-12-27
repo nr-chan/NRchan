@@ -13,7 +13,7 @@ type (
 	ThreadRepository interface {
 		GetThreadById(ctx context.Context, id string) (dto.Thread, error)
 		// High-level CreateThread is handled in service
-		InsertThread(ctx context.Context, boardID, subject, content, posterID, username string) (int64, error)
+		InsertThread(ctx context.Context, boardID, subject, content, posterID, uuid, username string) (int64, error)
 		InsertImage(ctx context.Context, url string, sizeBytes int64, width, height, thumbWidth, thumbHeight int) (int64, error)
 		UpdateThreadImage(ctx context.Context, threadID, imageID int64) error
 		DeleteByID(ctx context.Context, id string) error
@@ -22,6 +22,7 @@ type (
 
 		// Vote
 		GetVote(ctx context.Context, threadID, voterID string) (int, error)
+		GetVoteCount(ctx context.Context, threadID string) (int, error)
 		InsertVote(ctx context.Context, threadID, voterID string, voteType int) error
 		UpdateVoteType(ctx context.Context, threadID, voterID string, voteType int) error
 	}
@@ -34,11 +35,11 @@ func NewThreadRepository(db *sql.DB) *threadRepository {
 	return &threadRepository{db: db}
 }
 
-func (r *threadRepository) InsertThread(ctx context.Context, boardKey, subject, content, posterID, username string) (int64, error) {
+func (r *threadRepository) InsertThread(ctx context.Context, boardKey, subject, content, posterID, uuid, username string) (int64, error) {
 	res, err := r.db.ExecContext(ctx, `
-        INSERT INTO threads_new (board_key, subject, content, poster_id, username)
-        VALUES (?, ?, ?, ?, ?)`,
-		boardKey, subject, content, posterID, username,
+        INSERT INTO threads_new (board_key, subject, content, poster_id, uuid, username)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+		boardKey, subject, content, posterID, uuid, username,
 	)
 	if err != nil {
 		return 0, err
@@ -77,7 +78,7 @@ func (r *threadRepository) GetThreadById(ctx context.Context, id string) (dto.Th
 	err := r.db.QueryRowContext(ctx, `
         SELECT 
             t.id, t.board_key, t.username, t.subject, t.content, t.image_id,
-            t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
+            t.created_at, t.last_bump, t.poster_id, t.uuid, t.locked, t.sticky,
             i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
         FROM threads_new t
         LEFT JOIN images i ON i.id = t.image_id
@@ -85,7 +86,7 @@ func (r *threadRepository) GetThreadById(ctx context.Context, id string) (dto.Th
 		id,
 	).Scan(
 		&th.ID, &th.BoardKey, &th.Username, &th.Subject, &th.Content, &imageID,
-		&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
+		&th.CreatedAt, &th.LastBump, &th.PosterID, &th.UUID, &lockedInt, &stickyInt,
 		&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
 	)
 
@@ -126,7 +127,7 @@ func (r *threadRepository) GetThreadById(ctx context.Context, id string) (dto.Th
 
 func (r *threadRepository) GetPosterId(ctx context.Context, threadId string) (string, error) {
 	var posterId string
-	if err := r.db.QueryRowContext(ctx, "SELECT poster_id FROM threads_new WHERE id = ?", threadId).Scan(&posterId); err != nil {
+	if err := r.db.QueryRowContext(ctx, "SELECT uuid FROM threads_new WHERE id = ?", threadId).Scan(&posterId); err != nil {
 		return "", errors.New("invalid thread ID")
 	}
 	return posterId, nil
@@ -145,6 +146,21 @@ func (r *threadRepository) GetVote(ctx context.Context, threadID, voterID string
 		threadID, voterID,
 	).Scan(&vote)
 	return vote, err
+}
+
+func (r *threadRepository) GetVoteCount(ctx context.Context, threadID string) (int, error) {
+	var netVotes int
+	err := r.db.QueryRowContext(
+		ctx,
+		`SELECT 
+            COALESCE(SUM(CASE WHEN vote_type = 1 THEN 1 ELSE 0 END), 0) - 
+            COALESCE(SUM(CASE WHEN vote_type = -1 THEN 1 ELSE 0 END), 0) as net_votes
+         FROM votes_new 
+         WHERE thread_id = ?`,
+		threadID,
+	).Scan(&netVotes)
+
+	return netVotes, err
 }
 
 func (r *threadRepository) InsertVote(ctx context.Context, threadID, voterID string, voteType int) error {

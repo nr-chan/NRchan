@@ -26,6 +26,7 @@ func (c *ThreadController) PostThread(w http.ResponseWriter, r *http.Request) {
 	req := request.ThreadRequest{
 		Subject:      r.FormValue("subject"),
 		Content:      r.FormValue("content"),
+		Username:     r.FormValue("username"),
 		Board:        r.FormValue("board"),
 		CaptchaToken: r.FormValue("captchaToken"),
 		UUID:         r.Header.Get("uuid"),
@@ -69,6 +70,7 @@ func (c *ThreadController) PostReply(w http.ResponseWriter, r *http.Request) {
 	req := request.ReplyRequest{
 		Content:      r.FormValue("content"),
 		Username:     r.FormValue("username"),
+		ParentReply:  r.FormValue("replyto"),
 		CaptchaToken: r.FormValue("captchaToken"),
 		ThreadID:     id,
 		UUID:         r.Header.Get("uuid"),
@@ -181,4 +183,20 @@ func (c *ThreadController) UpdateVote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.BuildResponseSuccess(w, http.StatusOK, "Vote updated successfully", nil)
+}
+
+func (c *ThreadController) GetVote(w http.ResponseWriter, r *http.Request) {
+	threadId := r.PathValue("id")
+	if threadId == "" {
+		utils.BuildResponseFailed(w, http.StatusBadRequest, "Invalid thread ID", nil, nil)
+		return
+	}
+
+	vote, err := c.threadService.GetVote(r.Context(), threadId)
+	if err != nil {
+		utils.BuildResponseFailed(w, http.StatusInternalServerError, "Failed to get vote", err.Error(), nil)
+		return
+	}
+
+	utils.BuildResponseSuccess(w, http.StatusOK, "Vote retrieved successfully", vote)
 }

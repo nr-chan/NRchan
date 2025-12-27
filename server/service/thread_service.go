@@ -18,6 +18,10 @@ import (
 	"github.com/nr-chan/NRchan/utils"
 )
 
+var BOARDS = map[string]bool{
+	"ph": true, "f": true, "mm": true, "p": true, "v": true, "c": true, "a": true, "sp": true, "m": true, "par": true, "ka": true, "np": true, "gif": true, "rnt": true, "pol": true, "cs": true,
+}
+
 type (
 	ThreadService interface {
 		CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error)
@@ -28,6 +32,7 @@ type (
 		AddReply(ctx context.Context, reply request.ReplyRequest) (int64, error)
 		DeleteReply(ctx context.Context, replyID string, posterId string) error
 		UpdateVote(ctx context.Context, threadId, posterId string, isUpvote bool) error
+		GetVote(ctx context.Context, threadId string) (int, error)
 	}
 	threadService struct {
 		threadRepository repository.ThreadRepository
@@ -44,7 +49,11 @@ func NewThreadService(threadRepository repository.ThreadRepository, replyReposit
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
 
-	username := utils.UUIDToPosterID(thread.UUID)
+	if !BOARDS[thread.Board] {
+		return 0, fmt.Errorf("board %s not allowed", thread.Board)
+	}
+
+	posterID := utils.UUIDToPosterID(thread.UUID)
 
 	// 2) Kick off image processing in parallel (if present)
 	var (
@@ -103,7 +112,7 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 	}
 
 	// 3) Insert the thread row immediately (without image_id)
-	threadID, err := b.threadRepository.InsertThread(ctx, thread.Board, thread.Subject, thread.Content, thread.UUID, username)
+	threadID, err := b.threadRepository.InsertThread(ctx, thread.Board, thread.Subject, thread.Content, posterID, thread.UUID, thread.Username)
 	if err != nil {
 		return -1, err
 	}
@@ -136,15 +145,15 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 	return threadID, nil
 }
 
-func (b *threadService) DeleteThread(ctx context.Context, threadId, posterId string) error {
-	replyPosterId, err := b.threadRepository.GetPosterId(ctx, threadId)
+func (b *threadService) DeleteThread(ctx context.Context, threadId, uuid string) error {
+	replyUUID, err := b.threadRepository.GetPosterId(ctx, threadId)
 
 	if err != nil {
 		return err
 	}
 
-	if posterId != replyPosterId {
-		return errors.New("you are not the poster of this reply")
+	if uuid != replyUUID {
+		return errors.New("you are not the poster of this thread")
 	}
 
 	return b.threadRepository.DeleteByID(ctx, threadId)
@@ -166,7 +175,7 @@ func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Threa
 }
 
 func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest) (int64, error) {
-	username := utils.UUIDToPosterID(reply.UUID)
+	posterID := utils.UUIDToPosterID(reply.UUID)
 
 	// 2) Kick off image processing in parallel (if present)
 	var (
@@ -225,7 +234,7 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 	}
 
 	// 3) Insert the thread row immediately (without image_id)
-	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, reply.ParentReply, username, reply.UUID, reply.Content)
+	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, reply.ParentReply, reply.Username, reply.UUID, posterID, reply.Content)
 	if err != nil {
 		return -1, err
 	}
@@ -258,15 +267,15 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 	return replyId, nil
 }
 
-func (b *threadService) DeleteReply(ctx context.Context, replyID string, posterId string) error {
+func (b *threadService) DeleteReply(ctx context.Context, replyID string, uuid string) error {
 
-	replyPosterId, err := b.replyRepository.GetPosterId(ctx, replyID)
+	replyUUID, err := b.replyRepository.GetUUID(ctx, replyID)
 
 	if err != nil {
 		return err
 	}
 
-	if posterId != replyPosterId {
+	if uuid != replyUUID {
 		return errors.New("you are not the poster of this reply")
 	}
 
@@ -299,4 +308,12 @@ func (b *threadService) UpdateVote(ctx context.Context, threadID, voterID string
 		voterID,
 		newVote,
 	)
+}
+
+func (b *threadService) GetVote(ctx context.Context, threadId string) (int, error) {
+	vote, err := b.threadRepository.GetVoteCount(ctx, threadId)
+	if err != nil {
+		return 0, err
+	}
+	return vote, nil
 }

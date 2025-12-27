@@ -14,7 +14,7 @@ export default function Board() {
   const [threads, setThreads] = useState([])
   const [file, setFile] = useState(null)
   const fileInputRef = useRef(null)
-  const [name, setName] = useState('Anonymous')
+  const [name, setName] = useState('Anon')
   const [subject, setSubject] = useState(null)
   const [comment, setComment] = useState(null)
   const [banner, setBanner] = useState(null)
@@ -238,7 +238,7 @@ export default function Board() {
                 <td>
                   <input
                     type='text'
-                    defaultValue='Anonymous'
+                    defaultValue='Anon'
                     onChange={(e) => setName(e.target.value)}
                     className='w-full border bg-[#F0E0D6] border-[#AAA]'
                   />
@@ -388,9 +388,9 @@ export default function Board() {
                         )}
                       <div>
                         <span className='font-bold text-[#117743]'>
-                          {thread.username ? thread.username : 'Anonymous'}{' '}
+                          {thread.username ? thread.username : 'Anon'}{' '}
                         </span>
-                        <DynamicColorText posterID={thread.posterID || 'FFFFFF'} />
+                        <DynamicColorText posterID={thread.poster_id || 'FFFFFF'} />
                         <span className='ml-1 text-[#34345C]'>{formatDate(thread.created_at)}</span>
                         <br />
                         To view complete thread
@@ -416,7 +416,7 @@ export default function Board() {
                           <span className='font-bold text-[#117743]'>
                             {reply.username || 'Anon'}{' '}
                           </span>
-                          <DynamicColorText posterID={reply.posterID || 'FFFFFF'} />
+                          <DynamicColorText posterID={reply.poster_id || 'FFFFFF'} />
                           <span className='ml-1 text-[#34345C]'>{formatDate(reply.created_at)}</span>
 
                           {reply.image && (

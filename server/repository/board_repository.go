@@ -27,7 +27,7 @@ func NewBoardRepository(db *sql.DB) *boardRepository {
 
 func (b *boardRepository) GetBoards(ctx context.Context) ([]dto.Board, error) {
 	rows, err := b.db.QueryContext(ctx, `
-		SELECT board_key, name,description, created_at, updated_at
+		SELECT board_key, name, description, created_at, updated_at
 		FROM boards_new
 		ORDER BY created_at ASC
 	`)
@@ -56,7 +56,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string
 	rows, err := b.db.QueryContext(ctx, `
 		SELECT 
         t.id, t.board_key, t.username, t.subject, t.content, t.image_id,
-        t.created_at, t.last_bump, t.poster_id, t.locked, t.sticky,
+        t.created_at, t.last_bump, t.poster_id, t.uuid, t.locked, t.sticky,
         i.id, i.url, i.size, i.width, i.height, i.thumb_width, i.thumb_height
     FROM threads_new t
     LEFT JOIN images i ON i.id = t.image_id
@@ -89,7 +89,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string
 		)
 		if err := rows.Scan(
 			&th.ID, &th.BoardKey, &th.Username, &th.Subject, &th.Content, &imageID,
-			&th.CreatedAt, &th.LastBump, &th.PosterID, &lockedInt, &stickyInt,
+			&th.CreatedAt, &th.LastBump, &th.PosterID, &th.UUID, &lockedInt, &stickyInt,
 			&imgID, &imgURL, &imgSize, &imgW, &imgH, &imgTW, &imgTH,
 		); err != nil {
 			return nil, err
@@ -141,7 +141,7 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string
 		placeholders[i] = "?"
 		args[i] = id
 	}
-	query := "SELECT id, thread_id, parent_reply, username, content, image_id, created_at, is_op, poster_id FROM replies_new WHERE thread_id IN (" + strings.Join(placeholders, ",") + ") ORDER BY created_at ASC"
+	query := "SELECT id, thread_id, parent_reply, username, content, image_id, created_at, is_op, poster_id, uuid FROM replies_new WHERE thread_id IN (" + strings.Join(placeholders, ",") + ") ORDER BY created_at ASC"
 
 	repRows, err := b.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -154,11 +154,11 @@ func (b *boardRepository) GetThreadsByBoard(ctx context.Context, boardKey string
 		var parent sql.NullInt64
 		var image sql.NullInt64
 		var isOPInt int64
-		if err := repRows.Scan(&r.ID, &r.ThreadID, &parent, &r.Username, &r.Content, &image, &r.CreatedAt, &isOPInt, &r.PosterID); err != nil {
+		if err := repRows.Scan(&r.ID, &r.ThreadID, &parent, &r.Username, &r.Content, &image, &r.CreatedAt, &isOPInt, &r.PosterID, &r.UUID); err != nil {
 			return nil, err
 		}
 		if parent.Valid {
-			r.ParentReply = &parent.Int64
+			r.ParentReply = parent.Int64
 		}
 		if image.Valid {
 			r.ImageID = &image.Int64

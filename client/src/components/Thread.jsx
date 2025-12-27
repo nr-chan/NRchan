@@ -480,8 +480,8 @@ export default function Component() {
                 checked={selectedPosts.has(threadData.id)}
                 onChange={() => handleCheckboxChange(threadData.id)}
               />
-              <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anonymous') ? threadData.username : 'Anon'} </span>
-              <DynamicColorText posterID={threadData.posterID || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created_at)}</span>
+              <span className='font-bold text-[#117743]'> {(threadData.username && threadData.username !== 'Anon') ? threadData.username : 'Anon'} </span>
+              <DynamicColorText posterID={threadData.poster_id || 'FFFFFF'} /> <span className='text-[#34345C]'>{formatDate(threadData.created_at)}</span>
               <br />
               <div className='flex'>
                 <NRCButton label={"Reply"} onClick={() => {
@@ -504,7 +504,7 @@ export default function Component() {
           {token && <div className='flex justify-end mt-2'>
             <NRCButton
               label={"Ban uuid"}
-              onClick={() => { banUUID(threadData.posterID) }}
+              onClick={() => { banUUID(threadData.poster_id) }}
             />
           </div>}
         </article>
@@ -522,9 +522,9 @@ export default function Component() {
                     checked={selectedPosts.has(reply.id)}
                     onChange={() => handleCheckboxChange(reply.id)}
                   />
-                  <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anonymous'} </span>
+                  <span className='font-bold text-[#117743]'> {reply.username ? reply.username : 'Anon'} </span>
                   {reply.image && (<span>({getFileSize(reply.image.size)}, {reply.image.width}x{reply.image.height}) </span>)}
-                  <DynamicColorText posterID={reply.posterID || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
+                  <DynamicColorText posterID={reply.poster_id || 'FFFFFF'} /> <span className='font-bold text-[#800000]'>
                     No: {reply.id}
                   </span>
                   <span className='ml-2 text-[#34345C]'>{formatDate(reply.created_at)}</span>
@@ -566,12 +566,12 @@ export default function Component() {
                     </div>
 
                     <br />
-                    {reply.parentReply && (
+                    {reply.parent_reply && (
                       <div
                         className='m-2 mt-2 font-bold cursor-pointer text-[#276221]'
-                        onClick={() => scrollToReply(reply.parentReply.id)}
+                        onClick={() => scrollToReply(reply.parent_reply)}
                       >
-                        {`>>${reply.parentReply.id}`}
+                        {`>>${reply.parent_reply}`}
                       </div>
                     )}
 
@@ -581,7 +581,7 @@ export default function Component() {
                 {token && <div className='flex justify-end mt-2'>
                   <NRCButton
                     label={"Ban uuid"}
-                    onClick={() => { banUUID(reply.posterID) }}
+                    onClick={() => { banUUID(reply.poster_id) }}
                   />
                 </div>}
               </article>

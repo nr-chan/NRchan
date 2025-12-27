@@ -177,5 +177,5 @@ export async function GetVoteCount(threadID) {
     method: 'GET'
   })
   const respJson = await response.json();
-  return respJson.count;
+  return respJson.data;
 }

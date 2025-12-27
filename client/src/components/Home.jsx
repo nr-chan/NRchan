@@ -144,7 +144,7 @@ const Home = () => {
         </div>
         <div className='p-2 border border-[#800000] bg-[#FFFFEE]'>
           <div className='grid grid-cols-4 gap-4'>
-            {threads.slice(0, 8).map((thread, index) => (
+            {threads && threads.slice(0, 8).map((thread, index) => (
               <div key={index} className='cursor-pointer' onClick={() => nav(`/thread/${thread.id}`)}>
                 <div className='p-2 border border-[#B86] bg-[#F0E0D6]'>
                   {/* Thread Image */}
