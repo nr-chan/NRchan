@@ -71,9 +71,9 @@ const Home = () => {
   }
 
   const categories = [
-    { title: 'Discussion', boards: ['Programming', 'Meth-Math', 'Politics', 'CS Trends'] },
-    { title: 'Sports/ Games', boards: ['Video Games', 'Cricket', 'Arambh'] },
-    { title: 'Random', boards: ['Photography', 'Music', 'Food', 'Paranormal'] },
+    { title: 'Discussion', boards: ['Programming', 'Meth-Math', 'Goon HQ', 'Crypto-Anarchism'] },
+    { title: 'Sports/ Games', boards: ['Video Games', 'Cricket', 'Incel'] },
+    { title: 'Random', boards: ['Raand','Photography', 'Music', 'Food', 'Penis'] },
     { title: 'Adult (NSFW)', boards: ['Khoobsurat Aurate', 'Nasha Paani', 'GIF', 'Rant'] }
   ]
 

@@ -1,25 +1,26 @@
-export const boardList = ['p', 'mm', 'v', 'c', 'a', 'sp', 'ph', 'm', 'f', 'par', 'ka', 'np', 'gif', 'rnt', 'pol', 'cs']
+export const boardList = ['p', 'mm', 'v', 'c', 'incel', 'sp', 'ph', 'm', 'f', 'ps', 'ka', 'np', 'gif', 'rnt', 'nz4l', 'ca','b']
 
 export const links = [
   'Programming',
   'Meth-Math',
   'Video Games',
   'Cricket',
-  'Arambh',
+  'Incel',
   'Sports',
   'Photography',
   'Music',
   'Food',
-  'Paranormal',
+  'Penis',
   'Khoobsurat Aurate',
   'Nasha Paani',
   'GIF',
   'Rant',
-  'Politics',
-  'CS Trends'
+  'Goon HQ',
+  'Crypto-Anarchism',
+  'Raand'
 ]
 
-export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha']
+export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha', 'gentooo','mrgarlic','soy','agatha','criket','femi','lebran','opisgay','sports']
 
 export const API_URL = import.meta.env.VITE_API_URL
 export const STATIC_URL = import.meta.env.VITE_STATIC_URL

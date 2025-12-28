@@ -42,9 +42,10 @@ function Navbar() {
         <select
           id='board-select'
           onChange={handleBoardChange}
+          defaultValue=''
           className='p-0.5 rounded-md border focus:outline-none border-[#d9bfb7] bg-[#FCA] text-[#800000]'
         >
-          <option value='' disabled selected>
+          <option value='' disabled>
             Select a board
           </option>
           {boardList.map((board) => (
