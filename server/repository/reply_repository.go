@@ -9,7 +9,7 @@ import (
 
 type (
 	ReplyRepository interface {
-		AddReply(ctx context.Context, id string, parentReply string, username string, uuid string, posterID string, content string) (int64, error)
+		AddReply(ctx context.Context, id string, parentReply *string, username string, uuid string, posterID string, content string) (int64, error)
 		DeleteReplyWithId(ctx context.Context, id string) error
 		GetRepliesByThreadID(ctx context.Context, threadID string) ([]dto.Reply, error)
 		GetUUID(ctx context.Context, replyId string) (string, error)
@@ -111,7 +111,7 @@ func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID str
 	return replies, nil
 }
 
-func (r *replyRepository) AddReply(ctx context.Context, id string, parentReply string, username string, uuid string, posterID string, content string) (int64, error) {
+func (r *replyRepository) AddReply(ctx context.Context, id string, parentReply *string, username string, uuid string, posterID string, content string) (int64, error) {
 	res, err := r.db.ExecContext(ctx, "INSERT INTO replies_new (thread_id, parent_reply, username, uuid, poster_id, content) VALUES (?, ?, ?, ?, ?, ?)", id, parentReply, username, uuid, posterID, content)
 	if err != nil {
 		return 0, err

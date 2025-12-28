@@ -76,6 +76,10 @@ func (c *ThreadController) PostReply(w http.ResponseWriter, r *http.Request) {
 		UUID:         r.Header.Get("uuid"),
 	}
 
+	if req.ParentReply == "null" {
+		req.ParentReply = ""
+	}
+
 	if req.UUID == "" || req.Content == "" || req.CaptchaToken == "" {
 		utils.BuildResponseFailed(w, http.StatusBadRequest, "Missing required fields", nil, nil)
 		return

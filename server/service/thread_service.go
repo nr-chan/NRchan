@@ -19,7 +19,7 @@ import (
 )
 
 var BOARDS = map[string]bool{
-	"ph": true, "f": true, "mm": true, "p": true, "v": true, "c": true, "a": true, "sp": true, "m": true, "par": true, "ka": true, "np": true, "gif": true, "rnt": true, "pol": true, "cs": true,
+	"p": true, "mm": true, "v": true, "c": true, "incel": true, "sp": true, "ph": true, "m": true, "f": true, "ps": true, "ka": true, "np": true, "gif": true, "rnt": true, "nz4l": true, "ca": true, "b": true,
 }
 
 type (
@@ -234,7 +234,13 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 	}
 
 	// 3) Insert the thread row immediately (without image_id)
-	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, reply.ParentReply, reply.Username, reply.UUID, posterID, reply.Content)
+
+	var parentReply *string
+	if reply.ParentReply != "" {
+		parentReply = &reply.ParentReply
+	}
+
+	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, parentReply, reply.Username, reply.UUID, posterID, reply.Content)
 	if err != nil {
 		return -1, err
 	}
