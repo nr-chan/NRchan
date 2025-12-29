@@ -22,6 +22,9 @@ var BOARDS = map[string]bool{
 	"p": true, "mm": true, "v": true, "c": true, "incel": true, "sp": true, "ph": true, "m": true, "f": true, "ps": true, "ka": true, "np": true, "gif": true, "rnt": true, "nz4l": true, "ca": true, "b": true,
 }
 
+const THREAD_CACHE_PREFIX = "thread_"
+const VOTE_CACHE_PREFIX = "vote_"
+
 type (
 	ThreadService interface {
 		CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error)
@@ -38,13 +41,15 @@ type (
 		threadRepository repository.ThreadRepository
 		replyRepository  repository.ReplyRepository
 
+		cacheService CacheService
+
 		imageBucket *utils.ImageBucket
 		jwtService  JWTService
 	}
 )
 
-func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService, imageBucket *utils.ImageBucket) *threadService {
-	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: imageBucket}
+func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService, imageBucket *utils.ImageBucket, cacheService CacheService) *threadService {
+	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: imageBucket, cacheService: cacheService}
 }
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
@@ -156,10 +161,20 @@ func (b *threadService) DeleteThread(ctx context.Context, threadId, uuid string)
 		return errors.New("you are not the poster of this thread")
 	}
 
+	threadCacheKey := fmt.Sprintf("%s%s", THREAD_CACHE_PREFIX, threadId)
+	b.cacheService.Delete(threadCacheKey)
+
 	return b.threadRepository.DeleteByID(ctx, threadId)
 }
 
 func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Thread, error) {
+	var thread dto.Thread
+	threadID := fmt.Sprintf("%s%s", THREAD_CACHE_PREFIX, id)
+	if err := b.cacheService.Get(threadID, &thread); err == nil {
+		fmt.Println("Thread found in cache ", threadID)
+		return thread, nil
+	}
+
 	thread, err := b.threadRepository.GetThreadById(ctx, id)
 	if err != nil {
 		return dto.Thread{}, err
@@ -171,11 +186,14 @@ func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Threa
 	}
 
 	thread.Replies = replies
+
+	b.cacheService.Set(threadID, thread)
 	return thread, nil
 }
 
 func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest) (int64, error) {
 	posterID := utils.UUIDToPosterID(reply.UUID)
+	threadCacheKey := fmt.Sprintf("%s%s", THREAD_CACHE_PREFIX, reply.ThreadID)
 
 	// 2) Kick off image processing in parallel (if present)
 	var (
@@ -270,11 +288,12 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 		}
 	}
 
+	b.cacheService.Delete(threadCacheKey)
+
 	return replyId, nil
 }
 
 func (b *threadService) DeleteReply(ctx context.Context, replyID string, uuid string) error {
-
 	replyUUID, err := b.replyRepository.GetUUID(ctx, replyID)
 
 	if err != nil {
@@ -285,7 +304,15 @@ func (b *threadService) DeleteReply(ctx context.Context, replyID string, uuid st
 		return errors.New("you are not the poster of this reply")
 	}
 
-	return b.replyRepository.DeleteReplyWithId(ctx, replyID)
+	threadID, err := b.replyRepository.DeleteReplyWithId(ctx, replyID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("THREAD ID", threadID)
+
+	b.cacheService.Delete(fmt.Sprintf("%s%d", THREAD_CACHE_PREFIX, threadID))
+	return nil
 }
 
 func (b *threadService) UpdateVote(ctx context.Context, threadID, voterID string, isUpvote bool) error {

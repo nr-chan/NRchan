@@ -21,8 +21,12 @@
             "remote": true
         }
     ],
-
 	
+	"kv_namespaces": [{
+            "binding": "CACHE_NAMESPACE",
+            "id": "bbedbd1cc57845fe9b401a40b2839a61"
+    }],
+
 	"observability": {
 		"logs": {
 			"enabled": true,

@@ -10,7 +10,7 @@ import (
 type (
 	ReplyRepository interface {
 		AddReply(ctx context.Context, id string, parentReply *string, username string, uuid string, posterID string, content string) (int64, error)
-		DeleteReplyWithId(ctx context.Context, id string) error
+		DeleteReplyWithId(ctx context.Context, id string) (int64, error)
 		GetRepliesByThreadID(ctx context.Context, threadID string) ([]dto.Reply, error)
 		GetUUID(ctx context.Context, replyId string) (string, error)
 
@@ -25,9 +25,16 @@ func NewReplyRepository(db *sql.DB) *replyRepository {
 	return &replyRepository{db: db}
 }
 
-func (r *replyRepository) DeleteReplyWithId(ctx context.Context, id string) error {
-	_, err := r.db.ExecContext(ctx, `DELETE FROM replies_new WHERE id = ?`, id)
-	return err
+func (r *replyRepository) DeleteReplyWithId(ctx context.Context, id string) (int64, error) {
+	var threadID int64
+
+	err := r.db.QueryRowContext(
+		ctx,
+		`DELETE FROM replies_new WHERE id = ? RETURNING thread_id`,
+		id,
+	).Scan(&threadID)
+
+	return threadID, err
 }
 
 func (r *replyRepository) GetRepliesByThreadID(ctx context.Context, threadID string) ([]dto.Reply, error) {

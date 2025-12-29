@@ -11,11 +11,11 @@ type ServiceContainer struct {
 	threadService service.ThreadService
 }
 
-func RegisterServices(data *RepositoryContainer, container *Container) ServiceContainer {
+func RegisterServices(container *Container) ServiceContainer {
 	return ServiceContainer{
-		boardService:  service.NewBoardService(data.boardRepository, container.JWTService),
-		adminService:  service.NewAdminService(data.boardRepository, container.JWTService),
-		homeService:   service.NewHomeService(data.homeRepository, container.JWTService),
-		threadService: service.NewThreadService(data.threadRepository, data.replyRepository, container.JWTService, container.ImageBucket),
+		boardService:  service.NewBoardService(container.boardRepository, container.JWTService),
+		adminService:  service.NewAdminService(container.boardRepository, container.JWTService),
+		homeService:   service.NewHomeService(container.homeRepository, container.JWTService),
+		threadService: service.NewThreadService(container.threadRepository, container.replyRepository, container.JWTService, container.ImageBucket, container.CacheService),
 	}
 }

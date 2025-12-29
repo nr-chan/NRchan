@@ -20,6 +20,9 @@ type Container struct {
 	//DB
 	*DatabaseProvider
 
+	//Cache
+	CacheService service.CacheService
+
 	ConfigContainer
 	RepositoryContainer
 	ServiceContainer
@@ -40,6 +43,7 @@ func NewContainer() (*Container, error) {
 	// Initialize utils
 	container.ImageBucket = utils.NewImageBucket("NR_BUCKET")
 	container.JWTService = service.NewJWTService(cfg.JWTSecret)
+	container.CacheService = service.NewCacheService("CACHE_NAMESPACE")
 
 	// Initialize database
 	container.DatabaseProvider, err = RegisterDatabase(&container.ConfigContainer)
@@ -50,7 +54,7 @@ func NewContainer() (*Container, error) {
 	container.RepositoryContainer = RegisterRepositories(container.DatabaseProvider)
 
 	// Initialize services
-	container.ServiceContainer = RegisterServices(&container.RepositoryContainer, container)
+	container.ServiceContainer = RegisterServices(container)
 
 	// Initialize handlers
 	container.HandlerContainer = RegisterHandlers(&container.ServiceContainer)
