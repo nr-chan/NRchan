@@ -7,7 +7,7 @@ const Home = () => {
   const [threads, setThreads] = useState([])
   const [stats, setStats] = useState([]);
   const [uuidstats, setUUIDstats] = useState([]);
-  const [boardstats, setBoardstats] = useState([]); 
+  // const [boardstats, setBoardstats] = useState([]); 
   const [totalThread, settotalThread] = useState(0);
   const [totalPosts, settotalPosts] = useState(0);
   const [uniquePosters, setUniquePosters] = useState(0);
@@ -35,25 +35,25 @@ const Home = () => {
     settotalPosts(0);
   }
 };
-  const fetchUUIDstats = async () => {
-    try {
-    const res = await fetch(`${API_URL}/boards/stats`);
-    const json = await res.json();
-    if (res.ok && json?.status && Array.isArray(json.data)) {
-      setUUIDstats(json.data);
-    } else {
-      setUUIDstats([]);
-    }
-  } catch (e) {
-    console.error('fetchUuidStats error:', e);
-    setUUIDstats([]);
-  }
-  }
+  // const fetchUUIDstats = async () => {
+  //   try {
+  //   const res = await fetch(`${API_URL}/boards/stats`);
+  //   const json = await res.json();
+  //   if (res.ok && json?.status && Array.isArray(json.data)) {
+  //     setUUIDstats(json.data);
+  //   } else {
+  //     setUUIDstats([]);
+  //   }
+  // } catch (e) {
+  //   console.error('fetchUuidStats error:', e);
+  //   setUUIDstats([]);
+  // }
+  // }
 
   useEffect(() => {
     fetchStats()
     fetchRecent()
-    fetchUUIDstats()
+    //fetchUUIDstats()
     const deviceId = localStorage.getItem('uuid');
   
 
@@ -209,7 +209,7 @@ const Home = () => {
 
             </div>
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <div className="grid grid-cols-2 py-1 px-2 mx-1 border bg-[#9a64c9] border-[#06554a]">
               <h2 className='font-bold text-[15px]'>TOP POSTERS</h2>
               <h2 className='font-bold text-[15px]'>POSTS</h2>
@@ -222,7 +222,7 @@ const Home = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="w-full sm:w-1/2">
           {/* Board Stats Table */}
