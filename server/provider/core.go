@@ -61,9 +61,3 @@ func NewContainer() (*Container, error) {
 
 	return container, nil
 }
-
-// RegisterDependencies is kept for backward compatibility during transition
-// TODO: Remove this once all code is migrated to use Container directly
-func RegisterDependencies() (*Container, error) {
-	return NewContainer()
-}

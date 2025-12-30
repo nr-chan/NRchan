@@ -14,20 +14,12 @@ func NewDatabaseProvider(db *sql.DB) *DatabaseProvider {
 	}
 }
 
-func (dp *DatabaseProvider) GetDatabase() *sql.DB {
-	return dp.database
-}
-
 func RegisterDatabase(cfgCnt *ConfigContainer) (*DatabaseProvider, error) {
-
-	// Register mongoapi HTTP Client
 
 	db, err := cfgCnt.Config.DatabaseConfig.SetupClient()
 	if err != nil {
 		return nil, err
 	}
-
-	// Register DatabaseProvider
 
 	return NewDatabaseProvider(db), nil
 }
