@@ -9,6 +9,7 @@ import Thread from './components/Thread.jsx'
 import Login from './components/Login.jsx'
 import P404 from './components/P404.jsx'
 import NRChanRules from './components/Rules.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,7 +26,8 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-
-    <RouterProvider router={router} />
+    <ThemeProvider>
+        <RouterProvider router={router} />
+     </ThemeProvider>
   </React.StrictMode>
 )

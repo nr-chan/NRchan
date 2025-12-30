@@ -11,7 +11,6 @@ const Home = () => {
   const [totalThread, settotalThread] = useState(0);
   const [totalPosts, settotalPosts] = useState(0);
   const [uniquePosters, setUniquePosters] = useState(0);
-  const [activeDevices, setActiveDevices] = useState(0);
   let socket;
   const fetchStats = async () => {
   try {
@@ -86,7 +85,7 @@ const Home = () => {
   }
 
   return (
-    <div className='bg-[#FFFFEE]'>
+    <div className='bg-[var(--color-background)]'>
       {/* Header */}
       <header className='flex justify-center p-2'>
         <img
@@ -97,8 +96,8 @@ const Home = () => {
       </header>
 
       {/* Info Box */}
-      <div className='p-2 m-4 mx-auto border max-w-[720px] bg-[#F0E0D6] text-[#800000] border-[#D9BFB7]'>
-        <div className='flex justify-between items-center py-1 px-2 bg-red-700'>
+      <div className='p-2 m-4 mx-auto border max-w-[720px] bg-[var(--color-backgroundSecondary)] text-[var(--color-textSecondary)] border-[var(--color-borderThin)]'>
+        <div className='flex justify-between items-center py-1 px-2 bg-[var(--color-headerBg)]'>
           <h2 className='font-bold text-white text-[14px]'>What is NRchan?</h2>
         </div>
         <p className='mt-2'>
@@ -111,19 +110,19 @@ const Home = () => {
 
       {/* Boards */}
       <div className='mx-auto max-w-[720px]'>
-        <div className='flex justify-between items-center py-1 px-2 border bg-[#FCA] border-[#B86]'>
+        <div className='flex justify-between items-center py-1 px-2 border-t border-l border-r  bg-[var(--color-headerAlt)]  border-[var(--color-border)]'>
           <h2 className='font-bold text-[15px]'>Boards</h2>
         </div>
-        <div className='p-2 border border-[#B86] bg-[#F0E0D6]'>
+        <div className='p-2 border border-[var(--color-border)] bg-[var(--color-backgroundSecondary)]'>
           <div className='flex flex-wrap -mx-2'>
             {categories.map((category, index) => (
               <div key={index} className='px-2 mb-4 w-1/3'>
-                <h3 className='mb-1 font-bold underline text-[12.09px] text-[#CC1105]'>{category.title}</h3>
+                <h3 className='mb-1 font-bold underline text-[12.09px] text-[var(--color-primary)]'>{category.title}</h3>
                 <ul className='list-none'>
                   {category.boards.map((board, boardIndex) => (
                     <li key={boardIndex} className='leading-tight text-[11px]'>
                       <span
-                        className='cursor-pointer hover:underline text-[#800000]'
+                        className='cursor-pointer hover:underline text-[var(--color-textSecondary)]'
                         onClick={() => toboard(board)}
                       >
                         {board}
@@ -139,16 +138,16 @@ const Home = () => {
 
       {/* Popular Threads Section */}
       <div className='py-4 mx-auto max-w-[720px]'>
-        <div className='flex justify-between items-center py-1 px-2 border bg-[#FCA] border-[#B86]'>
+        <div className='flex justify-between items-center py-1 px-2 border bg-[var(--color-headerAlt)] border-[var(--color-border)]'>
           <h2 className='font-bold text-[15px]'>Popular Threads</h2>
         </div>
-        <div className='p-2 border border-[#800000] bg-[#FFFFEE]'>
+        <div className='p-2 border border-[var(--color-border)] bg-[var(--color-background)]'>
           <div className='grid grid-cols-4 gap-4'>
             {threads && threads.slice(0, 8).map((thread, index) => (
               <div key={index} className='cursor-pointer' onClick={() => nav(`/thread/${thread.id}`)}>
-                <div className='p-2 border border-[#B86] bg-[#F0E0D6]'>
+                <div className='p-2 border border-[var(--color-border)] bg-[var(--color-backgroundSecondary)]'>
                   {/* Thread Image */}
-                  <div className='flex justify-center items-center h-32 bg-[#F0E0D6]'>
+                  <div className='flex justify-center items-center h-32 bg-[var(--color-backgroundSecondary)]'>
                     {thread.image
                       ? (
                         thread.image.url.endsWith('.mp4')
@@ -176,11 +175,11 @@ const Home = () => {
                       )}
                   </div>
                   {/* Thread Info */}
-                  <div className='p-1 bg-[#FFFFEE]'>
-                    <div className='mb-1 font-bold text-[12px] text-[#CC1105]'>
+                  <div className='p-1 bg-[var(--color-backgroundTertiary)]'>
+                    <div className='mb-1 font-bold text-[12px] text-[var(--color-link)]'>
                       /{thread.board}/
                     </div>
-                    <div className='text-[11px] text-[#800000]'>
+                    <div className='text-[11px] text-[var(--color-text)]'>
                       {getPreviewText(thread.subject)}
                     </div>
                   </div>
@@ -204,9 +203,7 @@ const Home = () => {
                 <div>Total Threads  </div><div>{totalThread}</div> <div></div>
                 <div>Total Posts   </div><div>{totalPosts}</div><div></div>
                 <div>Unique User </div><div>{uniquePosters}</div> <div></div>
-                <div>Active Devices </div><div>  {activeDevices}</div><div></div>
               </div>
-
             </div>
           </div>
           {/* <div className="mb-4">

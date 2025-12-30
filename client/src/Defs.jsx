@@ -20,7 +20,9 @@ export const links = [
   'Raand'
 ]
 
-export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha', 'gentooo','mrgarlic','soy','agatha','criket','femi','lebran','opisgay','sports']
+export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha', 'gentooo','mrgarlic','soy','agatha','criket','femi','lebran','opisgay','sports',
+                          'anime', 'kanojo', 'pakisporty', 'touhou', 'bitches', 'statue', 'dollar', 'reaw', 'bunker'
+]
 
 export const API_URL = import.meta.env.VITE_API_URL
 export const STATIC_URL = import.meta.env.VITE_STATIC_URL
