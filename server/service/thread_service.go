@@ -116,7 +116,9 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 				return
 			}
 
-			if err := b.resizeImageService.ResizeImage(ctx, key, 0.25); err != nil {
+			scale := utils.NormalizeScale(cfg.Width, cfg.Height)
+
+			if err := b.resizeImageService.ResizeImage(ctx, key, scale); err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -258,7 +260,9 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 				return
 			}
 
-			if err := b.resizeImageService.ResizeImage(ctx, key, 0.25); err != nil {
+			scale := utils.NormalizeScale(cfg.Width, cfg.Height)
+
+			if err := b.resizeImageService.ResizeImage(ctx, key, scale); err != nil {
 				imgErrCh <- err
 				return
 			}
@@ -276,6 +280,10 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 
 	replyId, err := b.replyRepository.AddReply(ctx, reply.ThreadID, parentReply, reply.Username, reply.UUID, posterID, reply.Content)
 	if err != nil {
+		return -1, err
+	}
+
+	if err := b.threadRepository.UpdateThreadLastBump(ctx, reply.ThreadID); err != nil {
 		return -1, err
 	}
 

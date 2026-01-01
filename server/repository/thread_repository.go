@@ -18,6 +18,8 @@ type (
 		UpdateThreadImage(ctx context.Context, threadID, imageID int64) error
 		DeleteByID(ctx context.Context, id string) error
 		GetPosterId(ctx context.Context, threadId string) (string, error)
+		UpdateThreadLastBump(ctx context.Context, threadID string) error
+
 		// GetAllThreads(ctx context.Context) ([]dto.Thread, error)
 
 		// Vote
@@ -180,5 +182,10 @@ func (r *threadRepository) UpdateVoteType(ctx context.Context, threadID, voterID
 		 WHERE thread_id = ? AND voter_id = ?`,
 		voteType, threadID, voterID,
 	)
+	return err
+}
+
+func (r *threadRepository) UpdateThreadLastBump(ctx context.Context, threadID string) error {
+	_, err := r.db.ExecContext(ctx, "UPDATE threads_new SET last_bump = CURRENT_TIMESTAMP WHERE id = ?", threadID)
 	return err
 }
