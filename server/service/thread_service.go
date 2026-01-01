@@ -43,13 +43,14 @@ type (
 
 		cacheService CacheService
 
-		imageBucket *utils.ImageBucket
-		jwtService  JWTService
+		imageBucket        *utils.ImageBucket
+		jwtService         JWTService
+		resizeImageService ResizeImageService
 	}
 )
 
-func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService, imageBucket *utils.ImageBucket, cacheService CacheService) *threadService {
-	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: imageBucket, cacheService: cacheService}
+func NewThreadService(threadRepository repository.ThreadRepository, replyRepository repository.ReplyRepository, jwt JWTService, imageBucket *utils.ImageBucket, cacheService CacheService, resizeImageService ResizeImageService) *threadService {
+	return &threadService{threadRepository: threadRepository, replyRepository: replyRepository, jwtService: jwt, imageBucket: imageBucket, cacheService: cacheService, resizeImageService: resizeImageService}
 }
 
 func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadRequest) (int64, error) {
@@ -112,6 +113,12 @@ func (b *threadService) CreateThread(ctx context.Context, thread request.ThreadR
 				imgErrCh <- err
 				return
 			}
+
+			if err := b.resizeImageService.ResizeImage(ctx, key, 0.25); err != nil {
+				imgErrCh <- err
+				return
+			}
+
 			imgIDCh <- imageID
 		}()
 	}
@@ -243,10 +250,17 @@ func (b *threadService) AddReply(ctx context.Context, reply request.ReplyRequest
 			imageID, err := b.threadRepository.InsertImage(
 				ctx, imgURL, reply.Image.Size, cfg.Width, cfg.Height, cfg.Width, cfg.Height,
 			)
+
 			if err != nil {
 				imgErrCh <- err
 				return
 			}
+
+			if err := b.resizeImageService.ResizeImage(ctx, key, 0.25); err != nil {
+				imgErrCh <- err
+				return
+			}
+
 			imgIDCh <- imageID
 		}()
 	}

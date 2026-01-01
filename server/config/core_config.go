@@ -5,6 +5,7 @@ type AppConfig struct {
 	JWTSecret      string
 	Port           string
 	R2BucketName   string
+	ExternalURL    string
 }
 
 func LoadConfig() (*AppConfig, error) {
@@ -19,5 +20,6 @@ func LoadConfig() (*AppConfig, error) {
 		JWTSecret:      config.SECRETACCESSKEY,
 		Port:           config.PORT,
 		R2BucketName:   config.BUCKETNAME,
+		ExternalURL:    config.EXTERNAL_URL,
 	}, nil
 }

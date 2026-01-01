@@ -1,4 +1,4 @@
-{
+{ 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "nrchan-server",
 	"main": "./build/worker.mjs",
 	"compatibility_date": "2025-11-01",

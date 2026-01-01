@@ -23,6 +23,8 @@ type Container struct {
 	//Cache
 	CacheService service.CacheService
 
+	ResizeImageService service.ResizeImageService
+
 	ConfigContainer
 	RepositoryContainer
 	ServiceContainer
@@ -44,6 +46,7 @@ func NewContainer() (*Container, error) {
 	container.ImageBucket = utils.NewImageBucket("NR_BUCKET")
 	container.JWTService = service.NewJWTService(cfg.JWTSecret)
 	container.CacheService = service.NewCacheService("CACHE_NAMESPACE")
+	container.ResizeImageService = service.NewResizeImageService(container.Config.ExternalURL)
 
 	// Initialize database
 	container.DatabaseProvider, err = RegisterDatabase(&container.ConfigContainer)

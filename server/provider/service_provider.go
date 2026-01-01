@@ -16,6 +16,6 @@ func RegisterServices(container *Container) ServiceContainer {
 		boardService:  service.NewBoardService(container.boardRepository, container.JWTService),
 		adminService:  service.NewAdminService(container.boardRepository, container.JWTService),
 		homeService:   service.NewHomeService(container.homeRepository, container.JWTService),
-		threadService: service.NewThreadService(container.threadRepository, container.replyRepository, container.JWTService, container.ImageBucket, container.CacheService),
+		threadService: service.NewThreadService(container.threadRepository, container.replyRepository, container.JWTService, container.ImageBucket, container.CacheService, container.ResizeImageService),
 	}
 }

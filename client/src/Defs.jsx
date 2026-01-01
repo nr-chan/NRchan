@@ -115,8 +115,7 @@ export const formatText = (content) => {
 }
 
 export const getSmallImageUrl = (url) => {
-  const lastDotIndex = url.lastIndexOf('.')
-  return `${url.substring(0, lastDotIndex)}${url.substring(lastDotIndex)}`
+  return `${url}s`
 }
 
 export const getFileSize = (bytes) => {

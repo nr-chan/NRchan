@@ -16,6 +16,7 @@ type Config struct {
 	PORT                  string
 	JWT_SECRET            string
 	DATABASE_NAME         string
+	EXTERNAL_URL          string
 }
 
 func InitConfig() Config {
@@ -31,5 +32,6 @@ func InitConfig() Config {
 		PORT:                  cloudflare.Getenv("PORT"),
 		JWT_SECRET:            cloudflare.Getenv("JWT_SECRET"),
 		DATABASE_NAME:         cloudflare.Getenv("DATABASE_NAME"),
+		EXTERNAL_URL:          cloudflare.Getenv("EXTERNAL_URL"),
 	}
 }
