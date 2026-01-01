@@ -1,18 +1,18 @@
-import { API_URL } from "../Defs";
+import { STATIC_URL } from "../Defs";
 
 export default function Rules() {
   return (
-    <div className="min-h-screen bg-[#FFFFEE]">
+    <div className="min-h-screen bg-[var(--color-background)]">
       <header className="flex items-center justify-center gap-2 py-4">
         <img
-          src={`${API_URL}/images/banner.png`}
+          src={`${STATIC_URL}/banner.png`}
           alt="NRchan Logo"
           className="h-28"
         />
       </header>
       <div className="mx-auto max-w-6xl px-4">
         <div className="border border-red-800 bg-white text-sm">
-          <h2 className="mb-2 bg-[#fca] text-lg font-bold text-red-800 pl-2">Rules</h2>
+          <h2 className="mb-2 bg-[var(--color-headerAlt)] text-lg font-bold text-[var(--color-text)] pl-2">Rules</h2>
           <p className="p-2">
             By using this website (the "site"), you agree that you'll follow these rules, and understand that if we reasonably
             think you haven't followed these rules, we may (at our own discretion) terminate your access to the site:
@@ -50,13 +50,13 @@ export default function Rules() {
           </div>
 
           {/* Rules Columns Container */}
-          <div className="flex-1 flex flex-col gap-4">
+          <div className="flex-1 flex flex-col gap-4 text-[var(--color-text)]">
             {/* Global Rules Column */}
             <div className="border border-black min-w-[300px]">
-              <div className="bg-[#5599aa] p-2">
-                <h3 className="font-bold text-white">Global Rules</h3>
+              <div className="bg-[var(--color-headerInfo)] p-2">
+                <h3 className="font-bold">Global Rules</h3>
               </div>
-              <div className="bg-[#eeffff] py-5 px-8">
+              <div className="bg-[var(--color-backgroundSecondary)] py-5 px-8">
                 <ol className="list-decimal space-y-4 text-sm">
                   <li>You will not upload, post, discuss, request, or link to anything that violates local or national laws.</li>
                   <li>You will immediately cease and not continue to access the site if you are under the age of 18.</li>
@@ -79,13 +79,13 @@ export default function Rules() {
 
             {/* Image Boards Rules Column */}
             <div className="border border-black min-w-[300px]">
-              <div className="bg-[#5599aa] p-2">
-                <h3 className="font-bold text-white">Image Boards Rules</h3>
+              <div className="bg-[var(--color-headerInfo)] p-2">
+                <h3 className="font-bold">Image Boards Rules</h3>
               </div>
-              <div className="bg-[#eeffff] py-5 px-8">
+              <div className="bg-[var(--color-backgroundSecondary)] py-5 px-8">
                 {/* Programming Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Programming</h4>
+                  <h4 className="font-bold">Programming</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Discussions should be focused on programming languages, algorithms, and development tools.</li>
                     <li>No off-topic content like memes or non-technical discussions.</li>
@@ -96,7 +96,7 @@ export default function Rules() {
 
                 {/* Math Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Meth-Math</h4>
+                  <h4 className="font-bold">Meth-Math</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Focus on mathematical problems, theorems, and discussions.</li>
                     <li>Non-mathematical content or jokes are not allowed.</li>
@@ -107,7 +107,7 @@ export default function Rules() {
 
                 {/* Video Games Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Video Games</h4>
+                  <h4 className="font-bold">Video Games</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Discussions about gaming news, updates, or game mechanics are allowed.</li>
                     <li>Please share pirated content or illegal game copies.</li>
@@ -118,7 +118,7 @@ export default function Rules() {
 
                 {/* Cricket Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Cricket</h4>
+                  <h4 className="font-bold">Cricket</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Cricket news, player updates, and match discussions are encouraged.</li>
                     <li>Cricket shitposting is allowed</li>
@@ -130,11 +130,9 @@ export default function Rules() {
 
                 {/* Photography Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Photography</h4>
+                  <h4 className="font-bold">Photography</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Share and discuss photography techniques, gear, and photos.</li>
-
-
                     <li>Respect copyright laws when sharing photographs.</li>
                   </ul>
                 </div>
@@ -143,7 +141,7 @@ export default function Rules() {
 
                 {/* Music Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Music</h4>
+                  <h4 className="font-bold">Music</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Music discussions, song recommendations, and album reviews are allowed.</li>
                     <li>Do not share pirated music or illegal downloads.</li>
@@ -154,7 +152,7 @@ export default function Rules() {
 
                 {/* Music Rules */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-[#006600]">Food</h4>
+                  <h4 className="font-bold">Food</h4>
                   <ul className="list-disc ml-8 space-y-2 text-sm">
                     <li>Images and discussion should relate to food and cooking.</li>
                     <li>Recipes are welcome! Feel free to talk about your favorite dishes and discuss past cooking experiences.</li>

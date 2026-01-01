@@ -21,7 +21,8 @@ export const links = [
 ]
 
 export const bannerImg = ['fumo', 'lurking', 'joint', 'bhabha', 'gentooo','mrgarlic','soy','agatha','criket','femi','lebran','opisgay','sports',
-                          'anime', 'kanojo', 'pakisporty', 'touhou', 'bitches', 'statue', 'dollar', 'reaw', 'bunker'
+                          'anime', 'kanojo', 'pakisporty', 'touhou', 'bitches', 'statue', 'dollar', 'reaw', 'bunker', 'med', 'quack', 'sp',
+                          'titZ'
 ]
 
 export const API_URL = import.meta.env.VITE_API_URL
@@ -71,48 +72,65 @@ export const formatDate = (dateString) => {
   }
 }
 
+const linkRegex = /(https?:\/\/[^\s]+)/g
+
+const renderWithLinks = (text, keyPrefix) => {
+  return text.split(linkRegex).map((chunk, i) => {
+    if (chunk.match(linkRegex)) {
+      return (
+        <a
+          key={`${keyPrefix}-link-${i}`}
+          href={chunk}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[var(--color-link)] hover:underline break-all"
+        >
+          {chunk}
+        </a>
+      )
+    }
+    return <span key={`${keyPrefix}-text-${i}`}>{chunk}</span>
+  })
+}
+
 export const formatText = (content) => {
   if (!content) return null
 
   const parts = content.split(/```/)
 
   return parts.map((part, index) => {
-    // Handle code blocks (odd indexes)
+    // 🔹 Code blocks
     if (index % 2 === 1) {
       if (parts.length % 2 === 0 && index === parts.length - 1) {
-        part = '```' + part
-        return <span key={index}>{part}</span>
+        return <span key={index}>{'```' + part}</span>
       }
       return (
         <code
           key={index}
-          className='block bg-gray-800 text-white rounded-md p-2'
+          className="block bg-gray-800 text-white rounded-md p-2 whitespace-pre-wrap"
         >
           {part}
         </code>
       )
     }
 
-    // Handle regular text (even indexes)
+    // 🔹 Normal text
     return part.split('\n').map((line, lineIndex) => {
-      if (line.trim().startsWith('>')) {
-        return (
-          <span key={`${index}-${lineIndex}`} style={{ color: '#789922' }}>
-            {line}
-            <br />
-          </span>
-        )
-      } else {
-        return (
-          <span key={`${index}-${lineIndex}`}>
-            {line}
-            <br />
-          </span>
-        )
-      }
+      const isQuote = line.trim().startsWith('>')
+
+      return (
+        <span
+          key={`${index}-${lineIndex}`}
+          style={isQuote ? { color: '#789922' } : undefined}
+        >
+          {renderWithLinks(line, `${index}-${lineIndex}`)}
+          <br />
+        </span>
+      )
     })
   })
 }
+
 
 export const getSmallImageUrl = (url) => {
   return `${url}s`
@@ -153,7 +171,7 @@ export function DynamicColorText({ posterID }) {
     
   return (
     <span
-      className="font-bold px-1 rounded"
+      className="font-bold mx-1 px-1 rounded"
       style={{ backgroundColor: bgColor, color: textColor }}
     >
       {posterID}

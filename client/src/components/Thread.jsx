@@ -501,7 +501,7 @@ export default function Component() {
           {threadData.image?.url?.endsWith('.mp4') ? (
             <video
               controls
-              className="mr-4 border border-[var(--color-border)]"
+              className="border border-[var(--color-border)]"
               style={{ width: `${150 + sz}px` }}
               onClick={resize}
             >
@@ -582,7 +582,7 @@ export default function Component() {
           >
             <span className="text-gray-400 text-[1.2rem]">{'>>'}</span>
 
-            <article className="pt-4 pr-5 pb-4 pl-5 mr-4 mb-3 ml-1 bg-[var(--color-backgroundSecondary)]">
+            <article className="pt-4 pr-5 pb-4 pl-5 mr-2 mb-3 ml-1 bg-[var(--color-backgroundSecondary)]">
               <div>
                 <input
                   type="checkbox"
@@ -594,7 +594,7 @@ export default function Component() {
                   {reply.username || 'Anon'}
                 </span>
                 {reply.image && (
-                  <span>
+                  <span className="text-[var(--color-text)]">
                     {' '}
                     ({getFileSize(reply.image.size)},{' '}
                     {reply.image.width}x{reply.image.height})

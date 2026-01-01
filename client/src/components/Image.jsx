@@ -10,7 +10,7 @@ const ThreadImage = ({ imageData, allowExpand = true }) => {
 
   if (!allowExpand) {
     return (
-      <div className='max-w-full'>
+      <div className="pr-2">
         <img
           src={getSmallImageUrl(imageData.url)}
           alt={`${getFileSize(imageData.size)}`}
@@ -34,14 +34,14 @@ const ThreadImage = ({ imageData, allowExpand = true }) => {
         e.preventDefault()
         setIsExpanded(!isExpanded)
       }}
-      className='inline-block max-w-full cursor-pointer'
+      className='inline-block cursor-pointer pr-2'
     >
       {!isExpanded
         ? (
           <img
             src={getSmallImageUrl(imageData.url)}
             alt={`${getFileSize(imageData.size)}`}
-            className='mr-4 border object-contain'
+            className='border object-contain'
             style={{
               maxWidth: '100%',
               width: 'auto',
@@ -55,12 +55,12 @@ const ThreadImage = ({ imageData, allowExpand = true }) => {
             <img
               src={getSmallImageUrl(imageData.url)}
               alt={`${getFileSize(imageData.size)}`}
-              className='mr-4 border hidden'
+              className='border hidden pr-2'
             />
             <img
               src={imageData.url}
               alt={`${getFileSize(imageData.size)}`}
-              className='mr-4 border object-contain'
+              className='border object-contain'
               style={{
                 width: 'auto',
                 height: 'auto'
