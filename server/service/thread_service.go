@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/nr-chan/NRchan/dto"
 	"github.com/nr-chan/NRchan/dto/request"
 	"github.com/nr-chan/NRchan/repository"
@@ -178,7 +180,7 @@ func (b *threadService) GetThreadById(ctx context.Context, id string) (dto.Threa
 	var thread dto.Thread
 	threadID := fmt.Sprintf("%s%s", THREAD_CACHE_PREFIX, id)
 	if err := b.cacheService.Get(threadID, &thread); err == nil {
-		fmt.Println("Thread found in cache ", threadID)
+		fmt.Println("thread cache hit:", threadID)
 		return thread, nil
 	}
 
@@ -322,8 +324,6 @@ func (b *threadService) DeleteReply(ctx context.Context, replyID string, uuid st
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("THREAD ID", threadID)
 
 	b.cacheService.Delete(fmt.Sprintf("%s%d", THREAD_CACHE_PREFIX, threadID))
 	return nil
